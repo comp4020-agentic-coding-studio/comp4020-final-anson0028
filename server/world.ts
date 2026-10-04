@@ -83,9 +83,36 @@ export function walkable(x: number, y: number, gateOpen: boolean): boolean {
   return t !== WALL && t !== WATER;
 }
 
-export type Body = { x: number; y: number; dx: number; dy: number; inputAt: number };
+export type Body = { x: number; y: number; dx: number; dy: number; inputAt: number; tx?: number | null; ty?: number | null };
 
 export function step(b: Body, now: number, gateOpen: boolean): void {
+  if (b.tx != null && b.ty != null) {
+    const ddx = b.tx - b.x;
+    const ddy = b.ty - b.y;
+    const dist = Math.hypot(ddx, ddy);
+    const d = SPEED / TICK_HZ;
+    if (dist <= d) {
+      if (walkable(b.tx, b.ty, gateOpen)) {
+        b.x = b.tx;
+        b.y = b.ty;
+      }
+      b.tx = b.ty = null;
+      return;
+    }
+    const nx = b.x + (ddx / dist) * d;
+    const ny = b.y + (ddy / dist) * d;
+    let moved = false;
+    if (walkable(nx, b.y, gateOpen)) {
+      b.x = nx;
+      moved = true;
+    }
+    if (walkable(b.x, ny, gateOpen)) {
+      b.y = ny;
+      moved = true;
+    }
+    if (!moved) b.tx = b.ty = null;
+    return;
+  }
   if (now - b.inputAt > INPUT_TTL_MS) {
     b.dx = 0;
     b.dy = 0;

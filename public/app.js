@@ -115,6 +115,21 @@ for (const b of document.querySelectorAll(".pad button")) {
   b.addEventListener("pointerleave", up);
 }
 
+canvas.addEventListener("pointerdown", (e) => {
+  if (!map || !me || ws.readyState !== 1) return;
+  const self = interpolated().players.find((p) => p.id === me.id);
+  if (!self) return;
+  const r = canvas.getBoundingClientRect();
+  const s = TILE;
+  const x = self.x + (e.clientX - r.left - r.width / 2) / s;
+  const y = self.y + (e.clientY - r.top - r.height / 2) / s;
+  keys.clear();
+  held.dx = 0;
+  held.dy = 0;
+  ws.send(JSON.stringify({ t: "goto", seq: ++seq, x, y }));
+  canvas.focus();
+});
+
 sayForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const text = sayInput.value.trim();

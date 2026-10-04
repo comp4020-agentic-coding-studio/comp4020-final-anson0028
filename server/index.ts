@@ -114,7 +114,7 @@ function join_(ws: WebSocket, token: string): void {
 }
 
 function handle(c: Client, raw: string): void {
-  let msg: { t?: string; dx?: number; dy?: number; text?: string; code?: string; seq?: number };
+  let msg: { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; code?: string; seq?: number };
   try {
     msg = JSON.parse(raw);
   } catch {
@@ -124,6 +124,17 @@ function handle(c: Client, raw: string): void {
     c.body.dx = Math.sign(Number(msg.dx) || 0);
     c.body.dy = Math.sign(Number(msg.dy) || 0);
     c.body.inputAt = Date.now();
+    c.body.tx = c.body.ty = null;
+    c.seq = Number(msg.seq) || c.seq;
+    return;
+  }
+  if (msg.t === "goto") {
+    const x = Number(msg.x);
+    const y = Number(msg.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    c.body.tx = Math.min(W - 0.5, Math.max(0.5, x));
+    c.body.ty = Math.min(H - 0.5, Math.max(0.5, y));
+    c.body.dx = c.body.dy = 0;
     c.seq = Number(msg.seq) || c.seq;
     return;
   }
