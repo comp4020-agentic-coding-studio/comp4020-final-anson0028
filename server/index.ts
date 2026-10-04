@@ -210,4 +210,4 @@ for (const sig of ["SIGTERM", "SIGINT"] as const) {
   });
 }
 
-server.listen(PORT, "0.0.0.0", () => console.log(`walk listening on ${PORT}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`earshot listening on ${PORT}`));
