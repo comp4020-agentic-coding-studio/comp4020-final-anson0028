@@ -45,7 +45,7 @@ describe("the gate", { timeout: 60000 }, () => {
     expect(typist.inbox.some((m) => m.t === "code" || JSON.stringify(m).includes(`"${shown.code}"`))).toBe(false);
 
     reader.send({ t: "code", code: shown.code });
-    expect((await reader.next((m) => m.t === "toast")).text).toMatch(/keypad/);
+    expect((await reader.next((m) => m.t === "toast")).text).toBe("You need to be at the keypad.");
 
     typist.send({ t: "code", code: shown.code === "111" ? "222" : "111" });
     expect(await typist.next((m) => m.t === "toast" && /Wrong/.test(m.text))).toBeTruthy();
