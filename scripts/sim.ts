@@ -21,12 +21,12 @@ function pct(a: number[], q: number): number {
 
 await Promise.all(
   Array.from({ length: N }, (_, i) => new Promise<void>((resolve) => {
-    const token = `sim-${String(i).padStart(4, "0")}-0000-0000-0000-000000000000`;
+    const token = `5100${String(i).padStart(4, "0")}-0000-4000-8000-${String(Date.now()).slice(-12).padStart(12, "0")}`;
     const ws = new WebSocket(`${wsBase}/ws?token=${token}`);
-    const bot = { ws, id: token.slice(0, 8), pending: new Map<number, number>(), seq: 0 };
+    const bot = { ws, id: "", pending: new Map<number, number>(), seq: 0 };
     ws.on("message", (d) => {
       const m = JSON.parse(d.toString());
-      if (m.t === "hello") resolve();
+      if (m.t === "hello") { bot.id = m.you.id; resolve(); }
       if (m.t === "snap") {
         const s = m as Snap;
         snapAge.push(Date.now() - s.at);

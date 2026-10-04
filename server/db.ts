@@ -61,14 +61,22 @@ function hash(s: string): number {
 
 const getPlayer = db.prepare("SELECT token, name, hue, x, y FROM players WHERE token = ?");
 const insertPlayer = db.prepare("INSERT INTO players (token, name, hue, x, y) VALUES (?, ?, ?, ?, ?)");
+const nameTaken = db.prepare("SELECT 1 FROM players WHERE name = ?");
 const touchPlayer = db.prepare("UPDATE players SET x = ?, y = ?, last_seen = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE token = ?");
 
 export function loadPlayer(token: string, spawn: { x: number; y: number }): PlayerRow {
   const row = getPlayer.get(token) as PlayerRow | undefined;
   if (row) return row;
   const h = hash(token);
-  const name = `${ADJ[h % ADJ.length]} ${BIRD[(h >>> 8) % BIRD.length]}`;
   const hue = (h >>> 16) % 360;
+  const combos = ADJ.length * BIRD.length;
+  let name = "";
+  for (let n = 0; !name; n++) {
+    const i = (h + n) % combos;
+    const base = `${ADJ[i % ADJ.length]} ${BIRD[Math.floor(i / ADJ.length)]}`;
+    const candidate = n < combos ? base : `${base} ${Math.floor(n / combos) + 1}`;
+    if (nameTaken.get(candidate) === undefined) name = candidate;
+  }
   insertPlayer.run(token, name, hue, spawn.x, spawn.y);
   return { token, name, hue, x: spawn.x, y: spawn.y };
 }

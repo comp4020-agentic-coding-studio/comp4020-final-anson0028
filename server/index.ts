@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { codeFor, isOpen, loadPlayer, recentOpenings, recordOpening, savePlayer } from "./db.ts";
@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT ?? 8080);
 const COOKIE = "walker";
 const root = new URL("..", import.meta.url).pathname;
 
-type Client = { ws: WebSocket; token: string; name: string; hue: number; body: Body; onPlate: boolean; seq: number };
+type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; onPlate: boolean; seq: number };
 const clients = new Map<WebSocket, Client>();
 const GATE = "west";
 const canberraDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Canberra", year: "numeric", month: "2-digit", day: "2-digit" });
@@ -27,6 +27,9 @@ const tickTimes: number[] = [];
 let tick = 0;
 
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
+
+const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const publicId = (token: string) => createHash("sha256").update(token).digest("hex").slice(0, 8);
 
 function cookieToken(req: IncomingMessage): string | null {
   const m = /(?:^|;\s*)walker=([0-9a-f-]{36})/.exec(req.headers.cookie ?? "");
@@ -92,6 +95,11 @@ function send(ws: WebSocket, msg: unknown): void {
 }
 
 function join_(ws: WebSocket, token: string): void {
+  if (!TOKEN.test(token)) {
+    send(ws, { t: "refused", why: "bad_token" });
+    ws.close();
+    return;
+  }
   if ([...clients.values()].some((c) => c.token === token)) {
     send(ws, { t: "refused", why: "already_here" });
     ws.close();
@@ -103,11 +111,11 @@ function join_(ws: WebSocket, token: string): void {
     return;
   }
   const row = loadPlayer(token, SPAWN);
-  const c: Client = { ws, token, name: row.name, hue: row.hue, body: { x: row.x, y: row.y, dx: 0, dy: 0, inputAt: 0 }, onPlate: false, seq: 0 };
-  const id = token.slice(0, 8);
+  const id = publicId(token);
+  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: row.x, y: row.y, dx: 0, dy: 0, inputAt: 0 }, onPlate: false, seq: 0 };
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
-  const roster = [...clients.values()].map((o) => ({ id: o.token.slice(0, 8), name: o.name, hue: o.hue }));
+  const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, { t: "hello", you: { id, name: c.name, hue: c.hue }, roster, map: { w: W, h: H, tiles: Array.from(tiles) }, sayRange: SAY_RANGE, gateOpen, openings: recentOpenings(GATE) });
   ws.on("message", (data) => handle(c, data.toString()));
   ws.on("close", () => {
@@ -146,7 +154,7 @@ function handle(c: Client, raw: string): void {
     const text = String(msg.text ?? "").trim().slice(0, 40);
     if (!text) return;
     for (const o of clients.values()) {
-      if (within(o.body, c.body, SAY_RANGE)) send(o.ws, { t: "bubble", from: c.token.slice(0, 8), text });
+      if (within(o.body, c.body, SAY_RANGE)) send(o.ws, { t: "bubble", from: c.id, text });
     }
     return;
   }
@@ -179,8 +187,8 @@ function loop(): void {
     }
   }
   if (tick % (TICK_HZ / SNAP_HZ) === 0) {
-    const p = [...clients.values()].map((c) => [c.token.slice(0, 8), Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq]);
-    const plate = [...clients.values()].find((c) => c.onPlate)?.name ?? null;
+    const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq]);
+    const plate = [...clients.values()].some((c) => c.onPlate);
     const snap = JSON.stringify({ t: "snap", at: now, p, plate });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }
