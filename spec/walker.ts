@@ -2,7 +2,9 @@ import { WebSocket } from "ws";
 
 export type Msg = Record<string, any>;
 
-export const uuid = (n: string) => `${n.padEnd(8, "0")}-0000-4000-8000-000000000000`;
+const RUN = Array.from({ length: 12 }, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+
+export const uuid = (n: string) => `${n.padEnd(8, "0")}-0000-4000-8000-${RUN}`;
 
 export const bodies = (snap: Msg) =>
   (snap.p as [string, number, number, number][]).map(([id, x, y, seq]) => ({ id, x: x / 100, y: y / 100, seq }));

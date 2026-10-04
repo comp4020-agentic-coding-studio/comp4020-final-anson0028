@@ -32,7 +32,7 @@ describe("two people on the island", { timeout: 30000 }, () => {
     const a = await join(uuid("aaaa0002"));
     const b = await join(uuid("bbbb0002"));
     const far = await join(uuid("cccc0002"));
-    await Promise.all([far.walkTo(6.5, 3.5), a.walkTo(6.5, 16.5), b.walkTo(8.5, 16.5)]);
+    await Promise.all([a.walkTo(6.5, 16.5), b.walkTo(13.5, 16.5), far.walkTo(15.5, 16.5)]);
     far.inbox.length = 0;
     a.send({ t: "say", text: "over here" });
     const heard = await b.next((m) => m.t === "bubble" && m.text === "over here", 1000);
@@ -44,6 +44,12 @@ describe("two people on the island", { timeout: 30000 }, () => {
     far.close();
   });
 
+  it("refuses a token that is not a cookie it could have issued", async () => {
+    const forged = await join("aaaa0009-anything");
+    expect(forged.hello.t).toBe("refused");
+    expect(forged.hello.why).toBe("bad_token");
+  });
+
   it("refuses a second body for the same person", async () => {
     const a = await join(uuid("aaaa0003"));
     const twin = await join(uuid("aaaa0003"));
@@ -52,13 +58,16 @@ describe("two people on the island", { timeout: 30000 }, () => {
     a.close();
   });
 
-  it("never sends anyone another person's cookie", async () => {
-    const a = await join(uuid("aaaa0009"));
+  it("never sends anyone another person's cookie, or any part of it", async () => {
+    const token = uuid("aaaa0009");
+    const a = await join(token);
     const b = await join(uuid("bbbb0009"));
     await b.pos();
     a.send({ t: "say", text: "hello" });
     await b.next((m) => m.t === "bubble");
-    expect(JSON.stringify(b.inbox) + JSON.stringify(b.hello)).not.toContain(uuid("aaaa0009"));
+    const seen = JSON.stringify(b.inbox) + JSON.stringify(b.hello);
+    expect(seen).not.toContain(token.slice(0, 8));
+    expect(seen).not.toContain(token.slice(-12));
     a.close();
     b.close();
   });

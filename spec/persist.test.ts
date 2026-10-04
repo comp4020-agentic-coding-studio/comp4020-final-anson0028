@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
-import { Walker, bodies } from "./walker.ts";
+import { Walker, bodies, uuid } from "./walker.ts";
 
 const island = new Island();
 afterAll(() => island.stop());
@@ -8,7 +8,7 @@ afterAll(() => island.stop());
 describe("what survives a restart", { timeout: 30000 }, () => {
   it("keeps who you are and where you stood", async () => {
     await island.start();
-    const token = "persist1-0000-4000-8000-000000000000";
+    const token = uuid("feed0001");
     const a = await Walker.join(island.wsBase, token);
     a.hold(0, -1);
     await new Promise((r) => setTimeout(r, 900));
