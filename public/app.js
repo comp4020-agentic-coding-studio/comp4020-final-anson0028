@@ -10,6 +10,7 @@ const sayForm = document.getElementById("say");
 const sayInput = document.getElementById("text");
 const keypadForm = document.getElementById("keypad");
 const digits = document.getElementById("digits");
+const sign = document.getElementById("sign");
 
 const colours = { 0: "#3f7a4a", 1: "#2b5f8a", 2: "#4a4038", 3: "#c9a24a", 4: "#8a8f99", 5: "#6b4a2e", 6: "#d9c48a" };
 
@@ -24,6 +25,19 @@ const roster = new Map();
 const held = { dx: 0, dy: 0 };
 let seq = 0;
 let keypadNear = false;
+let gateNear = false;
+let openings = [];
+const dayLabel = (d) => new Date(d + "T12:00:00Z").toLocaleDateString(undefined, { day: "numeric", month: "short" });
+function renderSign() {
+  sign.replaceChildren();
+  const h = document.createElement("strong");
+  h.textContent = gateOpen ? "Gate log · open today" : "Gate log · locked today";
+  sign.append(h);
+  const ul = document.createElement("ul");
+  if (!openings.length) { const li = document.createElement("li"); li.textContent = "Nobody has opened it yet."; ul.append(li); }
+  for (const o of openings) { const li = document.createElement("li"); li.textContent = `${dayLabel(o.day)}: ${o.by} with ${o.with}`; ul.append(li); }
+  sign.append(ul);
+}
 
 const sibling = sessionStorage.getItem("sibling");
 const wsBase = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
@@ -39,6 +53,9 @@ ws.addEventListener("message", (e) => {
     who.textContent = `You are ${me.name}`;
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
+    openings = m.openings ?? [];
+    renderSign();
+    if (!gateOpen && openings.length) say(`The gate has locked itself again today. Last opened ${dayLabel(openings[0].day)} by ${openings[0].by} with ${openings[0].with}.`, true);
   } else if (m.t === "join") {
     roster.set(m.id, m);
   } else if (m.t === "leave") {
@@ -57,7 +74,10 @@ ws.addEventListener("message", (e) => {
     if (m.code) say(`(only you can see the plate's code: ${m.code})`, true);
   } else if (m.t === "gate") {
     gateOpen = m.open;
-    say(`${m.by} opened the gate while ${m.with} held the plate.`, true);
+    if (m.reset) say("A new day: the gate has locked itself and the plate shows a new code.", true);
+    else { openings.unshift({ day: m.day, by: m.by, with: m.with }); say(`${m.by} opened the gate while ${m.with} held the plate.`, true); }
+    keypadForm.hidden = !keypadNear || gateOpen;
+    renderSign();
   } else if (m.t === "toast") {
     say(m.text, true);
   } else if (m.t === "refused") {
@@ -99,8 +119,8 @@ function recompute() {
 window.addEventListener("keydown", (e) => {
   if (e.target instanceof HTMLInputElement) return;
   if (dirOf[e.key]) { e.preventDefault(); if (!keys.has(e.key)) { keys.add(e.key); recompute(); } }
-  if (e.key === "Enter") { sayInput.focus(); }
-  if (e.key === "e" || e.key === "E") { if (!keypadForm.hidden) digits.focus(); }
+  if (e.key === "Enter") { e.preventDefault(); sayInput.focus(); }
+  if ((e.key === "e" || e.key === "E") && !keypadForm.hidden) { e.preventDefault(); digits.focus(); }
 });
 window.addEventListener("keyup", (e) => { if (keys.delete(e.key)) recompute(); });
 window.addEventListener("blur", () => { keys.clear(); recompute(); });
@@ -218,9 +238,20 @@ function draw() {
     }
   }
   if (self) {
+    const g = gateTile();
+    const nearGate = Math.hypot(self.x - (g.x + 0.5), self.y - (g.y + 0.5)) <= 3;
+    if (nearGate !== gateNear) { gateNear = nearGate; sign.hidden = !nearGate; }
     const near = Math.hypot(self.x - (keypadTile().x + 0.5), self.y - (keypadTile().y + 0.5)) <= 1.5;
     if (near !== keypadNear) { keypadNear = near; keypadForm.hidden = !near || gateOpen; if (near && !gateOpen) say("You're at the keypad. Press E or tap the box to enter a code.", true); }
   }
+}
+
+let gateCache = null;
+function gateTile() {
+  if (gateCache) return gateCache;
+  const i = map.tiles.indexOf(5);
+  gateCache = { x: i % map.w, y: Math.floor(i / map.w) };
+  return gateCache;
 }
 
 let keypadCache = null;
