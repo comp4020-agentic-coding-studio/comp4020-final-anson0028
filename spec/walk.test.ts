@@ -108,6 +108,23 @@ describe("two people on the island", { timeout: 30000 }, () => {
 });
 
 describe("the gate", { timeout: 30000 }, () => {
+  it("is the only way from the spawn to the far side while it is shut", async () => {
+    const w = await Walker.join(uuid("aaaa0006"));
+    const { w: mw, h: mh, tiles } = w.hello.map as { w: number; h: number; tiles: number[] };
+    const gate = tileOf(w.hello.map, 5);
+    const open = (x: number, y: number) => x >= 0 && y >= 0 && x < mw && y < mh && ![1, 2, 5].includes(tiles[y * mw + x]);
+    const seen = new Set<number>();
+    const queue: [number, number][] = [[6, 16]];
+    while (queue.length) {
+      const [x, y] = queue.shift()!;
+      if (!open(x, y) || seen.has(y * mw + x)) continue;
+      seen.add(y * mw + x);
+      queue.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+    }
+    expect(seen.has(gate.y * mw + gate.x + 1)).toBe(false);
+    w.close();
+  });
+
   it("puts the plate out of earshot of the keypad, so the code has to be carried", async () => {
     const w = await Walker.join(uuid("aaaa0005"));
     const plate = tileOf(w.hello.map, 3);
