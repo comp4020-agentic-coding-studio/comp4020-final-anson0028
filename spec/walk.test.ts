@@ -108,6 +108,15 @@ describe("two people on the island", { timeout: 30000 }, () => {
 });
 
 describe("the gate", { timeout: 30000 }, () => {
+  it("puts the plate out of earshot of the keypad, so the code has to be carried", async () => {
+    const w = await Walker.join(uuid("aaaa0005"));
+    const plate = tileOf(w.hello.map, 3);
+    const keypad = tileOf(w.hello.map, 4);
+    const apart = Math.hypot(plate.x - keypad.x, plate.y - keypad.y);
+    expect(apart).toBeGreaterThan(w.hello.sayRange);
+    w.close();
+  });
+
   it("shows the code only to whoever stands on the plate, and opens only for a second person at the keypad", async () => {
     const reader = await Walker.join(uuid("aaaa0004"));
     const typist = await Walker.join(uuid("bbbb0004"));
