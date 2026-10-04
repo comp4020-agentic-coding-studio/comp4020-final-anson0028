@@ -17,23 +17,38 @@ db.exec(`
     first_seen TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
     last_seen TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
   );
-  CREATE TABLE IF NOT EXISTS gates (
-    id TEXT PRIMARY KEY,
-    code TEXT NOT NULL CHECK (length(code) = 3),
-    open INTEGER NOT NULL DEFAULT 0 CHECK (open IN (0, 1)),
-    opened_by TEXT,
-    opened_at TEXT
+  DROP TRIGGER IF EXISTS gates_stay_open;
+  DROP TABLE IF EXISTS gates;
+  CREATE TABLE IF NOT EXISTS gate_codes (
+    gate_id TEXT NOT NULL,
+    day TEXT NOT NULL CHECK (day GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+    code TEXT NOT NULL CHECK (code GLOB '[0-9][0-9][0-9]'),
+    PRIMARY KEY (gate_id, day)
   );
-  CREATE TRIGGER IF NOT EXISTS gates_stay_open
-  BEFORE UPDATE OF open ON gates
-  WHEN OLD.open = 1 AND NEW.open = 0
+  CREATE TABLE IF NOT EXISTS openings (
+    gate_id TEXT NOT NULL,
+    day TEXT NOT NULL CHECK (day GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+    opener_token TEXT NOT NULL,
+    holder_token TEXT NOT NULL CHECK (holder_token <> opener_token),
+    opener_name TEXT NOT NULL,
+    holder_name TEXT NOT NULL,
+    at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    PRIMARY KEY (gate_id, day)
+  );
+  CREATE TRIGGER IF NOT EXISTS openings_kept_update
+  BEFORE UPDATE ON openings
   BEGIN
-    SELECT RAISE(ABORT, 'gate_immutable');
+    SELECT RAISE(ABORT, 'openings_kept');
+  END;
+  CREATE TRIGGER IF NOT EXISTS openings_kept_delete
+  BEFORE DELETE ON openings
+  BEGIN
+    SELECT RAISE(ABORT, 'openings_kept');
   END;
 `);
 
 export type PlayerRow = { token: string; name: string; hue: number; x: number; y: number };
-export type GateRow = { id: string; code: string; open: number; opened_by: string | null };
+export type Opening = { day: string; by: string; with: string; at: string };
 
 const ADJ = ["quiet", "brisk", "amber", "misty", "dusty", "early", "late", "plain", "gentle", "stubborn", "lucky", "sleepy"];
 const BIRD = ["heron", "magpie", "rosella", "currawong", "galah", "lorikeet", "kookaburra", "wren", "cockatoo", "swift", "plover", "ibis"];
@@ -62,18 +77,37 @@ export function savePlayer(token: string, x: number, y: number): void {
   touchPlayer.run(x, y, token);
 }
 
-const getGate = db.prepare("SELECT id, code, open, opened_by FROM gates WHERE id = ?");
-const insertGate = db.prepare("INSERT INTO gates (id, code) VALUES (?, ?)");
-const openGateStmt = db.prepare("UPDATE gates SET open = 1, opened_by = ?, opened_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ? AND open = 0");
+const getCode = db.prepare("SELECT code FROM gate_codes WHERE gate_id = ? AND day = ?");
+const insertCode = db.prepare("INSERT OR IGNORE INTO gate_codes (gate_id, day, code) VALUES (?, ?, ?)");
+const getOpening = db.prepare("SELECT 1 FROM openings WHERE gate_id = ? AND day = ?");
+const insertOpening = db.prepare("INSERT OR IGNORE INTO openings (gate_id, day, opener_token, holder_token, opener_name, holder_name) VALUES (?, ?, ?, ?, ?, ?)");
+const listOpenings = db.prepare("SELECT day, opener_name AS by, holder_name AS with, at FROM openings WHERE gate_id = ? ORDER BY day DESC LIMIT ?");
 
-export function loadGate(id: string): GateRow {
-  const row = getGate.get(id) as GateRow | undefined;
-  if (row) return row;
-  const code = String(100 + Math.floor(Math.random() * 900));
-  insertGate.run(id, code);
-  return { id, code, open: 0, opened_by: null };
+export function codeFor(gate: string, day: string): string {
+  const row = getCode.get(gate, day) as { code: string } | undefined;
+  if (row) return row.code;
+  const previous = getCode.get(gate, yesterdayOf(day)) as { code: string } | undefined;
+  let code: string;
+  do code = String(100 + Math.floor(Math.random() * 900));
+  while (code === previous?.code);
+  insertCode.run(gate, day, code);
+  return (getCode.get(gate, day) as { code: string }).code;
 }
 
-export function openGate(id: string, by: string): boolean {
-  return openGateStmt.run(by, id).changes > 0;
+export function isOpen(gate: string, day: string): boolean {
+  return getOpening.get(gate, day) !== undefined;
+}
+
+export function recordOpening(gate: string, day: string, opener: { token: string; name: string }, holder: { token: string; name: string }): boolean {
+  return insertOpening.run(gate, day, opener.token, holder.token, opener.name, holder.name).changes > 0;
+}
+
+export function recentOpenings(gate: string, n = 5): Opening[] {
+  return listOpenings.all(gate, n) as Opening[];
+}
+
+function yesterdayOf(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
 }
