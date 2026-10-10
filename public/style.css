@@ -159,7 +159,7 @@ canvas#view:focus-visible { box-shadow: inset 0 0 0 3px #f0b94a; }
 
 @media (min-width: 60rem) { .pad { display: none; } }
 
-@media (max-width: 40rem) { .toast { top: auto; bottom: 10rem; } }
+@media (max-width: 40rem) { .toast { top: auto; bottom: 13rem; } }
 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -172,3 +172,72 @@ body.page { display: block; min-height: 100%; }
 .prose a { color: var(--accent); }
 
 .prose code { background: #eee9de; padding: 0.1em 0.3em; border-radius: 0.25rem; font-size: 0.9em; }
+
+.status {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.5rem;
+  background: rgba(21, 23, 28, 0.85);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.status.warn { background: rgba(140, 30, 20, 0.9); }
+
+.hint {
+  position: absolute;
+  top: 3.2rem;
+  right: 0.75rem;
+  max-width: 16rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  background: #f4e9cf;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.chart {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  background: rgba(20, 16, 10, 0.75);
+}
+
+.chart canvas { max-width: 96%; max-height: 86%; width: auto; height: auto; border: 6px solid #5c4a2a; border-radius: 4px; background: #e9dcbf; }
+
+.chart-note { margin: 0.4rem 0 0.8rem; color: #f4e9cf; font-size: 0.9rem; }
+
+.actions {
+  position: absolute;
+  right: 10rem;
+  bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.act, .leave {
+  font: inherit;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  touch-action: none;
+}
+
+.leave { background: #5b6270; }
+
+.act.down { background: #f0b94a; color: var(--ink); }
+
+@media (min-width: 60rem) { .actions { right: 0.75rem; bottom: 3.5rem; } }
+
+@media (max-width: 40rem) {
+  .status { top: auto; bottom: 7.6rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); font-size: 0.78rem; }
+  .hint { top: auto; bottom: 10.4rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); }
+  .actions { right: 0.75rem; bottom: 10.6rem; }
+}

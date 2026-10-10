@@ -10,27 +10,30 @@
     <header class="top">
       <a class="brand" href="/">Earshot</a>
       <nav aria-label="site">
-        <a href="/" aria-current="page">Island</a>
+        <a href="/" aria-current="page">Harbour</a>
         <a href="/readme/">About</a>
       </nav>
       <span id="who" class="who" aria-live="polite"></span>
     </header>
     <main>
       <h1 class="sr-only">Earshot</h1>
-      <canvas id="view" role="application" aria-label="The island. Arrow keys or WASD to walk." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The harbour and the sea. Arrow keys or WASD to walk, E to use what you stand on." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
-      <div id="code" class="code" hidden></div>
-      <aside id="sign" class="sign" aria-label="Gate log" hidden></aside>
+      <div id="status" class="status" aria-live="polite" hidden></div>
+      <div id="hint" class="hint" aria-live="polite" hidden></div>
+      <section id="chart" class="chart" aria-label="Chart" hidden>
+        <canvas id="chartview" width="960" height="640"></canvas>
+        <p class="chart-note">You are at the chart table. Step away to put it down.</p>
+      </section>
       <form id="say" class="say" autocomplete="off">
         <label for="text" class="sr-only">Say something to people near you</label>
         <input id="text" name="text" maxlength="40" placeholder="Say something (Enter)" />
         <button type="submit">Say</button>
       </form>
-      <form id="keypad" class="keypad" autocomplete="off" hidden>
-        <label for="digits">Keypad</label>
-        <input id="digits" name="digits" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" placeholder="000" />
-        <button type="submit">Enter</button>
-      </form>
+      <div class="actions">
+        <button id="act" type="button" class="act" aria-label="Use what you stand on (hold)">Use (E)</button>
+        <button id="leave" type="button" class="leave" hidden>Ashore (Q)</button>
+      </div>
       <div class="pad" aria-label="Walk">
         <button type="button" data-dir="0,-1" aria-label="Up">▲</button>
         <button type="button" data-dir="-1,0" aria-label="Left">◀</button>
