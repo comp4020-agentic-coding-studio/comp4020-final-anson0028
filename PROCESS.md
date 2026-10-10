@@ -2,101 +2,106 @@
 
 ## What I built
 
-Earshot, a top-down island where each visitor is a dot with a bird's name and
-anything you say reaches only people within 8 tiles. The first puzzle needs
-two people: one on a plate that shows a code, one at a keypad 21 tiles away.
-`README.md` says what good means here; this file is how it got that way.
+Earshot is a harbour with three ships. Each visitor is a dot with a bird's
+name. A ship has four stations, sail, helm, chart table and pump, and a body
+holds one at a time by standing on it. Every station runs down when it is
+left, reefs flood the hull, and the sea gets harder further out, so how far
+a ship gets is a record of how many people were aboard together.
+`README.md` says what good means here. This file is how it got that way.
 
-## Choosing it
+## Where crit 8 left it
 
-My first ideas were a sign-up list, a bill splitter and a shared harp, and I
-dropped them as too simple. Avatar games came next, then I asked for
-something like Big Walk, where distance limits what you can tell people.
-Before building I had agents visit every classmate's deployed app. The
-course's six crit agents had all built a wall that only grows, and 14 of 32
-READMEs cited Robin Sloan's essay on an app as a home-cooked meal. Nobody
-limited what you know by where you stand, so I built that. Sloan is about
-who an app is for. Shirky fits Earshot better: it leans on the people
-already in the room.
+Crit 8 shipped a gate: one person on a plate 21 tiles from a keypad reads a
+code, another types it
+([`46eedd6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/46eedd6)).
+It worked, and it had nothing after it. The pod opened the gate once and
+stood around. Alone, I could only walk. The tutor said an idea borrowed from
+a game needs its own variation, and that I should work out what is good and
+bad in games like it.
 
-## How I got here
+## Choosing again
 
-The spike came first and went in as one commit
-([`8611c0b`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/8611c0b)).
-Before that I deployed it and ran 30 simulated walkers against the real
-machine ([`docs/load-test.md`](docs/load-test.md)). On my laptop 95% of
-inputs came back within 99 ms; on Fly, within 1.26 s. Every snapshot resent
-every name and colour ten times a second. With five walkers the tail was
-gone, so it grew with the crowd, not the network. Names now travel once, and
-the same run on Fly gave 146 ms.
+Before changing anything I had agents read 29 games and papers in five
+clusters, each for how it works, what is good and what is bad, and a sixth
+agent fetch every source they cited and check the claims. One source didn't
+load and several claims were corrected; the notes mark both
+([`docs/research.md`](docs/research.md)). A second pass read the 114
+final-project READMEs in the class
+([`docs/cohort-survey.md`](docs/cohort-survey.md)). Both came out the same
+way: the strong designs make a second person necessary with a rule, not a
+hope, and keep an artefact that is itself the attributed record. Nobody
+makes the number of hands a thing needs change with how many are there. Big
+Walk's reviews name its fault as no solo mode, and my gate had copied it.
 
-The rule the whole idea rests on wasn't doing anything. The plate was 5
-tiles from the keypad, so two people could pass the code standing still. I
-wrote that as a test
-([`005acf3`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/005acf3)),
-watched it fail, then moved the plate
-([`4b6c35b`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/4b6c35b)).
-That showed the dividing wall started at row 3, so you could walk round the
-gate: failing test
-([`111f6d5`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/111f6d5)),
-then the fix
-([`b25cf7c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/b25cf7c)).
+So the design was written before any code
+([`6c20b7a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6c20b7a),
+[`5068bf0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/5068bf0))
+and I corrected it. Three things changed in that round: the view will be
+blocks seen over the bird's shoulder, with the chart table as the only map;
+ships are always at the pier, not one that respawns; and one person must
+always be able to sail. The decision record picks "one person can do
+everything, but only from where they stand" over two-or-nothing, because it
+needs no counting of people and can't be beaten with a second tab.
 
-A gate that opens once leaves nothing for the next visitor, and the marker
-comes the next day. It now locks again each day with a new code, and who
-opened it stays in a table the database won't let anyone edit: tests
-([`9eede68`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9eede68)),
-then code
-([`37f7b43`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37f7b43)).
+## Red, then green
+
+The eleven ship tests went in first
+([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4)).
+Run against the crit 8 server they fail 11 of 11 in 57 seconds. The server
+that passes them is the next commit
+([`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)):
+12 of 12 with the persist test, and the whole spec 19 of 19 once the client
+([`e72c8a4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/e72c8a4))
+and the README
+([`c8280f3`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c8280f3))
+landed. Three of the tests were wrong before the code was. A sailing ship
+can't be boarded, so the stations test has to board the second bird before
+the first raises the sail; the walker's snapshot helper cleared its inbox
+and threw away the toast the test was waiting for; and the two-bodies and
+one-body sailing checks compare one measured speed, so they became two
+tests that share it.
 
 ## How I knew
 
-I broke three rules on purpose. Sending bubbles to everyone and sending the
-code to everyone each turned a named test red. Letting the plate-holder type
-the code did not, and still doesn't: the holder is 21 tiles from the keypad,
-so the server turns them away for distance before it asks who they are. The
-test now names that notice
-([`0ceebd0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0ceebd0)).
-The real guard is the database refusing one person in both roles, and the
-last gate test checks that directly.
-
-A review of these files against the code found the short id everyone saw
-was the first 8 characters of their cookie, and that a widened range still
-passed the earshot test. Both are tests first now
-([`d22176d`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/d22176d)),
-then fixed
-([`641fea6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/641fea6)).
-Fresh random birds in those tests also turned up two visitors with the same
-name. A keyboard-only pass in a real browser found Enter submitted the empty
-text box
-([`a5e37b8`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a5e37b8)).
+I broke four rules on purpose: stations never released, a sail that never
+loosens, the chart sent to everyone aboard, a wreck naming only the first
+person. Each turned its named test red. In a real browser one window at
+1920 raised the sail with the mouse while a 390-wide phone view boarded by
+the on-screen button and turned the helm 64 degrees by touch; a
+keyboard-only pass boarded and went ashore. That pass found the first bug:
+pressing E straight after the page loaded did nothing, because the client
+decided whether you were aboard from a snapshot it hadn't received yet. The
+boarding range also had to grow from 5 to 7 tiles to reach the moored
+ships, and the phone's status line sat on the d-pad. Thirty simulated
+walkers on my laptop came back within 104 ms at the 95th percentile with
+73 MB of memory; the same run against Fly comes after this deploy.
 
 ## How I directed it
 
-`CLAUDE.md` is the README turned into rules, and four of them came from this
-week's mistakes. The gate test that passed by skipping, because an earlier
-run had opened the gate, became "a test that needs a shut gate starts its
-own server"
-([`714b094`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/714b094)).
-The keypad check that stayed green became "break the rule once and watch the
-test go red". The empty Enter became "Enter and E must move focus without
-submitting anything". The cookie prefix became "never send any part of a
-cookie".
+`CLAUDE.md` is the README as rules, and the new ones come from this round.
+"Never gate play on a headcount" is the decision record as a rule. "Tuning
+numbers live in `server/params.ts` and change by simulation" exists because
+the first draft had them scattered and guessed. "Break the rule once and
+watch the test go red" stays from crit 8, and this time every break went
+red, which is what the rule is for. The design note and the decision record
+are the course's process made literal: the agent proposed, I corrected, and
+the corrections are in the file.
 
 ## Stack
 
-Moves go up and positions come down ten times a second, so one WebSocket
-beats server-sent events plus a POST for every key. The idea needs the
-server to decide who hears what, so one Node process holds the world, steps
-it twenty times a second and the page only draws. The Astro starter from
-crit 7 has no place for that loop. The costs: hand-written routing, a
-`node:sqlite` that is still experimental in Node 24 and prints a warning,
-and gate and restart tests that each start a server of their own.
+Unchanged from crit 8, and the case for it grew. The ship is stepped twenty
+times a second on the server from who holds which station, so one Node
+process owning the world and one WebSocket per visitor is still the shape.
+The block view that comes next is the browser's job; the server sends the
+same small state either way. The costs remain: hand-written routing, a
+`node:sqlite` that is still experimental, and tests that start their own
+server.
 
 ## Thin spots
 
-The map is a placeholder with one puzzle and nothing behind the gate. The
-spike sat uncommitted while I deployed and load-tested it, so the snapshot
-fix has no commit of its own, and the rest landed in one morning. CI hasn't
-run yet because the repo is private until the cutoff. The agent wrote most
-of the code and drafted this file. I decided what to build and what to cut.
+The numbers are untuned, so the ladder in the design note (two for speed,
+three for reefs, four for the far island) is a claim until the bots run.
+The view is still top-down. Plaques show only on the chart. The research
+notes are the agents' reports in their own words, checked but not
+rewritten. The agent wrote most of the code and drafted this file; I decided
+what to build, what to cut, and what to correct.

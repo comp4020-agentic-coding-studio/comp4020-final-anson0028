@@ -20,3 +20,12 @@ send backlog of 0 bytes on every socket.
 
 The spike was not yet committed during these runs; the "after" version is
 the first commit, 8611c0b. The simulated walkers stay in the live database.
+
+## 10 October, the ship build
+
+The same `pnpm sim 30 20` against the ship server on the laptop, with three
+ships moored and the walkers on the pier: p50 58 ms, p95 104 ms, max
+105 ms, 73 MB, a tick taking 1.14 ms at the 95th percentile, and a send
+backlog of 0 bytes. Snapshots now also carry each ship's position, heading,
+sail, water, state and four holder ids. The run against Fly comes after the
+deploy.
