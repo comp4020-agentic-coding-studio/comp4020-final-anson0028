@@ -7,6 +7,7 @@ export class Island {
   readonly dataDir = mkdtempSync(join(tmpdir(), "walk-"));
   readonly port = 8100 + Math.floor(Math.random() * 800);
   private child: ChildProcess | null = null;
+  private env: Record<string, string> = {};
 
   get url(): string {
     return `http://localhost:${this.port}`;
@@ -16,10 +17,13 @@ export class Island {
     return `ws://localhost:${this.port}`;
   }
 
-  async start(today?: string): Promise<void> {
+  async start(extra: Record<string, string> = {}): Promise<void> {
+    this.env = extra;
     const env: NodeJS.ProcessEnv = { ...process.env, PORT: String(this.port), DATA_DIR: this.dataDir };
-    if (today) env.WALK_TODAY = today;
-    else delete env.WALK_TODAY;
+    delete env.WALK_TODAY;
+    delete env.WALK_TEST;
+    delete env.SHIP_PARAMS;
+    Object.assign(env, extra);
     this.child = spawn(process.execPath, ["server/index.ts"], { env, stdio: ["ignore", "ignore", "pipe"] });
     this.child.stderr?.on("data", (d) => {
       const s = d.toString();
@@ -46,8 +50,8 @@ export class Island {
     });
   }
 
-  async restart(today?: string): Promise<void> {
+  async restart(extra: Record<string, string> = this.env): Promise<void> {
     await this.stop();
-    await this.start(today);
+    await this.start(extra);
   }
 }
