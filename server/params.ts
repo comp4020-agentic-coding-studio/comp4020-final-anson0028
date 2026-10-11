@@ -1,10 +1,10 @@
 const defaults = {
   SAIL_RISE: 0.25,
-  SAIL_LOOSEN: 0.05,
-  MAX_SPEED: 3,
+  SAIL_LOOSEN: 0.12,
+  MAX_SPEED: 1.2,
   TURN_RATE: 0.8,
-  REEF_DAMAGE: 10,
-  LEAK_PER_DAMAGE: 0.02,
+  REEF_DAMAGE: 15,
+  LEAK_PER_DAMAGE: 0.07,
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 5,
   SIGHT: 8,
@@ -12,6 +12,11 @@ const defaults = {
   SHIPS_AT_PIER: 3,
   MAX_SHIPS: 12,
   LANDING_RANGE: 4.5,
+  REEF_FROM: 12,
+  REEF_SLOPE: 70,
+  REEF_MAX: 0.5,
+  REEF_CLUMP: 1,
+  HELM_DRIFT: 0.1,
 };
 
 export type Params = typeof defaults;

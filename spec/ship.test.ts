@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
 import { STATIONS, Walker, bodies, settle, ships, uuid, type Msg } from "./walker.ts";
 
-const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, LAUNCH_DELAY_S: 1 });
+const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, LAUNCH_DELAY_S: 1, HELM_DRIFT: 0 });
 const env = { WALK_TEST: "1", WALK_TODAY: "2026-10-12", SHIP_PARAMS: FAST };
 
 let island: Island | null = null;

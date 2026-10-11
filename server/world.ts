@@ -47,6 +47,17 @@ function noise(x: number, y: number): number {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
+function lattice(x: number, y: number, cell: number): number {
+  const gx = x / cell, gy = y / cell;
+  const x0 = Math.floor(gx), y0 = Math.floor(gy);
+  const fx = gx - x0, fy = gy - y0;
+  const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const n = (i: number, j: number) => noise(i + 1000, j + 1000);
+  const top = n(x0, y0) * (1 - sx) + n(x0 + 1, y0) * sx;
+  const bottom = n(x0, y0 + 1) * (1 - sx) + n(x0 + 1, y0 + 1) * sx;
+  return top * (1 - sy) + bottom * sy;
+}
+
 export const tiles: Uint8Array = new Uint8Array(W * H);
 for (let y = 0; y < H; y++) {
   for (let x = 0; x < W; x++) {
@@ -58,7 +69,9 @@ for (let y = 0; y < H; y++) {
       const d = Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y);
       const nearIsland = ISLANDS.some((i) => Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) <= i.r + 2.5);
       const nearSlot = SLOTS.some((s) => Math.hypot(x + 0.5 - s.x, y + 0.5 - s.y) <= 5);
-      const p = d < 16 ? 0 : Math.min(0.3, (d - 16) / 150);
+      const base = d < P.REEF_FROM ? 0 : Math.min(P.REEF_MAX, (d - P.REEF_FROM) / P.REEF_SLOPE);
+      const clump = 1 + P.REEF_CLUMP * (2 * lattice(x, y, 7) - 1) * 1.6;
+      const p = Math.min(0.9, Math.max(0, base * clump));
       if (!nearIsland && !nearSlot && noise(x, y) < p) t = REEF;
     }
     tiles[y * W + x] = t;
@@ -147,8 +160,8 @@ export function stationUnder(b: Body): StationName | null {
 }
 
 export type ShipState = "moored" | "sailing" | "building";
-export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean };
-export type Control = { sail: boolean; helmDir: number; pump: boolean };
+export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
+export type Control = { sail: boolean; helmDir: number; helmHeld: boolean; pump: boolean };
 export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "edge" } | { kind: "collision" } | { kind: "reef" };
 export const inBounds = (x: number, y: number): boolean => x >= 0 && y >= 0 && x < W && y < H;
 export type Clear = (x: number, y: number) => boolean;
@@ -179,9 +192,12 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   s.sail = c.sail ? Math.min(1, s.sail + P.SAIL_RISE * dt) : Math.max(0, s.sail - P.SAIL_LOOSEN * dt);
   if (c.helmDir) {
     s.heading += c.helmDir * P.TURN_RATE * dt;
-    if (s.heading > Math.PI) s.heading -= 2 * Math.PI;
-    if (s.heading < -Math.PI) s.heading += 2 * Math.PI;
+  } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0) {
+    s.wander = (s.wander ?? 0) + dt;
+    s.heading += P.HELM_DRIFT * Math.sin((s.wander * 2 * Math.PI) / 40 + s.id) * dt;
   }
+  if (s.heading > Math.PI) s.heading -= 2 * Math.PI;
+  if (s.heading < -Math.PI) s.heading += 2 * Math.PI;
   if (s.state === "moored" && s.sail > 0.05) s.state = "sailing";
   const speed = s.sail * P.MAX_SPEED;
   if (s.state === "sailing" && speed > 0) {

@@ -472,7 +472,7 @@ function loop(): void {
   }
   for (const s of [...ships.values()]) {
     if (s.state === "building") continue;
-    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, pump: !!s.holders.pump };
+    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump };
     for (const ev of stepShip(s, control, dt, clearOf(s))) {
       if (ev.kind === "sank") {
         sink(s);
