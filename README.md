@@ -45,17 +45,20 @@ What holds each claim (`spec/ship.test.ts` unless noted):
 10. Bubbles and gestures reach 8 tiles; nobody is sent another's cookie; a
     move shows within a second; your bird survives a restart.
     (`spec/walk.test.ts`, `spec/persist.test.ts`, `spec/harbour.test.ts`)
-11. A typed name goes on every record after it and survives a restart.
+11. A typed name goes on every record after it.
 12. Every landing and wreck is a kept line on the harbour board, with crew
-    and day, for everyone.
+    and day.
 13. A note left ashore is seen within sight, kept, and taken up only by its
     writer.
 14. Shift+Enter aboard speaks to the crew alone; a word nobody heard says
     so. (11–14: `spec/harbour.test.ts`)
 
-Judged, not tested: how far one, two, three and four people get. Simulated
-crews will tune the numbers; until then the ladder in `docs/the-ship.md` is
-a target, and the judge is the crit 9 pod and the showcase room.
+Measured, not promised: with the numbers in `server/params.ts`, simulated
+crews of one reach the near island and wreck before the middle one; two
+reach the middle island half the time; three always, and the far island a
+third of the time; four, with one at the chart table, reach the far island
+every time ([`docs/tuning.md`](docs/tuning.md)). Whether people match the
+bots is for the crit 10 pod.
 
 ## Trying it alone
 
@@ -73,7 +76,8 @@ second person".
 
 ## Still open
 
-The numbers are untuned; the block view has not met a phone in a real hand.
+The numbers are tuned by bots, not yet by a pod; the block view has not met
+a phone in a real hand.
 
 ## Sources
 

@@ -79,7 +79,10 @@ Each of these becomes a test.
    the same station.
 2. Sail. Held, the sail rises over a few seconds. Unheld, it loosens over a
    longer time. Speed follows the sail.
-3. Helm. Held with a direction, the ship turns. Unheld, the heading stays.
+3. Helm. Held with a direction, the ship turns. Unheld, a sailing ship
+   wanders: a slow swing either way, so a course set and left drifts off
+   over the next half minute. (Changed 12 October: with a heading that held
+   itself, two people were as good as three; see `docs/tuning.md`.)
 4. Chart. Only a body standing at the chart table is sent the map beyond the
    ship's own sight, and only that body's view switches to the chart.
    Everyone else sees the water around the ship and nothing more.
@@ -108,18 +111,17 @@ Each of these becomes a test.
 
 ## What each extra body adds
 
-| Aboard | What the ship can do |
-|---|---|
-| 1 | Leaves harbour. Raise the sail, run to the chart, run to the helm, notice the leak, run to the pump, find the sail has loosened. Calm water is fine; the reef field is usually a wreck. |
-| 2 | One at the helm, one at the sail. The ship holds speed through turns. The near island is reachable. |
-| 3 | A third on the pump. The ship can take a scrape and keep going, so the reef field is crossable. |
-| 4 | A fourth at the chart, calling reefs ahead. The far islands come into reach. |
-| 5 and up | Far out, the hull springs more than one leak. Several people pump at once. |
-| A room of 30 | Three crews on three ships. The plaques say which crew got furthest. |
+| Aboard | What the ship can do | Measured, 12 October (`docs/tuning.md`) |
+|---|---|---|
+| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows. Calm water is fine; the reef field is a wreck. | Near island 12 of 12; middle and far 0 of 12, wrecked at about 35 tiles. |
+| 2 | One on the sail, one who sets the course and then pumps, running back to the helm as the ship wanders. | Near 12 of 12; middle 7 of 12; far 0 of 12. |
+| 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Middle 12 of 12; far 4 of 12. |
+| 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Far 12 of 12. |
+| A room of 30 | Three crews on three ships, and more berths refilling. The board says which crew got furthest. | Not yet. |
 
 The ladder is not enforced by counting people. It falls out of one body
-being in one place at a time, and of distances and leak rates that make one
-pair of hands too few further out.
+being in one place at a time, of a helm that wanders when nobody holds it,
+and of reef fields with lanes that only the chart shows.
 
 ## What persists, and what expires
 
@@ -147,12 +149,11 @@ crews of four or more; the near one may say one sailor.
 ## Numbers that are tuned, not guessed
 
 Sail rise and loosen times, turn rate, station spacing, leak rate by
-distance, reef density, the pier's launch interval. They get tuned with
-headless bots the way crit 5's game was: one bot, then two, then four, each
-run a hundred times. The targets, to be confirmed by the runs: alone, the
-near island is reached sometimes and the reef field almost never; two reach
-the near island nearly always; the far island needs four. The measured
-numbers go in the README.
+distance, reef density, the pier's launch interval. They were tuned with
+headless bots on 12 October, crews of one to four, each cell run a dozen
+times; the method, the sweeps and the two rule changes they forced (a helm
+that wanders, reefs in clumps) are in `docs/tuning.md`, and the measured
+ladder is in the README.
 
 ## What I learned from each game
 

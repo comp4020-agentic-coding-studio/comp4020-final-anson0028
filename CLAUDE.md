@@ -53,7 +53,9 @@ them broken, change README.md first and say why.
   go red. If it stays green, the check is wrong, or the rule can't be
   reached.
 - Tuning numbers live in `server/params.ts` and nowhere else. They change by
-  simulation, with the runs recorded under `docs/`, not by feel.
+  simulation (`pnpm crews`, recorded in `docs/tuning.md`), not by feel. The
+  spec pins its own fast numbers, so a tuning change never moves a test;
+  if it does, the test was about a number, not a rule.
 - Snapshots carry public ids, positions, each body's input number and ship,
   and each ship's position, heading, sail, water, state and holders. Names
   and colours travel once, on join.
@@ -85,7 +87,10 @@ them broken, change README.md first and say why.
 - A ship is three points, centre, bow 3.5 ahead and stern 2.5 behind. Land
   and reefs are checked at all three, ships keep 5 tiles between centres
   (`SHIP_CLEARANCE`), and the crew are told when the hull is stopped or
-  scraped.
+  scraped. Reefs start `REEF_FROM` tiles from the pier, thicken by
+  `REEF_SLOPE` to `REEF_MAX`, in clumps with lanes (`REEF_CLUMP`). An
+  unheld helm wanders (`HELM_DRIFT`). The spec's fixed positions were
+  checked to be open water under the shipped map.
 - Deck coordinates are local to the ship: x in [-3, 4), y in [-2, 2).
   Stations: helm (-3, 0), sail (0, 1), chart (3, 0), pump (0, -2).
 - A name is what the visitor typed, cleaned on the server to letters, digits
