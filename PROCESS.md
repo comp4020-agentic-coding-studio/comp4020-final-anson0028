@@ -84,6 +84,27 @@ in `docs/tuning.md`
 Thirty simulated walkers against Fly, on this build, answer within 92 ms at
 the 95th percentile with 102 MB in use (`docs/load-test.md`).
 
+On the Monday the sea read as mostly rock from a phone and a holed ship
+sank with nothing to be done, so a reef now holes the deck where it
+struck and a body standing there patches it
+([`f6f7488`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f6f7488)
+red, [`20413e3`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/20413e3),
+[`a2e7799`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a2e7799)),
+and the reefs are thinner
+([`0e43732`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0e43732)).
+The live log of one sinking showed a hull still being torn while the ship
+lay stopped on the reef, so a still ship takes no more and patching shows
+its progress
+([`3d2bf04`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/3d2bf04)
+red, [`9a274f7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9a274f7),
+[`6eb7c63`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6eb7c63)).
+The same afternoon found the simulator's fourth fault: a server left
+running after every landed or wrecked run, 398 of them by the time the
+load average said so
+([`1fab797`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/1fab797)).
+The shipped numbers re-measured the same on a quiet machine; the thinner
+sea is in `docs/tuning.md`.
+
 ## Who did what
 
 For crit 10 the server logs one line per act, `name#id did what`, with
