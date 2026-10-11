@@ -42,6 +42,11 @@ function logged(entry: LogEntry): void {
   broadcast({ t: "log", entry });
 }
 
+const whoIs = (c: Client) => `${c.name}#${c.id}`;
+function logLine(text: string): void {
+  console.log(`${new Date().toISOString()} ${text}`);
+}
+
 function cleanName(raw: unknown): string {
   return String(raw ?? "").normalize("NFKC").replace(/[^\p{L}\p{N} ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 16).trim();
 }
@@ -99,7 +104,10 @@ function refillBerths(now: number): void {
     emptySince.set(i, since);
     if (now - since < P.LAUNCH_DELAY_S * 1000 || ships.size >= P.MAX_SHIPS) return;
     const s = launchAt(slot);
-    if (s) broadcast({ t: "ship", event: "launched", id: s.id, ship: pubShip(s) });
+    if (s) {
+      broadcast({ t: "ship", event: "launched", id: s.id, ship: pubShip(s) });
+      logLine(`ship ${s.id} is launched into the empty berth at (${slot.x}, ${slot.y}); ${ships.size} ships`);
+    }
     emptySince.delete(i);
   });
 }
@@ -114,6 +122,7 @@ function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
   if (now - (noticeAt.get(key) ?? 0) < 4000) return;
   noticeAt.set(key, now);
   for (const c of aboard(s)) send(c.ws, { t: "toast", text: NOTICES[kind] });
+  logLine(`ship ${s.id} ${{ aground: "runs aground", collision: "is blocked by another ship", reef: "scrapes a reef" }[kind]} at (${s.x.toFixed(0)}, ${s.y.toFixed(0)}) with ${aboard(s).map(whoIs).join(", ") || "nobody"} aboard`);
 }
 
 const clearOf = (s: LiveShip) => (x: number, y: number): boolean =>
@@ -210,14 +219,17 @@ function aboard(s: LiveShip): Client[] {
 
 function join_(ws: WebSocket, token: string): void {
   if (!TOKEN.test(token)) {
+    logLine("a socket with a token the harbour never issued is refused");
     send(ws, { t: "refused", why: "bad_token" });
     return ws.close();
   }
   if ([...clients.values()].some((c) => c.token === token)) {
+    logLine(`#${publicId(token)} tries to join from a second tab and is refused`);
     send(ws, { t: "refused", why: "already_here" });
     return ws.close();
   }
   if (clients.size >= MAX_PLAYERS) {
+    logLine(`#${publicId(token)} is refused: the harbour is full`);
     send(ws, { t: "refused", why: "full" });
     return ws.close();
   }
@@ -227,6 +239,7 @@ function join_(ws: WebSocket, token: string): void {
   const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0 };
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
+  logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
     t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, deck: DECK, stations: STATIONS, day: today(),
@@ -238,6 +251,7 @@ function join_(ws: WebSocket, token: string): void {
     const w = worldPos(c);
     savePlayer(c.token, w.x, w.y);
     for (const o of clients.values()) send(o.ws, { t: "leave", id });
+    logLine(`${whoIs(c)} leaves${c.body.ship === null ? "" : ` from ship ${c.body.ship}`}; ${clients.size} here`);
   });
 }
 
@@ -280,7 +294,11 @@ function handle(c: Client, raw: string): void {
   }
   if (msg.t === "name") {
     const name = cleanName(msg.name);
-    if (!name) return send(c.ws, { t: "toast", text: "A name needs a letter or a digit." });
+    if (!name) {
+      logLine(`${whoIs(c)} sends a name with nothing in it; refused`);
+      return send(c.ws, { t: "toast", text: "A name needs a letter or a digit." });
+    }
+    logLine(`${whoIs(c)} is now called ${name}`);
     c.name = name;
     renamePlayer(c.token, name);
     broadcast({ t: "rename", id: c.id, name });
@@ -293,7 +311,9 @@ function handle(c: Client, raw: string): void {
     const from = worldPos(c);
     const hearers = crew ? aboard(ships.get(b.ship!)!) : [...clients.values()].filter((o) => within(worldPos(o), from, SAY_RANGE));
     for (const o of hearers) send(o.ws, { t: "bubble", from: c.id, text, crew });
-    if (!hearers.some((o) => o !== c)) send(c.ws, { t: "toast", text: crew ? "Nobody else is aboard to hear that." : "Nobody within earshot heard that." });
+    const others = hearers.filter((o) => o !== c);
+    logLine(`${whoIs(c)} says${crew ? ` to the crew of ship ${b.ship}` : ""}: "${text}" (heard by ${others.length ? others.map(whoIs).join(", ") : "nobody"})`);
+    if (!others.length) send(c.ws, { t: "toast", text: crew ? "Nobody else is aboard to hear that." : "Nobody within earshot heard that." });
     return;
   }
   if (msg.t === "emote") {
@@ -304,10 +324,14 @@ function handle(c: Client, raw: string): void {
     c.lastEmote = now;
     const from = worldPos(c);
     for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind });
+    logLine(`${whoIs(c)} ${{ wave: "waves", jump: "jumps", yes: "nods", no: "shakes their head" }[kind]}`);
     return;
   }
   if (msg.t === "note") {
-    if (b.ship !== null) return send(c.ws, { t: "toast", text: "Notes go on the ground. Step ashore first." });
+    if (b.ship !== null) {
+      logLine(`${whoIs(c)} tries to leave a note aboard ship ${b.ship}; refused`);
+      return send(c.ws, { t: "toast", text: "Notes go on the ground. Step ashore first." });
+    }
     const text = String(msg.text ?? "").replace(/\s+/g, " ").trim().slice(0, 60).trim();
     if (!text) return;
     const mine = notes.filter((n) => n.author === c.id);
@@ -315,15 +339,22 @@ function handle(c: Client, raw: string): void {
       const old = mine.shift()!;
       removeNote(old.id, c.id);
       notes.splice(notes.indexOf(old), 1);
+      logLine(`${whoIs(c)}'s oldest note (${old.id}) makes room`);
     }
-    notes.push(addNote(c.id, c.name, b.x, b.y, text, today()));
+    const note = addNote(c.id, c.name, b.x, b.y, text, today());
+    notes.push(note);
+    logLine(`${whoIs(c)} leaves note ${note.id} at (${b.x.toFixed(1)}, ${b.y.toFixed(1)}): "${text}"`);
     nudgeNear();
     return;
   }
   if (msg.t === "unnote") {
     const i = notes.findIndex((n) => n.id === Number(msg.id) && n.author === c.id);
-    if (i < 0) return;
+    if (i < 0) {
+      logLine(`${whoIs(c)} tries to take up note ${Number(msg.id)}, which is not theirs; refused`);
+      return;
+    }
     removeNote(notes[i].id, c.id);
+    logLine(`${whoIs(c)} takes up note ${notes[i].id}`);
     notes.splice(i, 1);
     nudgeNear();
     return;
@@ -335,12 +366,14 @@ function handle(c: Client, raw: string): void {
     const s = choices[0];
     if (!s) return send(c.ws, { t: "toast", text: "No ship close enough to board." });
     Object.assign(b, { ship: s.id, x: -2.5, y: -0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+    logLine(`${whoIs(c)} boards ship ${s.id}; ${aboard(s).length} aboard`);
     return;
   }
   if (msg.t === "ashore") {
     if (b.ship === null) return send(c.ws, { t: "toast", text: "You're already ashore." });
     const s = ships.get(b.ship);
     const far = !s || distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
+    logLine(`${whoIs(c)} goes ashore from ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
     Object.assign(b, { ship: null, x: SPAWN.x, y: SPAWN.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
     if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
     return;
@@ -352,7 +385,10 @@ function handle(c: Client, raw: string): void {
     if (!st) return send(c.ws, { t: "toast", text: "Nothing to hold here." });
     const s = b.ship === null ? null : ships.get(b.ship);
     const holder = s?.holders[st];
-    if (holder && holder !== c) send(c.ws, { t: "toast", text: `${holder.name} is already at the ${st}.` });
+    if (holder && holder !== c) {
+      logLine(`${whoIs(c)} is refused the ${st} of ship ${b.ship}: ${whoIs(holder)} holds it`);
+      send(c.ws, { t: "toast", text: `${holder.name} is already at the ${st}.` });
+    }
     return;
   }
   if (msg.t === "test" && TEST) {
@@ -375,6 +411,7 @@ function sink(s: LiveShip): void {
   const crew = aboard(s);
   const names = crew.length ? crew.map((c) => c.name) : ["nobody aboard"];
   const wreck = recordWreck(s.x, s.y, today(), names, distanceFromPier(s.x, s.y));
+  logLine(`ship ${s.id} sinks ${wreck.distance.toFixed(0)} tiles out with ${crew.length ? crew.map(whoIs).join(", ") : "nobody"} aboard; wreck ${wreck.id}`);
   wrecks.push(wreck);
   crew.forEach((c, i) => Object.assign(c.body, { ship: null, x: SPAWN.x - 1 + (i % 3) * 0.5, y: SPAWN.y - 1 + Math.floor(i / 3) * 0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false }));
   ships.delete(s.id);
@@ -393,6 +430,7 @@ function land(s: LiveShip, island: { id: string; name: string }): void {
   if (i >= 0) landings[i] = landing;
   else landings.push(landing);
   broadcast({ t: "landing", landing, first, ship: s.id, name: island.name });
+  logLine(`ship ${s.id} lands on ${island.name} with ${crew.map(whoIs).join(", ")} aboard${first ? ", the first landing there" : ` (visit ${landing.visits})`}`);
   logged(visitEntry(recordVisit(island.id, today(), names, distanceFromPier(s.x, s.y))));
 }
 
@@ -411,14 +449,20 @@ function loop(): void {
   for (const s of ships.values()) {
     for (const name of STATION_NAMES) {
       const h = s.holders[name];
-      if (h && !(clients.has(h.ws) && h.body.ship === s.id && h.body.holding && stationUnder(h.body) === name)) s.holders[name] = null;
+      if (h && !(clients.has(h.ws) && h.body.ship === s.id && h.body.holding && stationUnder(h.body) === name)) {
+        s.holders[name] = null;
+        logLine(`${whoIs(h)} lets go of the ${name} of ship ${s.id}`);
+      }
     }
   }
   for (const c of clients.values()) {
     if (!c.body.holding || c.body.ship === null) continue;
     const st = stationUnder(c.body);
     const s = ships.get(c.body.ship);
-    if (st && s && !s.holders[st]) s.holders[st] = c;
+    if (st && s && !s.holders[st]) {
+      s.holders[st] = c;
+      logLine(`${whoIs(c)} takes the ${st} of ship ${s.id}`);
+    }
   }
   for (const s of [...ships.values()]) {
     if (s.state === "building") continue;
@@ -476,4 +520,4 @@ for (const sig of ["SIGTERM", "SIGINT"] as const) {
   });
 }
 
-server.listen(PORT, "0.0.0.0", () => console.log(`earshot listening on ${PORT}`));
+server.listen(PORT, "0.0.0.0", () => logLine(`earshot listening on ${PORT} with ${ships.size} ships, ${wrecks.length} wrecks, ${notes.length} notes`));
