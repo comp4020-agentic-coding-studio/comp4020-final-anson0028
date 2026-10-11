@@ -25,6 +25,12 @@ const boardBox = document.getElementById("board");
 const boardToggle = document.getElementById("board-toggle");
 const furthest = document.getElementById("furthest");
 const logList = document.getElementById("log");
+const countEl = document.getElementById("count");
+const heardList = document.getElementById("heard");
+const noteForm = document.getElementById("note-form");
+const noteInput = document.getElementById("note-text");
+const noteButton = document.getElementById("note");
+const unnoteButton = document.getElementById("unnote");
 
 let me = null;
 let deck = null;
@@ -36,6 +42,9 @@ let wrecks = [];
 let landings = [];
 let log = [];
 let near = [];
+let notes = [];
+const heard = [];
+let ownNoteNear = null;
 let chart = null;
 let snaps = [];
 let clockOffset = 0;
@@ -99,13 +108,20 @@ ws.addEventListener("message", (e) => {
     if (snaps.length > 6) snaps.shift();
   } else if (m.t === "near") {
     near = m.tiles;
+    notes = m.notes ?? [];
     setTiles();
+    syncNotes();
   } else if (m.t === "chart") {
     chart = m.tiles ? m : null;
     chartBox.hidden = !chart;
     if (chart) drawChart();
+  } else if (m.t === "emote") {
+    const g = birdMeshes.get(m.id);
+    if (g) g.userData.emote = { kind: m.kind, t0: performance.now() };
   } else if (m.t === "bubble") {
-    bubbles.set(m.from, { text: m.text, until: performance.now() + 4000 });
+    bubbles.set(m.from, { text: m.text, until: performance.now() + 8000, crew: !!m.crew });
+    heard.push({ at: Date.now(), name: roster.get(m.from)?.name ?? "", text: m.text, crew: !!m.crew });
+    drawHeard();
   } else if (m.t === "wreck") {
     wrecks.push(m.wreck);
     const who = m.wreck.crew[0] === "nobody aboard" ? "nobody aboard" : `${m.wreck.crew.join(", ")} aboard`;
@@ -302,10 +318,20 @@ window.addEventListener("keydown", (e) => {
   if ((e.key === "e" || e.key === "E") && !e.repeat) { e.preventDefault(); act(true); }
   if (e.key === "q" || e.key === "Q") { e.preventDefault(); goAshore(); }
   if (e.key === "?") { e.preventDefault(); showIntro(); }
+  if ((e.key === "n" || e.key === "N") && !e.repeat) { e.preventDefault(); openNote(); }
+  if (e.key === "x" || e.key === "X") { e.preventDefault(); removeNote(); }
+  if (e.target instanceof HTMLButtonElement) return;
+  const gesture = { " ": "jump", h: "wave", H: "wave", y: "yes", Y: "yes", b: "no", B: "no" }[e.key];
+  if (gesture && !e.repeat) { e.preventDefault(); emote(gesture); }
 });
+function emote(kind) {
+  if (ws.readyState === 1) ws.send(JSON.stringify({ t: "emote", kind }));
+}
+for (const b of document.querySelectorAll(".emotes button")) b.addEventListener("click", () => { emote(b.dataset.emote); canvas.focus(); });
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (!intro.hidden) { e.preventDefault(); hideIntro(); }
+    else if (!noteForm.hidden) { e.preventDefault(); closeNote(); }
     else if (e.target === sayInput) { e.preventDefault(); sayInput.blur(); canvas.focus(); }
   }
 });
@@ -331,13 +357,62 @@ actButton.addEventListener("pointerdown", (e) => { e.preventDefault(); act(true)
 for (const ev of ["pointerup", "pointercancel", "pointerleave"]) actButton.addEventListener(ev, () => act(false));
 leaveButton.addEventListener("click", goAshore);
 
+function sendSay(to) {
+  const text = sayInput.value.trim();
+  if (text && ws.readyState === 1) ws.send(JSON.stringify(to ? { t: "say", text, to } : { t: "say", text }));
+  sayInput.value = "";
+  countEl.textContent = "0/40";
+  canvas.focus();
+}
 sayForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const text = sayInput.value.trim();
-  if (text && ws.readyState === 1) ws.send(JSON.stringify({ t: "say", text }));
-  sayInput.value = "";
-  canvas.focus();
+  sendSay();
 });
+sayInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.shiftKey) {
+    e.preventDefault();
+    sendSay(aboardNow === null ? undefined : "crew");
+  }
+});
+sayInput.addEventListener("input", () => { countEl.textContent = `${sayInput.value.length}/40`; });
+
+function drawHeard() {
+  const cutoff = Date.now() - 120000;
+  while (heard.length && heard[0].at < cutoff) heard.shift();
+  const show = heard.slice(matchMedia("(max-width: 40rem)").matches ? -3 : -6);
+  heardList.hidden = show.length === 0;
+  heardList.replaceChildren(...show.map((h) => {
+    const li = document.createElement("li");
+    li.textContent = `${h.name}: ${h.text}`;
+    if (h.crew) li.className = "crew";
+    return li;
+  }));
+}
+setInterval(drawHeard, 5000);
+
+function openNote() {
+  if (aboardNow !== null) return say("Notes go on the ground. Step ashore first.");
+  noteForm.hidden = false;
+  sayForm.hidden = true;
+  noteInput.value = "";
+  noteInput.focus();
+}
+function closeNote() {
+  noteForm.hidden = true;
+  sayForm.hidden = false;
+  canvas.focus();
+}
+noteForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = noteInput.value.trim();
+  if (text && ws.readyState === 1) ws.send(JSON.stringify({ t: "note", text }));
+  closeNote();
+});
+noteButton.addEventListener("click", openNote);
+function removeNote() {
+  if (ownNoteNear !== null && ws.readyState === 1) ws.send(JSON.stringify({ t: "unnote", id: ownNoteNear }));
+}
+unnoteButton.addEventListener("click", removeNote);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -523,6 +598,14 @@ function makeBird(hue, name, isMe) {
   const beak = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 0.12), mat(0xe8a03a));
   beak.position.set(0.38, 0.82, 0);
   g.add(beak);
+  const wingGeo = new THREE.BoxGeometry(0.3, 0.34, 0.08);
+  wingGeo.translate(0, -0.17, 0);
+  const wings = [-0.32, 0.32].map((z) => {
+    const wing = new THREE.Mesh(wingGeo, mat(colour.clone().offsetHSL(0, 0, -0.08)));
+    wing.position.set(0, 0.6, z);
+    g.add(wing);
+    return wing;
+  });
   for (const z of [-0.12, 0.12]) {
     const eye = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), mat(0x15171c));
     eye.position.set(0.29, 0.9, z);
@@ -540,8 +623,29 @@ function makeBird(hue, name, isMe) {
     mark.position.y = 0.03;
     g.add(mark);
   }
-  g.userData = { last: null, bubble: null, bubbleText: "", label, name };
+  g.userData = { last: null, bubble: null, bubbleText: "", label, name, head, wingR: wings[1], emote: null };
   return g;
+}
+
+function animateEmote(g, now) {
+  const em = g.userData.emote;
+  if (!em) return 0;
+  const dt = (now - em.t0) / 1000;
+  const { head, wingR } = g.userData;
+  if (em.kind === "jump") {
+    if (dt < 0.6) return 0.7 * Math.sin((Math.PI * dt) / 0.6);
+  } else if (em.kind === "wave") {
+    if (dt < 1.4) { wingR.rotation.x = -Math.abs(Math.sin(dt * 10)) * 1.6; return 0; }
+    wingR.rotation.x = 0;
+  } else if (em.kind === "yes") {
+    if (dt < 1) { head.rotation.z = Math.sin(dt * 14) * 0.25; return 0; }
+    head.rotation.z = 0;
+  } else if (em.kind === "no") {
+    if (dt < 1) { head.rotation.y = Math.sin(dt * 14) * 0.45; return 0; }
+    head.rotation.y = 0;
+  }
+  g.userData.emote = null;
+  return 0;
 }
 
 function groundHeight(p) {
@@ -578,7 +682,7 @@ function syncBirds(players, shipsNow) {
       if (Math.hypot(dx, dz) > 0.02) g.rotation.y = -Math.atan2(dz, dx);
     }
     g.userData.last = w;
-    g.position.set(w.x, y, w.y);
+    g.position.set(w.x, y + animateEmote(g, now), w.y);
     const b = bubbles.get(p.id);
     if (b && b.until > now) {
       if (g.userData.bubbleText !== b.text) {
@@ -620,6 +724,52 @@ function syncWrecks() {
       scene.add(g);
     }
     for (const child of g.children) child.material.opacity = alpha;
+  }
+}
+
+const noteMeshes = new Map();
+const noteAge = (n) => Math.max(0.35, 1 - Math.max(0, (Date.now() - Date.parse(n.at)) / 86400000) / 14);
+function syncNotes() {
+  const seen = new Set();
+  for (const n of notes) {
+    seen.add(n.id);
+    let g = noteMeshes.get(n.id);
+    if (!g) {
+      g = new THREE.Group();
+      const paper = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.04, 0.5), mat(0xf4e9cf, { transparent: true }));
+      paper.position.y = 0.02;
+      g.add(paper);
+      const pin = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), mat(0x7a1a1a));
+      pin.position.set(0.25, 0.09, -0.15);
+      g.add(pin);
+      g.rotation.y = (hash(Math.round(n.x * 10), Math.round(n.y * 10)) - 0.5) * 0.8;
+      g.userData = { note: n, paper, label: null };
+      noteMeshes.set(n.id, g);
+      scene.add(g);
+    }
+    g.userData.note = n;
+    const kind = ground.get(`${Math.floor(n.x)},${Math.floor(n.y)}`);
+    g.position.set(n.x, TOP[kind] ?? TOP[PIER], n.y);
+    g.userData.paper.material.opacity = noteAge(n);
+  }
+  for (const [id, g] of noteMeshes) if (!seen.has(id)) { scene.remove(g); noteMeshes.delete(id); }
+}
+function syncNoteLabels(self) {
+  ownNoteNear = null;
+  for (const g of noteMeshes.values()) {
+    const n = g.userData.note;
+    const close = self !== null && Math.hypot(n.x - self.x, n.y - self.y) <= 1.5;
+    if (close && n.author === me.id) ownNoteNear = n.id;
+    if (close && !g.userData.label) {
+      const label = makeLabel(`${n.text} — ${n.name}`, "#f4e9cf", "#15171c", 3.6);
+      label.position.y = 1.1;
+      label.material.opacity = noteAge(n);
+      g.add(label);
+      g.userData.label = label;
+    } else if (!close && g.userData.label) {
+      g.remove(g.userData.label);
+      g.userData.label = null;
+    }
   }
 }
 
@@ -691,9 +841,15 @@ function stationUnder(p) {
 function updateHud(self, shipsNow) {
   if (!self) return;
   const ship = self.ship === null ? null : shipsNow.find((s) => s.id === self.ship);
-  if (self.ship !== aboardNow) yawOffset = ship ? 0 : lastViewYaw;
+  if (self.ship !== aboardNow) {
+    yawOffset = ship ? 0 : lastViewYaw;
+    sayInput.placeholder = ship ? "Say something (Enter · Shift+Enter: crew only)" : "Say something (Enter)";
+  }
   aboardNow = self.ship;
   leaveButton.hidden = !ship;
+  noteButton.hidden = !!ship;
+  syncNoteLabels(ship ? null : self);
+  unnoteButton.hidden = ownNoteNear === null;
   if (ship) {
     status.hidden = false;
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
@@ -707,7 +863,8 @@ function updateHud(self, shipsNow) {
   let text = "";
   if (!ship) {
     const nearShip = shipsNow.some((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= 7);
-    text = nearShip ? "A ship is close. Press E to board." : "WASD to walk, arrows or drag to look.";
+    if (ownNoteNear !== null) text = "Your note is here. X removes it.";
+    else text = nearShip ? "A ship is close. Press E to board." : "WASD to walk, arrows or drag to look. N leaves a note.";
   } else if (st === "helm") text = holding ? "Holding the helm. A or D to turn." : "Hold E to take the helm.";
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : "Hold E to raise the sail.";
   else if (st === "pump") text = holding ? "Pumping." : "Hold E to pump.";

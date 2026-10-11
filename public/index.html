@@ -42,7 +42,7 @@
           <p>A harbour with three ships, and a sea that gets harder further out.</p>
           <p>Board a ship and hold E at a station: sail, helm, chart table, pump. A body holds one station at a time, and every station runs down when it's left. One person can sail, badly. More hands get further.</p>
           <p>Where each crew got to goes on the harbour board and the chart, with their names.</p>
-          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore · tap or click to walk there</p>
+          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore · N leaves a note · H waves, Space jumps, Y and B nod and shake · tap or click to walk there</p>
           <form id="name-form" class="name-form" autocomplete="off">
             <label for="name">What should the crew call you?</label>
             <input id="name" name="name" maxlength="16" />
@@ -50,14 +50,29 @@
           </form>
         </div>
       </section>
+      <ol id="heard" class="heard" aria-label="What you heard lately" hidden></ol>
       <form id="say" class="say" autocomplete="off">
         <label for="text" class="sr-only">Say something to people near you</label>
         <input id="text" name="text" maxlength="40" placeholder="Say something (Enter)" />
+        <span id="count" class="count">0/40</span>
         <button type="submit">Say</button>
       </form>
+      <form id="note-form" class="say note-form" autocomplete="off" hidden>
+        <label for="note-text" class="sr-only">Leave a note where you stand</label>
+        <input id="note-text" name="note" maxlength="60" placeholder="Leave a note here (Enter)" />
+        <button type="submit">Leave</button>
+      </form>
+      <div class="emotes" aria-label="Gestures">
+        <button type="button" data-emote="wave" aria-label="Wave (H)">Wave</button>
+        <button type="button" data-emote="jump" aria-label="Jump (Space)">Jump</button>
+        <button type="button" data-emote="yes" aria-label="Nod yes (Y)">Yes</button>
+        <button type="button" data-emote="no" aria-label="Shake no (B)">No</button>
+      </div>
       <div class="actions">
         <button id="act" type="button" class="act" aria-label="Use what you stand on (hold)">Use (E)</button>
         <button id="leave" type="button" class="leave" hidden>Ashore (Q)</button>
+        <button id="note" type="button" class="note-btn" hidden>Note (N)</button>
+        <button id="unnote" type="button" class="leave" hidden>Remove note (X)</button>
       </div>
       <div class="pad" aria-label="Walk">
         <button type="button" data-dir="0,-1" aria-label="Forward">▲</button>

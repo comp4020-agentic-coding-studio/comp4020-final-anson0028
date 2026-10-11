@@ -138,6 +138,53 @@ canvas#view:focus-visible { box-shadow: inset 0 0 0 3px #f0b94a; }
 
 .keypad input { width: 5.5rem; font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.3em; }
 
+.count { align-self: center; color: var(--muted); font-size: 0.75rem; }
+
+.heard {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 3.6rem;
+  margin: 0;
+  padding: 0.3rem 0.6rem;
+  list-style: none;
+  max-width: 22rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: #fff;
+  background: rgba(21, 23, 28, 0.55);
+  border-radius: 0.5rem;
+  pointer-events: none;
+}
+
+.heard li.crew { color: #ffe08a; }
+
+.note-btn { background: #8a6a3a; }
+
+.emotes {
+  position: absolute;
+  left: 50%;
+  bottom: 0.75rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.3rem;
+}
+
+.emotes button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  touch-action: manipulation;
+}
+
+@media (max-width: 40rem) {
+  .emotes { left: 0.75rem; right: auto; bottom: auto; top: 0.75rem; transform: none; }
+  .emotes button { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+}
+
 .say button, .keypad button {
   font: inherit;
   padding: 0.45rem 0.9rem;
@@ -253,6 +300,7 @@ body.page { display: block; min-height: 100%; }
   .status { top: auto; bottom: 7.6rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); font-size: 0.78rem; }
   .hint { top: auto; bottom: 10.4rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); }
   .actions { right: 0.75rem; bottom: 10.6rem; }
+  .heard { max-width: calc(100% - 11rem); font-size: 0.75rem; }
 }
 
 @media (min-width: 60rem) { .toast { left: 22rem; right: 20rem; transform: none; max-width: none; width: fit-content; margin: 0 auto; } }
