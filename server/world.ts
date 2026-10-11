@@ -18,10 +18,11 @@ export const H = 64;
 export const PIER_CENTRE = { x: 9.5, y: 31.5 };
 export const SPAWN = { x: 9.5, y: 31.5 };
 export const SLOTS = [
-  { x: 13.5, y: 28 },
-  { x: 13.5, y: 32 },
-  { x: 13.5, y: 36 },
+  { x: 13.5, y: 26, heading: 0.35 },
+  { x: 13.5, y: 32, heading: 0 },
+  { x: 13.5, y: 38, heading: -0.2 },
 ];
+export const SHIP_CLEARANCE = 5;
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };
 export const ISLANDS: Island[] = [
@@ -146,9 +147,16 @@ export function stationUnder(b: Body): StationName | null {
 }
 
 export type ShipState = "moored" | "sailing" | "building";
-export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null };
+export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean };
 export type Control = { sail: boolean; helmDir: number; pump: boolean };
-export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" };
+export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "collision" } | { kind: "reef" };
+export type Clear = (x: number, y: number) => boolean;
+
+export function hullPoints(x: number, y: number, heading: number): [number, number][] {
+  const c = Math.cos(heading);
+  const n = Math.sin(heading);
+  return [[x, y], [x + c * 3.5, y + n * 3.5], [x - c * 2.5, y - n * 2.5]];
+}
 
 export function deckToWorld(s: { x: number; y: number; heading: number }, lx: number, ly: number): { x: number; y: number } {
   const c = Math.cos(s.heading);
@@ -164,7 +172,7 @@ export function worldToDeck(s: { x: number; y: number; heading: number }, wx: nu
   return { x: dx * c + dy * n, y: -dx * n + dy * c };
 }
 
-export function stepShip(s: Ship, c: Control, dt: number): ShipEvent[] {
+export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => true): ShipEvent[] {
   const events: ShipEvent[] = [];
   if (s.state === "building") return events;
   s.sail = c.sail ? Math.min(1, s.sail + P.SAIL_RISE * dt) : Math.max(0, s.sail - P.SAIL_LOOSEN * dt);
@@ -178,14 +186,19 @@ export function stepShip(s: Ship, c: Control, dt: number): ShipEvent[] {
   if (s.state === "sailing" && speed > 0) {
     const nx = Math.min(W - 0.5, Math.max(0.5, s.x + Math.cos(s.heading) * speed * dt));
     const ny = Math.min(H - 0.5, Math.max(0.5, s.y + Math.sin(s.heading) * speed * dt));
-    if (sailable(nx, ny)) {
+    if (!hullPoints(nx, ny, s.heading).every(([px, py]) => sailable(px, py))) {
+      events.push({ kind: "aground" });
+    } else if (!clear(nx, ny)) {
+      events.push({ kind: "collision" });
+    } else {
       s.x = nx;
       s.y = ny;
-    } else {
-      events.push({ kind: "aground" });
     }
   }
-  if (tileAt(s.x, s.y) === REEF) s.hull = Math.min(100, s.hull + P.REEF_DAMAGE * dt);
+  const onReef = hullPoints(s.x, s.y, s.heading).some(([px, py]) => tileAt(px, py) === REEF);
+  if (onReef) s.hull = Math.min(100, s.hull + P.REEF_DAMAGE * dt);
+  if (onReef && !s.onReef) events.push({ kind: "reef" });
+  s.onReef = onReef;
   const leak = s.hull * P.LEAK_PER_DAMAGE;
   s.water += leak * dt;
   if (c.pump) s.water -= P.PUMP_RATE * dt;

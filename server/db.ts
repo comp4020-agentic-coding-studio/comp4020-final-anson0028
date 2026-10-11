@@ -70,12 +70,32 @@ db.exec(`
   BEGIN
     SELECT RAISE(ABORT, 'landings_kept');
   END;
+  CREATE TABLE IF NOT EXISTS visits (
+    id INTEGER PRIMARY KEY,
+    island TEXT NOT NULL,
+    day TEXT NOT NULL CHECK (day GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+    crew TEXT NOT NULL,
+    size INTEGER NOT NULL CHECK (size >= 1),
+    distance REAL NOT NULL CHECK (distance >= 0),
+    at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+  );
+  CREATE TRIGGER IF NOT EXISTS visits_kept_update
+  BEFORE UPDATE ON visits
+  BEGIN
+    SELECT RAISE(ABORT, 'visits_kept');
+  END;
+  CREATE TRIGGER IF NOT EXISTS visits_kept_delete
+  BEFORE DELETE ON visits
+  BEGIN
+    SELECT RAISE(ABORT, 'visits_kept');
+  END;
 `);
 
 export type PlayerRow = { token: string; name: string; hue: number; x: number; y: number };
 export type ShipRow = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: "moored" | "sailing" | "building"; ready_at: string | null };
 export type WreckRow = { id: number; x: number; y: number; day: string; crew: string[]; distance: number; at: string };
 export type LandingRow = { island: string; day: string; crew: string[]; size: number; visits: number; at: string };
+export type VisitRow = { id: number; island: string; day: string; crew: string[]; size: number; distance: number; at: string };
 
 const ADJ = ["quiet", "brisk", "amber", "misty", "dusty", "early", "late", "plain", "gentle", "stubborn", "lucky", "sleepy"];
 const BIRD = ["heron", "magpie", "rosella", "currawong", "galah", "lorikeet", "kookaburra", "wren", "cockatoo", "swift", "plover", "ibis"];
@@ -110,6 +130,12 @@ export function loadPlayer(token: string, spawn: { x: number; y: number }): Play
 
 export function savePlayer(token: string, x: number, y: number): void {
   touchPlayer.run(x, y, token);
+}
+
+const setName = db.prepare("UPDATE players SET name = ? WHERE token = ?");
+
+export function renamePlayer(token: string, name: string): void {
+  setName.run(name, token);
 }
 
 const listShips = db.prepare("SELECT id, x, y, heading, sail, water, hull, state, ready_at FROM ships ORDER BY id");
@@ -162,4 +188,16 @@ export function recordLanding(island: string, day: string, crew: string[]): { la
 
 export function loadLandings(): LandingRow[] {
   return (listLandings.all() as (Omit<LandingRow, "crew"> & { crew: string })[]).map((l) => ({ ...l, crew: JSON.parse(l.crew) }));
+}
+
+const insertVisit = db.prepare("INSERT INTO visits (island, day, crew, size, distance) VALUES (?, ?, ?, ?, ?) RETURNING id, at");
+const listVisits = db.prepare("SELECT id, island, day, crew, size, distance, at FROM visits ORDER BY id");
+
+export function recordVisit(island: string, day: string, crew: string[], distance: number): VisitRow {
+  const row = insertVisit.get(island, day, JSON.stringify(crew), crew.length, distance) as { id: number; at: string };
+  return { id: row.id, island, day, crew, size: crew.length, distance, at: row.at };
+}
+
+export function loadVisits(): VisitRow[] {
+  return (listVisits.all() as (Omit<VisitRow, "crew"> & { crew: string })[]).map((v) => ({ ...v, crew: JSON.parse(v.crew) }));
 }

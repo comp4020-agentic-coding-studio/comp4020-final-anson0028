@@ -1,16 +1,17 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, statSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
+import { gzipSync } from "node:zlib";
 import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { P } from "./params.ts";
 import {
-  createShip, loadLandings, loadPlayer, loadShips, loadWrecks, recordLanding, recordWreck, removeShip, savePlayer, saveShip,
-  type LandingRow, type WreckRow,
+  createShip, loadLandings, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeShip, renamePlayer, savePlayer, saveShip,
+  type LandingRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SLOTS, SNAP_HZ, SPAWN, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, SPAWN, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
   deckToWorld, distanceFromPier, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tiles, within,
 } from "./world.ts";
 
@@ -28,6 +29,21 @@ const clients = new Map<WebSocket, Client>();
 const ships = new Map<number, LiveShip>();
 const wrecks: WreckRow[] = loadWrecks();
 const landings: LandingRow[] = loadLandings();
+
+type LogEntry = { kind: "landing" | "wreck"; island?: string; name?: string; crew: string[]; size: number; distance: number; day: string; at: string };
+const islandName = (id: string) => ISLANDS.find((i) => i.id === id)?.name ?? id;
+const visitEntry = (v: VisitRow): LogEntry => ({ kind: "landing", island: v.island, name: islandName(v.island), crew: v.crew, size: v.size, distance: v.distance, day: v.day, at: v.at });
+const wreckEntry = (w: WreckRow): LogEntry => ({ kind: "wreck", crew: w.crew, size: w.crew[0] === "nobody aboard" ? 0 : w.crew.length, distance: w.distance, day: w.day, at: w.at });
+const log: LogEntry[] = [...loadVisits().map(visitEntry), ...wrecks.map(wreckEntry)].sort((p, q) => (p.at < q.at ? 1 : p.at > q.at ? -1 : 0));
+
+function logged(entry: LogEntry): void {
+  log.unshift(entry);
+  broadcast({ t: "log", entry });
+}
+
+function cleanName(raw: unknown): string {
+  return String(raw ?? "").normalize("NFKC").replace(/[^\p{L}\p{N} ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 16).trim();
+}
 const tickTimes: number[] = [];
 let tick = 0;
 
@@ -36,26 +52,60 @@ const noHolders = (): Record<StationName, Client | null> => ({ sail: null, helm:
 for (const row of loadShips()) {
   ships.set(row.id, { ...row, readyAt: row.ready_at ? Date.parse(row.ready_at) : null, landedOn: null, holders: noHolders() });
 }
+for (const s of [...ships.values()]) {
+  if (s.state !== "building") continue;
+  ships.delete(s.id);
+  removeShip(s.id);
+}
+for (const s of ships.values()) {
+  if (s.state !== "moored" || SLOTS.some((slot) => within(s, slot, 0.5))) continue;
+  const slot = SLOTS.find((slot) => ![...ships.values()].some((o) => o !== s && within(o, slot, 2)));
+  if (!slot) continue;
+  Object.assign(s, { x: slot.x, y: slot.y, heading: slot.heading });
+  saveShip({ ...s, ready_at: null });
+}
 while (ships.size < P.SHIPS_AT_PIER) launchAt(freeSlot());
 
-function freeSlot(): { x: number; y: number } | null {
+function freeSlot(): (typeof SLOTS)[number] | null {
   return SLOTS.find((slot) => ![...ships.values()].some((s) => s.state !== "building" && within(s, slot, 2))) ?? null;
 }
 
-function launchAt(slot: { x: number; y: number } | null, existing?: LiveShip): LiveShip | null {
+function launchAt(slot: { x: number; y: number; heading: number } | null): LiveShip | null {
   if (!slot) return null;
-  if (existing) {
-    Object.assign(existing, { x: slot.x, y: slot.y, heading: 0, sail: 0, water: 0, hull: 0, state: "moored", readyAt: null, landedOn: null });
-    saveShip({ ...existing, ready_at: null });
-    return existing;
-  }
-  const id = createShip({ x: slot.x, y: slot.y, heading: 0, sail: 0, water: 0, hull: 0, state: "moored", ready_at: null });
-  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: 0, sail: 0, water: 0, hull: 0, state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
+  const id = createShip({ x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, state: "moored", ready_at: null });
+  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
   ships.set(id, s);
   return s;
 }
 
+const emptySince = new Map<number, number>();
+
+function refillBerths(now: number): void {
+  SLOTS.forEach((slot, i) => {
+    if ([...ships.values()].some((s) => s.state !== "building" && within(s, slot, 2))) return emptySince.delete(i);
+    const since = emptySince.get(i) ?? now;
+    emptySince.set(i, since);
+    if (now - since < P.LAUNCH_DELAY_S * 1000 || ships.size >= P.MAX_SHIPS) return;
+    const s = launchAt(slot);
+    if (s) broadcast({ t: "ship", event: "launched", id: s.id, ship: pubShip(s) });
+    emptySince.delete(i);
+  });
+}
+
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
+const gzipped = new Map<string, Buffer>();
+const noticeAt = new Map<string, number>();
+const NOTICES = { aground: "Aground. Turn the helm away from the land.", collision: "Another ship is in the way.", reef: "Reef under the hull. It's taking water." };
+
+function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
+  const key = `${s.id}:${kind}`;
+  if (now - (noticeAt.get(key) ?? 0) < 4000) return;
+  noticeAt.set(key, now);
+  for (const c of aboard(s)) send(c.ws, { t: "toast", text: NOTICES[kind] });
+}
+
+const clearOf = (s: LiveShip) => (x: number, y: number): boolean =>
+  ![...ships.values()].some((o) => o !== s && o.state !== "building" && Math.hypot(o.x - x, o.y - y) < SHIP_CLEARANCE && Math.hypot(o.x - x, o.y - y) < Math.hypot(o.x - s.x, o.y - s.y));
 const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const publicId = (token: string) => createHash("sha256").update(token).digest("hex").slice(0, 8);
 
@@ -95,8 +145,22 @@ function serve(req: IncomingMessage, res: ServerResponse): void {
   }
   const headers: Record<string, string> = { "content-type": types[extname(path)] ?? "application/octet-stream" };
   if (file === "/index.html" && !cookieToken(req)) headers["set-cookie"] = `${COOKIE}=${randomUUID()}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`;
+  const body = readFileSync(path);
+  if (/\bgzip\b/.test(String(req.headers["accept-encoding"] ?? "")) && /^\.(js|css|html)$/.test(extname(path))) {
+    const key = `${path}:${statSync(path).mtimeMs}`;
+    let zipped = gzipped.get(key);
+    if (!zipped) {
+      zipped = gzipSync(body);
+      gzipped.set(key, zipped);
+    }
+    headers["content-encoding"] = "gzip";
+    headers["vary"] = "accept-encoding";
+    res.writeHead(200, headers);
+    res.end(zipped);
+    return;
+  }
   res.writeHead(200, headers);
-  res.end(readFileSync(path));
+  res.end(body);
 }
 
 const server = createServer(serve);
@@ -154,7 +218,7 @@ function join_(ws: WebSocket, token: string): void {
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
     t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, deck: DECK, stations: STATIONS, day: today(),
-    ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings,
+    ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => handle(c, data.toString()));
   ws.on("close", () => {
@@ -165,7 +229,7 @@ function join_(ws: WebSocket, token: string): void {
   });
 }
 
-type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean };
+type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; name?: string; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean };
 
 function handle(c: Client, raw: string): void {
   let msg: Incoming;
@@ -176,8 +240,11 @@ function handle(c: Client, raw: string): void {
   }
   const b = c.body;
   if (msg.t === "input") {
-    b.dx = Math.sign(Number(msg.dx) || 0);
-    b.dy = Math.sign(Number(msg.dy) || 0);
+    const dx = Number(msg.dx) || 0;
+    const dy = Number(msg.dy) || 0;
+    const len = Math.hypot(dx, dy);
+    b.dx = len > 1 ? dx / len : dx;
+    b.dy = len > 1 ? dy / len : dy;
     b.inputAt = Date.now();
     b.tx = b.ty = null;
     c.seq = Number(msg.seq) || c.seq;
@@ -197,6 +264,14 @@ function handle(c: Client, raw: string): void {
     b.dx = b.dy = 0;
     b.holding = false;
     c.seq = Number(msg.seq) || c.seq;
+    return;
+  }
+  if (msg.t === "name") {
+    const name = cleanName(msg.name);
+    if (!name) return send(c.ws, { t: "toast", text: "A name needs a letter or a digit." });
+    c.name = name;
+    renamePlayer(c.token, name);
+    broadcast({ t: "rename", id: c.id, name });
     return;
   }
   if (msg.t === "say") {
@@ -257,21 +332,21 @@ function sink(s: LiveShip): void {
   crew.forEach((c, i) => Object.assign(c.body, { ship: null, x: SPAWN.x - 1 + (i % 3) * 0.5, y: SPAWN.y - 1 + Math.floor(i / 3) * 0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false }));
   ships.delete(s.id);
   removeShip(s.id);
-  const readyAt = Date.now() + P.LAUNCH_DELAY_S * 1000;
-  const id = createShip({ x: 0, y: 0, heading: 0, sail: 0, water: 0, hull: 0, state: "building", ready_at: new Date(readyAt).toISOString() });
-  ships.set(id, { id, x: 0, y: 0, heading: 0, sail: 0, water: 0, hull: 0, state: "building", readyAt, landedOn: null, holders: noHolders() });
   broadcast({ t: "wreck", wreck, ship: s.id });
   broadcast({ t: "ship", event: "sunk", id: s.id });
+  logged(wreckEntry(wreck));
 }
 
 function land(s: LiveShip, island: { id: string; name: string }): void {
   const crew = aboard(s);
   if (!crew.length) return;
-  const { landing, first } = recordLanding(island.id, today(), crew.map((c) => c.name));
+  const names = crew.map((c) => c.name);
+  const { landing, first } = recordLanding(island.id, today(), names);
   const i = landings.findIndex((l) => l.island === island.id);
   if (i >= 0) landings[i] = landing;
   else landings.push(landing);
   broadcast({ t: "landing", landing, first, ship: s.id, name: island.name });
+  logged(visitEntry(recordVisit(island.id, today(), names, distanceFromPier(s.x, s.y))));
 }
 
 function loop(): void {
@@ -279,6 +354,7 @@ function loop(): void {
   const now = Date.now();
   const dt = 1 / TICK_HZ;
   tick++;
+  refillBerths(now);
   for (const c of clients.values()) {
     const b = c.body;
     if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, x: SPAWN.x, y: SPAWN.y, holding: false, tx: null, ty: null });
@@ -298,22 +374,20 @@ function loop(): void {
     if (st && s && !s.holders[st]) s.holders[st] = c;
   }
   for (const s of [...ships.values()]) {
-    if (s.state === "building") {
-      if (s.readyAt !== null && now >= s.readyAt && launchAt(freeSlot(), s)) broadcast({ t: "ship", event: "launched", id: s.id, ship: pubShip(s) });
-      continue;
-    }
-    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dx) : 0, pump: !!s.holders.pump };
-    for (const ev of stepShip(s, control, dt)) {
+    if (s.state === "building") continue;
+    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, pump: !!s.holders.pump };
+    for (const ev of stepShip(s, control, dt, clearOf(s))) {
       if (ev.kind === "sank") {
         sink(s);
         break;
       }
       if (ev.kind === "landed") land(s, ev.island);
+      else notice(s, ev.kind, now);
     }
   }
   if (tick % (TICK_HZ / SNAP_HZ) === 0) {
     const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq, c.body.ship ?? ""]);
-    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? ""]);
+    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull)]);
     const snap = JSON.stringify({ t: "snap", at: now, p, s });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }

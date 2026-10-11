@@ -6,11 +6,12 @@ const defaults = {
   REEF_DAMAGE: 10,
   LEAK_PER_DAMAGE: 0.02,
   PUMP_RATE: 3,
-  LAUNCH_DELAY_S: 300,
+  LAUNCH_DELAY_S: 5,
   SIGHT: 8,
   BOARD_RANGE: 7,
   SHIPS_AT_PIER: 3,
-  LANDING_RANGE: 1.2,
+  MAX_SHIPS: 12,
+  LANDING_RANGE: 4.5,
 };
 
 export type Params = typeof defaults;
