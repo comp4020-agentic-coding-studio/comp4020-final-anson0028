@@ -204,6 +204,17 @@ describe("ships", { timeout: 60000 }, () => {
     b.close();
   });
 
+  it("are told the chart ends, not that they are aground, at the edge of the sea", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0112"));
+    const ship = await a.board();
+    a.test({ op: "place", ship, x: 93, y: 30, heading: 0 });
+    await a.man("sail");
+    const told = await a.next((m) => m.t === "toast" && /chart ends/i.test(m.text), 6000);
+    expect(told.text).not.toMatch(/Aground/);
+    a.close();
+  });
+
   it("stop short of another ship instead of passing through it", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0111"));
