@@ -301,6 +301,7 @@ body.page { display: block; min-height: 100%; }
 @media (min-width: 60rem) { .actions { right: 0.75rem; bottom: 3.5rem; } }
 
 @media (max-width: 40rem) {
+  .toast { top: 3rem; }
   .status { top: auto; bottom: 7.6rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); font-size: 0.78rem; }
   .hint { top: auto; bottom: 10.4rem; left: 0.75rem; right: auto; max-width: calc(100% - 11rem); }
   .actions { right: 0.75rem; bottom: 10.6rem; }

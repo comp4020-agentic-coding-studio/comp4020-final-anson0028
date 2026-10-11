@@ -211,6 +211,7 @@ function nextToast() {
   setTimeout(nextToast, toastQueue.length ? 2600 : 4000);
 }
 const touch = matchMedia("(pointer: coarse)").matches;
+const narrow = matchMedia("(max-width: 40rem)");
 const key = (desk, tap) => (touch ? tap : desk);
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -925,8 +926,10 @@ function updateHud(self, shipsNow) {
     status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard`;
     status.classList.toggle("warn", ship.water >= 50);
     status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
+    hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";
   } else {
     status.hidden = true;
+    hint.style.bottom = "";
   }
   const st = stationUnder(self);
   let text = "";
