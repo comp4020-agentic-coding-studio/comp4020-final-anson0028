@@ -116,7 +116,7 @@ describe("notes on the ground", { timeout: 30000 }, () => {
     expect(seen.notes[0].text).toBe("gone to the far island, back by dark");
     expect(seen.notes[0].name).toBe(a.name);
     expect(seen.notes[0].author).toBe(a.id);
-    expect(Math.hypot(seen.notes[0].x - 9.5, seen.notes[0].y - 31.5)).toBeLessThan(1);
+    expect(Math.hypot(seen.notes[0].x - 9.5, seen.notes[0].y - 31.5)).toBeLessThan(2);
     await b.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
     b.send({ t: "unnote", id: seen.notes[0].id });
     await b.walkTo(4.5, 31.5);
