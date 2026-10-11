@@ -81,24 +81,24 @@ function waypoints(chart: Msg, from: { x: number; y: number }, to: { x: number; 
   const cost = (x: number, y: number) => {
     const t = tiles[y * w + x];
     if (t !== SEA && t !== REEF) return Infinity;
-    let c = t === REEF ? 40 : 1;
+    let c = t === REEF ? 60 : 1;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) {
       const nx = x + dx, ny = y + dy;
-      if (nx >= 0 && ny >= 0 && nx < w && ny < h && tiles[ny * w + nx] === REEF) c += 6;
+      if (nx >= 0 && ny >= 0 && nx < w && ny < h && tiles[ny * w + nx] === REEF) c += 12;
     }
     return c;
   };
   const sx = Math.floor(from.x), sy = Math.floor(from.y), tx = Math.floor(to.x), ty = Math.floor(to.y);
   const dist = new Float64Array(w * h).fill(Infinity);
   const prev = new Int32Array(w * h).fill(-1);
-  const open: [number, number][] = [[0, sy * w + sx]];
+  const open: [number, number, number][] = [[0, 0, sy * w + sx]];
   dist[sy * w + sx] = 0;
-  const goalOk = (x: number, y: number) => Math.hypot(x - tx, y - ty) <= 4.5;
+  const goalOk = (x: number, y: number) => Math.hypot(x - tx, y - ty) <= 5.5;
   let goal = -1;
   while (open.length) {
     open.sort((a, b) => a[0] - b[0]);
-    const [d, i] = open.shift()!;
-    if (d > dist[i]) continue;
+    const [, g, i] = open.shift()!;
+    if (g > dist[i]) continue;
     const x = i % w, y = Math.floor(i / w);
     if (goalOk(x, y)) { goal = i; break; }
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) {
@@ -106,9 +106,9 @@ function waypoints(chart: Msg, from: { x: number; y: number }, to: { x: number; 
       if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
       const c = cost(nx, ny);
       if (!Number.isFinite(c)) continue;
-      const nd = d + c * (dx && dy ? 1.4 : 1);
+      const ng = g + c * (dx && dy ? 1.4 : 1);
       const j = ny * w + nx;
-      if (nd < dist[j]) { dist[j] = nd; prev[j] = i; open.push([nd + Math.hypot(nx - tx, ny - ty), j]); }
+      if (ng < dist[j]) { dist[j] = ng; prev[j] = i; open.push([ng + Math.hypot(nx - tx, ny - ty), ng, j]); }
     }
   }
   if (goal < 0) return [to];
@@ -116,7 +116,7 @@ function waypoints(chart: Msg, from: { x: number; y: number }, to: { x: number; 
   for (let i = goal; i >= 0; i = prev[i]) path.push({ x: (i % w) + 0.5, y: Math.floor(i / w) + 0.5 });
   path.reverse();
   const out: { x: number; y: number }[] = [];
-  for (let i = 5; i < path.length; i += 5) out.push(path[i]);
+  for (let i = 4; i < path.length; i += 4) out.push(path[i]);
   out.push(to);
   return out;
 }
@@ -149,12 +149,15 @@ async function run(crew: number, target: Target): Promise<Outcome> {
     await sleep(20);
     for (const b of bots) b.w.inbox.length = 0;
     const s = first.ship(shipId);
-    if (!s) break;
-    far = Math.max(far, Math.hypot(s.x - PIER_CENTRE.x, s.y - PIER_CENTRE.y));
     const landed = first.events.find((e) => e.t === "landing" && e.ship === shipId && e.landing.island === target);
-    if (landed) return { crew, target, result: "landed", t: gameTime(), far, water: s.water, hull: s.hull };
+    if (landed) return { crew, target, result: "landed", t: gameTime(), far, water: s?.water ?? 0, hull: s?.hull ?? 0 };
     if (first.events.some((e) => e.t === "wreck" && e.ship === shipId)) return { crew, target, result: "wrecked", t: gameTime(), far, water: 100, hull: 100 };
-    while (route.length > 1 && Math.hypot(s.x - route[0].x, s.y - route[0].y) < 3.5) route.shift();
+    if (!s) {
+      await sleep(300);
+      continue;
+    }
+    far = Math.max(far, Math.hypot(s.x - PIER_CENTRE.x, s.y - PIER_CENTRE.y));
+    while (route.length > 1 && Math.hypot(s.x - route[0].x, s.y - route[0].y) < 2.5) route.shift();
     const wp = route[0];
     const want = Math.atan2(wp.y - s.y, wp.x - s.x);
     const off = norm(want - s.heading);
@@ -186,7 +189,11 @@ async function run(crew: number, target: Target): Promise<Outcome> {
         pumper.work("pump");
         if (nav) {
           nav.work("chart");
-          if (nav.chart && !routed) { route = waypoints(nav.chart, s, { x: island.cx, y: island.cy }); routed = true; }
+          if (nav.chart && !routed) {
+            const clearOfBerths = Math.hypot(s.x - PIER_CENTRE.x, s.y - PIER_CENTRE.y) < 10 ? { x: s.x + 7, y: s.y } : s;
+            route = [...(clearOfBerths === s ? [] : [clearOfBerths]), ...waypoints(nav.chart, clearOfBerths, { x: island.cx, y: island.cy })];
+            routed = true;
+          }
         }
       }
     }
