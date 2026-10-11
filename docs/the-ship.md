@@ -50,7 +50,7 @@ map is something you have to go and stand at. "Where you stand decides what
 you know" becomes literal.
 
 What it costs: a 3D renderer (three.js, in the browser), phone controls that
-work at 390 px (a thumb stick to walk, drag to look, one action button), a
+work at 390 px (a d-pad to walk, drag to look, one action button), a
 keyboard-only path (WASD to walk, arrows to turn the camera, E to use), and
 time. A classmate's endless driving game (marcuszorian) shows 3D runs fine
 on this stack and on a phone. The server doesn't care: it simulates tiles,
@@ -96,11 +96,15 @@ Each of these becomes a test.
    and if it is leaking the water keeps rising. The next visitor finds it as
    it was left. A ship that sinks empty leaves a wreck named "nobody
    aboard".
-9. The pier. Ships are shared, not owned. A sunk ship is gone; the pier
-   launches a new hull some minutes later, so there are never more than
-   three ships moored and never none for long.
+9. The pier. Ships are shared, not owned. A berth left empty, because its
+   ship sailed or sank, is refilled five seconds later, so there is always
+   a ship to take; ships at sea stay where they were left, up to a cap on
+   the fleet. Each berth faces open water.
 10. Talking is unchanged: a bubble reaches 8 tiles. Aboard, that is the whole
     ship. Ship to ship, and ship to shore, it isn't.
+11. Hulls are solid. A ship stops short of another ship and of the shore,
+    the hull is checked at bow, centre and stern, and the crew are told when
+    it is stopped or scraped.
 
 ## What each extra body adds
 
@@ -119,9 +123,10 @@ pair of hands too few further out.
 
 ## What persists, and what expires
 
-Forever: every wreck, every first landing, each ship's last state, your bird
-and where it stood. Expires: bubbles (four seconds), who holds which station,
-the voyage in progress.
+Forever: every wreck, every landing (a line on the harbour board with the
+crew's names and the day; the first one on each island is also the plaque),
+each ship's last state, your bird, its name and where it stood. Expires:
+bubbles (four seconds), who holds which station, the voyage in progress.
 
 The map tells the story on its own. Single-handed wrecks pile up near the
 harbour. Far wrecks are rare and have long crew lists. The far plaques name
@@ -194,15 +199,20 @@ the treasure).
 
 ## Plan
 
-- By Monday 12 October 13:30 (crit 9): the sim above with its tests, drawn
-  in the existing top-down view; the decision record; README rewritten;
-  PROCESS rewritten; reflections/crit-9.md. The sim is the same whichever
-  way it is drawn, so this loses nothing.
-- The week after: the block view, third person, phone and keyboard
-  controls, the chart as the only map. Crit 10 (19 October) adds a log line
-  per action and demos in 3D.
-- Then islands and plaques, tuning by bots, and a second decision record on
-  the view if it stands.
+- Done 10 October, tagged `crit-9`: the sim with its tests, drawn top-down;
+  the decision record; README, PROCESS and reflections/crit-9.md rewritten.
+- Done the same evening, after the tag: the block view, third person, WASD
+  and arrows, d-pad and drag on a phone, the chart as the only map. The
+  top-down renderer survives only as the chart. The helm now turns on the
+  port/starboard part of the holder's input, because camera-relative keys
+  make "left" mean a side of the ship, not a side of the deck.
+- Done 11 October, after two played sessions and a night of being played:
+  the hull as three points and ships that stop short of each other and of
+  the shore, with the crew told why; ships moored apart; a first-visit card;
+  typed names; the harbour board.
+- Crit 10 (19 October): a log line per action, tuning by bots with the runs
+  recorded, plaques in the world, and a second decision record on the view
+  if it stands.
 
 ## Decisions taken for the first slice
 
@@ -210,8 +220,11 @@ Each of these is a default I chose to get building. Any of them can change.
 
 1. Name: still Earshot, until a better one turns up.
 2. Third person, when the block view lands.
-3. Three ships at the pier; a new hull is launched five minutes after a
-   sinking (`LAUNCH_DELAY_S`).
+3. Three berths at the pier; a berth is refilled five seconds after its
+   ship leaves (`LAUNCH_DELAY_S`), with at most twelve ships in the world
+   (`MAX_SHIPS`). Changed on 11 October from "a new hull five minutes after
+   a sinking", after a reviewer showed three ships abandoned intact at sea
+   left the harbour empty for good.
 4. When a ship sinks, everyone is put ashore at the pier. Leaving a ship at
    sea also puts you ashore ("you swim back"), and the ship stays where it
    is.
@@ -221,3 +234,10 @@ Each of these is a default I chose to get building. Any of them can change.
 8. The gate is gone, not kept as a ruin.
 9. The sea map is generated from a fixed seed, so every visitor sees the
    same reefs and islands and the spec can rely on them.
+10. Names are free text, letters, digits and spaces, 16 at most, with the
+    bird name as the default. Two visitors may share a name.
+11. The harbour board sits at the top right the whole time: every landing
+    and wreck, newest first, with the day. It ranks nothing; the only
+    summary is who got furthest today.
+12. A first-visit card says what this is, lists the keys and asks the name.
+    It shows once per browser and ? brings it back.

@@ -1,75 +1,74 @@
 # Earshot
 
-Three ships at a pier, and a sea that gets harder the further out you go. Each
-visitor is a coloured dot with a bird's name. Stand at a station and hold E: the
-sail rises, the helm turns, the pump empties the hull. A body holds one station
-at a time, and every station runs down the moment it is left. One person can
-sail, slowly and badly. Two split the work. Further out, one pair of hands isn't
-enough, and where a ship ends up is a record of how many people were aboard
-together.
+Earshot is a harbour of three ships, built for a room of strangers who
+arrive at different times. One person can do everything aboard, but only
+from where they stand, so how far a ship gets is a record of how many people
+were aboard together.
+
+You are a block bird with a name you can change. Stand at a station and hold
+E: the sail rises, the helm turns, the pump empties the hull. Every station
+runs down the moment it is left. One person can sail, badly. Two split the
+work. Further out, the reefs thicken and one pair of hands can't keep up.
 
 ## What good means here
 
-**What you can do, and what you know, depends on where your body is.** The sail
-rises only while someone stands at the mast, the helm turns only while someone
-stands at the wheel, and the whole sea is visible only to the body at the chart
-table. Everyone else sees the water within 8 tiles, which is also how far what
-you type carries.
+**What you can do, and what you know, depends on where your body is.** The
+sail rises only while someone is at the mast, the helm turns only while
+someone is at the wheel, and the map shows only at the chart table. Everyone
+else sees 8 tiles of water, which is as far as what you type carries.
 
-The distance rule comes from Big Walk (House House, 2026), where voices fade as
-friends drift apart. Its reviews name its fault too: no solo mode. My first
-version copied that, and the crit 8 pod found it, so one person can always sail
-here, the way one cook can run an Overcooked kitchen, badly. The stations come
-from crewed ships like Sea of Thieves, without the 3D or the voice. Erickson and
-Kellogg (2000) describe a room where sight and sound carried only part way, so
-nobody could run it alone.
-
-In the class, the six course agents built walls that only grow, and nobody makes
-the number of people a thing needs change with how many are there. That is the
-gap.
+The distance rule comes from Big Walk (House House, 2026), where voices fade
+as friends drift apart. Its reviews name its fault: no solo mode. My first
+version copied that and the crit 8 pod found it, so one person can always
+sail here, badly. Erickson and Kellogg (2000) found that a limit works when everyone can see
+it, which is why the chart rule is the same for everyone. Some of the class
+unlock things by headcount ([`docs/cohort-survey.md`](docs/cohort-survey.md));
+here the hands a ship needs grow with distance from the pier, and the server
+never counts heads ([the decision record](docs/decisions/0001-one-body-one-station.md)).
 
 What holds each claim (`spec/ship.test.ts` unless noted):
 
-1. A body holds one station at a time, and a station has one holder.
+1. One body, one station; one holder per station.
 2. An unheld sail loosens and the ship slows.
-3. Two bodies at sail and helm keep speed through a turn; one body running
-   between them loses it.
-4. Reefs flood the hull. A held pump empties it. At full water the ship sinks.
-5. A sinking puts everyone ashore and writes a wreck naming everyone aboard,
-   kept across restarts; the database refuses to change or delete it.
+3. Sail and helm held by two bodies keep speed through a turn; one body
+   running between them loses it.
+4. Reefs flood the hull; a held pump empties it; at full water the ship sinks.
+5. A sinking puts everyone ashore and writes a wreck naming them, which the
+   database refuses to change or delete.
 6. A ship nobody is aboard keeps running down.
-7. Ships move independently, and the pier launches a new hull after a sinking.
-8. The first landing on an island is written once with the crew's names and
-   size; later visits are counted.
-9. Only a body at the chart table is sent the whole map.
-10. A bubble reaches 8 tiles. Nobody is sent another person's cookie. A move
-    shows up in another window within a second, and your bird and where it stood
-    survive a restart. (`spec/walk.test.ts`, `spec/persist.test.ts`)
+7. Ships move independently; an empty berth is refilled in five seconds.
+8. The first landing on an island is written once with the crew; later
+   visits are counted.
+9. Only a body at the chart table is sent the map.
+10. Bubbles reach 8 tiles; nobody is sent another's cookie; a move shows
+    within a second; your bird survives a restart. (`spec/walk.test.ts`,
+    `spec/persist.test.ts`)
+11. A ship stops short of another ship.
+12. A typed name goes on every record after it and survives a restart.
+13. Every landing and wreck is a line on the harbour board, with crew and
+    day, for everyone, and kept. (`spec/harbour.test.ts`)
 
-Judged, not tested: how far one, two, three and four people get. That rests on
-numbers I will tune with simulated crews and report here; until then the ladder
-in `docs/the-ship.md` is a target. Also judged: whether sailing alone is a
-challenge or a chore. My crit 9 pod is the first test.
+Judged, not tested: how far one, two, three and four people get. Simulated
+crews will tune the numbers; until then the ladder in `docs/the-ship.md` is
+a target, and the judge is the crit 9 pod and the showcase room.
 
 ## Trying it alone
 
-Open the harbour in two windows. The second says "You're already on the island
-in another tab." Press "Walk here as a second person". E near a ship boards it;
-hold E at a station; Q puts you ashore.
+A first-visit card says this, lists the keys and asks your name; ? brings it
+back. For a second person, open another window and press "Walk here as a
+second person".
 
 ## What I didn't build
 
-- Voice. Big Walk is built on it, but in one room it would feed back, and the
-  room already has voices.
-- Accounts, a chat history, scores. A cookie brings you back as the same bird; a
-  bubble lasts four seconds; the wrecks and plaques are the record.
+- Voice: in one room it would feed back, and the room already has voices.
+- Accounts, chat history, scores. A cookie brings you back as the same bird;
+  the board, wrecks and plaques are the record, and nothing is ranked.
 - Wind, cards on deck, trade.
 
 ## Still open
 
-The view is top-down for now; a block view over your bird's shoulder, with the
-chart as the only map, is next. The numbers are untuned. Plaques show only on
-the chart.
+The numbers are untuned, and the block view has not yet met a phone in a
+real hand.
 
 ## Sources
 

@@ -10,7 +10,9 @@ them broken, change README.md first and say why.
   server before sending; hiding it in the page doesn't count. That covers
   bubbles beyond 8 tiles, the map beyond 8 tiles for anyone not standing at
   the chart table, and anything about other people beyond their public id,
-  bird name, colour, position and which ship they are on.
+  name, colour, position and which ship they are on. The harbour board is
+  public: every landing and wreck, with names, crew size and day, goes to
+  everyone.
 - Never send a cookie, or any part of one, to anyone but its owner. Public
   ids are a hash of the cookie.
 - Never let the client decide the world. It sends intent: a held direction,
@@ -27,7 +29,9 @@ them broken, change README.md first and say why.
   simulator may run against Fly only when asked; its walkers stay in that
   database.
 - Never add voice, accounts, a chat history or scores. README.md says why
-  each one isn't built.
+  each one isn't built. A typed name is not an account, and the harbour
+  board is not a ranking: no points, and no order but time.
+- Never update or delete a row in `visits` either; it is the board.
 - Never ship a test hook that works without `WALK_TEST=1`.
 
 ## Every change
@@ -48,24 +52,40 @@ them broken, change README.md first and say why.
 - Snapshots carry public ids, positions, each body's input number and ship,
   and each ship's position, heading, sail, water, state and holders. Names
   and colours travel once, on join.
-- Before a UI change is done: board, raise the sail and turn at 390 × 844 by
-  touch, at 1920 × 1080 with a mouse with a resize halfway, and with the
-  keyboard only. E and Q must not submit anything.
+- Before a UI change is done: board, walk to a station, raise the sail, turn
+  the ship and turn the camera at 390 × 844 by touch (d-pad and drag), at
+  1920 × 1080 with a mouse with a resize halfway, and with the keyboard only
+  (WASD, arrows, E, Q), and read the first-visit card and the board at both
+  sizes. E and Q must not submit anything.
 - Words in README.md match the code. Change both in the same commit.
 
 ## Facts about the stack
 
 - Node 24 runs the `.ts` files directly. Imports name the `.ts` file. No
   build step, no framework.
-- `ws` for sockets, `node:sqlite` for storage, plain Canvas for drawing.
+- `ws` for sockets, `node:sqlite` for storage. The view is three.js,
+  vendored in `public/vendor/` (MIT, `three.LICENSE`) and loaded through an
+  import map, no bundler; the chart is a 2D canvas. The server gzips `.js`,
+  `.css` and `.html` when asked.
+- Movement is camera-relative on the client and arrives at the server as a
+  unit vector in deck coordinates when aboard. The helm turns on the
+  port/starboard part of the holder's input.
 - The Fly machine has 256 MB. Node runs with `--max-old-space-size=160`.
   Check memory with `/health` after anything that adds per-player or
   per-ship state.
 - The sea is generated from a fixed seed in `server/world.ts`; the spec
-  relies on the pier at (9.5, 31.5), three slots at x 13.5 and the near
-  island at (34, 20).
+  relies on the pier at (9.5, 31.5), three berths at x 13.5 (y 26, 32, 38,
+  each facing open water) and the near island at (34, 20). A berth empty
+  for `LAUNCH_DELAY_S` is refilled while the fleet is under `MAX_SHIPS`.
+- A ship is three points, centre, bow 3.5 ahead and stern 2.5 behind. Land
+  and reefs are checked at all three, ships keep 5 tiles between centres
+  (`SHIP_CLEARANCE`), and the crew are told when the hull is stopped or
+  scraped.
 - Deck coordinates are local to the ship: x in [-3, 4), y in [-2, 2).
   Stations: helm (-3, 0), sail (0, 1), chart (3, 0), pump (0, -2).
+- A name is what the visitor typed, cleaned on the server to letters, digits
+  and spaces, 16 at most; the bird name is the default. The board is
+  `visits` and `wrecks` merged, newest first, 40 on hello.
 - `DATA_DIR` is `/data` on Fly. `WALK_TODAY` overrides the Canberra date,
   `SHIP_PARAMS` overrides tuning, `WALK_TEST=1` enables the test-only
   `place` message. All three exist for tests only.

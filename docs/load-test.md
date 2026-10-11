@@ -27,5 +27,6 @@ The same `pnpm sim 30 20` against the ship server on the laptop, with three
 ships moored and the walkers on the pier: p50 58 ms, p95 104 ms, max
 105 ms, 73 MB, a tick taking 1.14 ms at the 95th percentile, and a send
 backlog of 0 bytes. Snapshots now also carry each ship's position, heading,
-sail, water, state and four holder ids. The run against Fly comes after the
-deploy.
+sail, water, state, four holder ids and the hull. Run 2 above showed a
+laptop number is not evidence for Fly, and the ship build has not been run
+against Fly yet; that run is owed.

@@ -2,12 +2,13 @@
 
 ## What I built
 
-Earshot is a harbour with three ships. Each visitor is a dot with a bird's
-name. A ship has four stations, sail, helm, chart table and pump, and a body
-holds one at a time by standing on it. Every station runs down when it is
-left, reefs flood the hull, and the sea gets harder further out, so how far
-a ship gets is a record of how many people were aboard together.
-`README.md` says what good means here. This file is how it got that way.
+Earshot is a harbour with three berths, seen over the shoulder of a block
+bird with a name you can change. A ship has four stations, sail, helm, chart
+table and pump, and a body holds one at a time by standing on it. Every
+station runs down when it is left, reefs flood the hull, and the sea gets
+harder further out, so how far a ship gets is a record of how many people
+were aboard together. `README.md` says what good means here. This file is
+how it got that way.
 
 ## Where crit 8 left it
 
@@ -15,9 +16,8 @@ Crit 8 shipped a gate: one person on a plate 21 tiles from a keypad reads a
 code, another types it
 ([`46eedd6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/46eedd6)).
 It worked, and it had nothing after it. The pod opened the gate once and
-stood around. Alone, I could only walk. The tutor said an idea borrowed from
-a game needs its own variation, and that I should work out what is good and
-bad in games like it.
+stood around. Alone, I could only walk. The tutor said a borrowed idea needs
+its own variation, and to work out what is good and bad in games like it.
 
 ## Choosing again
 
@@ -29,79 +29,101 @@ load and several claims were corrected; the notes mark both
 final-project READMEs in the class
 ([`docs/cohort-survey.md`](docs/cohort-survey.md)). Both came out the same
 way: the strong designs make a second person necessary with a rule, not a
-hope, and keep an artefact that is itself the attributed record. Nobody
-makes the number of hands a thing needs change with how many are there. Big
-Walk's reviews name its fault as no solo mode, and my gate had copied it.
+hope, and keep an artefact that is itself the attributed record. Big Walk's
+reviews name its fault as no solo mode, and my gate had copied it.
 
 So the design was written before any code
 ([`6c20b7a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6c20b7a),
 [`5068bf0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/5068bf0))
-and I corrected it. Three things changed in that round: the view will be
-blocks seen over the bird's shoulder, with the chart table as the only map;
-ships are always at the pier, not one that respawns; and one person must
-always be able to sail. The decision record picks "one person can do
-everything, but only from where they stand" over two-or-nothing, because it
-needs no counting of people and can't be beaten with a second tab.
+and I corrected it: blocks over the bird's shoulder with the chart as the
+only map, ships always at the pier, one person always able to sail. The
+[decision record](docs/decisions/0001-one-body-one-station.md) picks "one
+person can do everything, but only from where they stand" over
+two-or-nothing, because it needs no counting of people and can't be beaten
+with a second tab.
 
 ## Red, then green
 
 The eleven ship tests went in first
 ([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4)).
-Run against the crit 8 server they fail 11 of 11 in 57 seconds. The server
-that passes them is the next commit
-([`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)):
-12 of 12 with the persist test, and the whole spec 19 of 19 once the client
+Against the crit 8 server they fail 11 of 11. The server that passes them is
+the next commit
+([`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)),
+which also dropped crit 8's `openings` table, the one crit 8's CLAUDE.md
+said never to delete; the wrecks and landings that replaced it carry the
+same triggers. Then the client
 ([`e72c8a4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/e72c8a4))
 and the README
-([`c8280f3`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c8280f3))
-landed. Three of the tests were wrong before the code was. A sailing ship
-can't be boarded, so the stations test has to board the second bird before
-the first raises the sail; the walker's snapshot helper cleared its inbox
-and threw away the toast the test was waiting for; and the two-bodies and
-one-body sailing checks compare one measured speed, so they became two
-tests that share it.
+([`c8280f3`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c8280f3)).
+Three of the tests were wrong before the code was: a sailing ship can't be
+boarded, the walker's snapshot helper threw away the toast it was waiting
+for, and two sailing checks compared one measured speed.
+
+The next evening went the same way in bigger batches. Five new claims went
+in as one spec commit
+([`a00c0be`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a00c0be)):
+the helm turns on the port/starboard part of its holder's input, a ship
+stops short of another, an empty berth is refilled, a typed name goes on
+every record, every landing and wreck is a line on the harbour board. Each
+failed against the server before it; the runs are in
+[`docs/red-runs.md`](docs/red-runs.md). three.js came in on its own
+([`f5c28f6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f5c28f6)),
+then the server
+([`a201e65`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a201e65)),
+then the block view, the first-visit card and the board
+([`6586fcd`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6586fcd)).
 
 ## How I knew
 
 I broke four rules on purpose: stations never released, a sail that never
 loosens, the chart sent to everyone aboard, a wreck naming only the first
-person. Each turned its named test red. In a real browser one window at
-1920 raised the sail with the mouse while a 390-wide phone view boarded by
-the on-screen button and turned the helm 64 degrees by touch; a
-keyboard-only pass boarded and went ashore. That pass found the first bug:
-pressing E straight after the page loaded did nothing, because the client
-decided whether you were aboard from a snapshot it hadn't received yet. The
-boarding range also had to grow from 5 to 7 tiles to reach the moored
-ships, and the phone's status line sat on the d-pad. Thirty simulated
-walkers on my laptop came back within 104 ms at the 95th percentile with
-73 MB of memory; the same run against Fly comes after this deploy.
+person. Each turned its named test red. A headless browser boards, walks to
+a station, raises the sail and turns the helm at 1920 wide with a mouse, at
+390 wide by touch and with the keyboard only, after every client change.
+
+Then I had the game played. Two scripted sessions, a keyboard and a phone,
+reached all three islands in seventy seconds without touching the pump, and
+a lone sailor reached the near island in ten, so the numbers are untuned and
+say so. The same sessions found the ship ramming the island after the
+landing toast with no word on screen, which is why a hull is now three
+points that stop at the shore and the crew are told why. Then three agents
+read it with narrow briefs, a marker with the brief open, the tutor who
+marked my first two assignments, and a classmate playing cold. The marker
+showed three ships abandoned intact at sea leave the harbour empty for good,
+so berths refill themselves. The tutor found the fault my first two
+assignments had, the point not on the first screen, which the first
+paragraph and the card now carry. The player could not find the helm on a
+phone and wrecked on the first sail; those are next. Thirty simulated
+walkers on my laptop answer within 104 ms, and crit 8 showed a laptop number
+is not evidence for Fly; that run is owed.
 
 ## How I directed it
 
-`CLAUDE.md` is the README as rules, and the new ones come from this round.
-"Never gate play on a headcount" is the decision record as a rule. "Tuning
-numbers live in `server/params.ts` and change by simulation" exists because
-the first draft had them scattered and guessed. "Break the rule once and
-watch the test go red" stays from crit 8, and this time every break went
-red, which is what the rule is for. The design note and the decision record
-are the course's process made literal: the agent proposed, I corrected, and
-the corrections are in the file.
+`CLAUDE.md` is the README as rules. "Never gate play on a headcount" is the
+decision record as a rule. "Tuning numbers live in `server/params.ts` and
+change by simulation" exists because the first draft had them scattered and
+guessed. "Break the rule once and watch the test go red" stays from crit 8.
+The design note and the decision record are where I corrected the agent:
+the view, the pier, solo play, then free names and a board that ranks
+nothing. The three reviews were agents too, each told whose eyes to use and
+to find what I had missed, not to agree with me.
 
 ## Stack
 
 Unchanged from crit 8, and the case for it grew. The ship is stepped twenty
 times a second on the server from who holds which station, so one Node
 process owning the world and one WebSocket per visitor is still the shape.
-The block view that comes next is the browser's job; the server sends the
-same small state either way. The costs remain: hand-written routing, a
-`node:sqlite` that is still experimental, and tests that start their own
-server.
+The block view is the browser's job; the server sends the same small state.
+The costs remain: hand-written routing, an experimental `node:sqlite`, tests
+that start their own server, and now two megabytes of three.js in the repo.
 
 ## Thin spots
 
-The numbers are untuned, so the ladder in the design note (two for speed,
-three for reefs, four for the far island) is a claim until the bots run.
-The view is still top-down. Plaques show only on the chart. The research
-notes are the agents' reports in their own words, checked but not
-rewritten. The agent wrote most of the code and drafted this file; I decided
-what to build, what to cut, and what to correct.
+The numbers are untuned, so the ladder in the design note is a claim until
+the bots run. Nobody but me, scripts and one phone in a real hand has
+driven the block view. Both evenings' commits were cut from one working
+tree at the end, so the pairs are not one per claim; the red runs are
+recorded instead. The research notes are the agents' reports in their own
+words, checked but not rewritten. The agent wrote most of the code and
+drafted this file; I decided what to build, what to cut, and what to
+correct.
