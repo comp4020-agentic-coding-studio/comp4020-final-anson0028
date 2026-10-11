@@ -517,7 +517,8 @@ function persist(): void {
   for (const s of ships.values()) saveShip({ ...s, ready_at: s.readyAt === null ? null : new Date(s.readyAt).toISOString() });
 }
 
-setInterval(loop, 1000 / TICK_HZ);
+const SIM_SPEED = TEST ? Math.max(1, Math.min(20, Number(process.env.SIM_SPEED) || 1)) : 1;
+setInterval(loop, 1000 / TICK_HZ / SIM_SPEED);
 
 for (const sig of ["SIGTERM", "SIGINT"] as const) {
   process.on(sig, () => {
