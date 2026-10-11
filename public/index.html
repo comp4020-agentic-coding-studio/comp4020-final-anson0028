@@ -5,25 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Earshot</title>
     <link rel="stylesheet" href="/style.css" />
+    <script type="importmap">{ "imports": { "three": "/vendor/three.module.js" } }</script>
   </head>
   <body>
     <header class="top">
       <a class="brand" href="/">Earshot</a>
+      <span class="tag">more hands get further</span>
       <nav aria-label="site">
         <a href="/" aria-current="page">Harbour</a>
         <a href="/readme/">About</a>
       </nav>
       <span id="who" class="who" aria-live="polite"></span>
+      <button id="help" type="button" class="help" aria-label="What is this, and how do I play">?</button>
     </header>
     <main>
       <h1 class="sr-only">Earshot</h1>
-      <canvas id="view" role="application" aria-label="The harbour and the sea. Arrow keys or WASD to walk, E to use what you stand on." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Q to go ashore." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
       <div id="status" class="status" aria-live="polite" hidden></div>
       <div id="hint" class="hint" aria-live="polite" hidden></div>
+      <aside id="board" class="board" aria-label="Harbour board">
+        <button id="board-toggle" type="button" class="board-toggle" aria-expanded="false">Harbour board</button>
+        <div class="board-body">
+          <h2>Harbour board</h2>
+          <p id="furthest" class="furthest"></p>
+          <ol id="log" class="log"></ol>
+        </div>
+      </aside>
       <section id="chart" class="chart" aria-label="Chart" hidden>
         <canvas id="chartview" width="960" height="640"></canvas>
         <p class="chart-note">You are at the chart table. Step away to put it down.</p>
+      </section>
+      <section id="intro" class="intro" aria-label="Welcome" hidden>
+        <div class="intro-card">
+          <h2>Earshot</h2>
+          <p>A harbour with three ships, and a sea that gets harder further out.</p>
+          <p>Board a ship and hold E at a station: sail, helm, chart table, pump. A body holds one station at a time, and every station runs down when it's left. One person can sail, badly. More hands get further.</p>
+          <p>Where each crew got to goes on the harbour board and the chart, with their names.</p>
+          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore · tap or click to walk there</p>
+          <form id="name-form" class="name-form" autocomplete="off">
+            <label for="name">What should the crew call you?</label>
+            <input id="name" name="name" maxlength="16" />
+            <button type="submit">Go ashore</button>
+          </form>
+        </div>
       </section>
       <form id="say" class="say" autocomplete="off">
         <label for="text" class="sr-only">Say something to people near you</label>
@@ -35,10 +60,10 @@
         <button id="leave" type="button" class="leave" hidden>Ashore (Q)</button>
       </div>
       <div class="pad" aria-label="Walk">
-        <button type="button" data-dir="0,-1" aria-label="Up">▲</button>
+        <button type="button" data-dir="0,-1" aria-label="Forward">▲</button>
         <button type="button" data-dir="-1,0" aria-label="Left">◀</button>
         <button type="button" data-dir="1,0" aria-label="Right">▶</button>
-        <button type="button" data-dir="0,1" aria-label="Down">▼</button>
+        <button type="button" data-dir="0,1" aria-label="Back">▼</button>
       </div>
     </main>
     <script type="module" src="/app.js"></script>
