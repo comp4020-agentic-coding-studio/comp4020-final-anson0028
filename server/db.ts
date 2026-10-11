@@ -89,6 +89,16 @@ db.exec(`
   BEGIN
     SELECT RAISE(ABORT, 'visits_kept');
   END;
+  CREATE TABLE IF NOT EXISTS notes (
+    id INTEGER PRIMARY KEY,
+    author TEXT NOT NULL,
+    name TEXT NOT NULL,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    text TEXT NOT NULL CHECK (length(text) BETWEEN 1 AND 60),
+    day TEXT NOT NULL CHECK (day GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+    at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+  );
 `);
 
 export type PlayerRow = { token: string; name: string; hue: number; x: number; y: number };
@@ -96,6 +106,7 @@ export type ShipRow = { id: number; x: number; y: number; heading: number; sail:
 export type WreckRow = { id: number; x: number; y: number; day: string; crew: string[]; distance: number; at: string };
 export type LandingRow = { island: string; day: string; crew: string[]; size: number; visits: number; at: string };
 export type VisitRow = { id: number; island: string; day: string; crew: string[]; size: number; distance: number; at: string };
+export type NoteRow = { id: number; author: string; name: string; x: number; y: number; text: string; day: string; at: string };
 
 const ADJ = ["quiet", "brisk", "amber", "misty", "dusty", "early", "late", "plain", "gentle", "stubborn", "lucky", "sleepy"];
 const BIRD = ["heron", "magpie", "rosella", "currawong", "galah", "lorikeet", "kookaburra", "wren", "cockatoo", "swift", "plover", "ibis"];
@@ -200,4 +211,21 @@ export function recordVisit(island: string, day: string, crew: string[], distanc
 
 export function loadVisits(): VisitRow[] {
   return (listVisits.all() as (Omit<VisitRow, "crew"> & { crew: string })[]).map((v) => ({ ...v, crew: JSON.parse(v.crew) }));
+}
+
+const insertNote = db.prepare("INSERT INTO notes (author, name, x, y, text, day) VALUES (?, ?, ?, ?, ?, ?) RETURNING id, at");
+const listNotes = db.prepare("SELECT id, author, name, x, y, text, day, at FROM notes ORDER BY id");
+const deleteNote = db.prepare("DELETE FROM notes WHERE id = ? AND author = ?");
+
+export function addNote(author: string, name: string, x: number, y: number, text: string, day: string): NoteRow {
+  const row = insertNote.get(author, name, x, y, text, day) as { id: number; at: string };
+  return { id: row.id, author, name, x, y, text, day, at: row.at };
+}
+
+export function loadNotes(): NoteRow[] {
+  return listNotes.all() as NoteRow[];
+}
+
+export function removeNote(id: number, author: string): boolean {
+  return Number(deleteNote.run(id, author).changes) > 0;
 }

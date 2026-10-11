@@ -7,8 +7,8 @@ import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { P } from "./params.ts";
 import {
-  createShip, loadLandings, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeShip, renamePlayer, savePlayer, saveShip,
-  type LandingRow, type VisitRow, type WreckRow,
+  addNote, createShip, loadLandings, loadNotes, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
+  type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
   type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, SPAWN, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
@@ -22,7 +22,8 @@ const root = new URL("..", import.meta.url).pathname;
 const canberraDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Canberra", year: "numeric", month: "2-digit", day: "2-digit" });
 const today = () => process.env.WALK_TODAY ?? canberraDay.format(new Date());
 
-type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number };
+type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number };
+const EMOTES = new Set(["wave", "jump", "yes", "no"]);
 type LiveShip = Ship & { holders: Record<StationName, Client | null> };
 
 const clients = new Map<WebSocket, Client>();
@@ -43,6 +44,17 @@ function logged(entry: LogEntry): void {
 
 function cleanName(raw: unknown): string {
   return String(raw ?? "").normalize("NFKC").replace(/[^\p{L}\p{N} ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 16).trim();
+}
+
+const notes: NoteRow[] = loadNotes();
+const NOTES_EACH = 3;
+
+function notesNear(x: number, y: number): NoteRow[] {
+  return notes.filter((n) => Math.hypot(n.x - x, n.y - y) <= P.SIGHT);
+}
+
+function nudgeNear(): void {
+  for (const c of clients.values()) c.nearKey = "";
 }
 const tickTimes: number[] = [];
 let tick = 0;
@@ -212,7 +224,7 @@ function join_(ws: WebSocket, token: string): void {
   const row = loadPlayer(token, SPAWN);
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : SPAWN;
   const id = publicId(token);
-  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0 };
+  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0 };
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
@@ -229,7 +241,7 @@ function join_(ws: WebSocket, token: string): void {
   });
 }
 
-type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; name?: string; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean };
+type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; name?: string; to?: string; kind?: string; id?: number; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean };
 
 function handle(c: Client, raw: string): void {
   let msg: Incoming;
@@ -277,8 +289,43 @@ function handle(c: Client, raw: string): void {
   if (msg.t === "say") {
     const text = String(msg.text ?? "").trim().slice(0, 40);
     if (!text) return;
+    const crew = msg.to === "crew" && b.ship !== null;
     const from = worldPos(c);
-    for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE)) send(o.ws, { t: "bubble", from: c.id, text });
+    const hearers = crew ? aboard(ships.get(b.ship!)!) : [...clients.values()].filter((o) => within(worldPos(o), from, SAY_RANGE));
+    for (const o of hearers) send(o.ws, { t: "bubble", from: c.id, text, crew });
+    if (!hearers.some((o) => o !== c)) send(c.ws, { t: "toast", text: crew ? "Nobody else is aboard to hear that." : "Nobody within earshot heard that." });
+    return;
+  }
+  if (msg.t === "emote") {
+    const kind = String(msg.kind ?? "");
+    if (!EMOTES.has(kind)) return;
+    const now = Date.now();
+    if (now - c.lastEmote < 400) return;
+    c.lastEmote = now;
+    const from = worldPos(c);
+    for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind });
+    return;
+  }
+  if (msg.t === "note") {
+    if (b.ship !== null) return send(c.ws, { t: "toast", text: "Notes go on the ground. Step ashore first." });
+    const text = String(msg.text ?? "").replace(/\s+/g, " ").trim().slice(0, 60).trim();
+    if (!text) return;
+    const mine = notes.filter((n) => n.author === c.id);
+    while (mine.length >= NOTES_EACH) {
+      const old = mine.shift()!;
+      removeNote(old.id, c.id);
+      notes.splice(notes.indexOf(old), 1);
+    }
+    notes.push(addNote(c.id, c.name, b.x, b.y, text, today()));
+    nudgeNear();
+    return;
+  }
+  if (msg.t === "unnote") {
+    const i = notes.findIndex((n) => n.id === Number(msg.id) && n.author === c.id);
+    if (i < 0) return;
+    removeNote(notes[i].id, c.id);
+    notes.splice(i, 1);
+    nudgeNear();
     return;
   }
   if (msg.t === "board") {
@@ -398,7 +445,7 @@ function loop(): void {
       if (key !== c.nearKey || now - c.nearAt > 1000) {
         c.nearKey = key;
         c.nearAt = now;
-        send(c.ws, { t: "near", at: { x: w.x, y: w.y }, tiles: nearTiles(w.x, w.y, P.SIGHT) });
+        send(c.ws, { t: "near", at: { x: w.x, y: w.y }, tiles: nearTiles(w.x, w.y, P.SIGHT), notes: notesNear(w.x, w.y) });
       }
       const onChart = c.body.ship !== null && stationUnder(c.body) === "chart";
       if (onChart !== c.onChart) {
