@@ -103,7 +103,8 @@ const emptySince = new Map<number, number>();
 
 function refillBerths(now: number): void {
   SLOTS.forEach((slot, i) => {
-    if ([...ships.values()].some((s) => s.state !== "building" && within(s, slot, 2))) return emptySince.delete(i);
+    const blocked = [...ships.values()].some((s) => s.state !== "building" && within(s, slot, SHIP_CLEARANCE + 2) && !SLOTS.some((o) => o !== slot && within(s, o, 0.5)));
+    if (blocked) return emptySince.delete(i);
     const since = emptySince.get(i) ?? now;
     emptySince.set(i, since);
     if (now - since < P.LAUNCH_DELAY_S * 1000 || ships.size >= P.MAX_SHIPS) return;
