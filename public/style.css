@@ -307,7 +307,7 @@ body.page { display: block; min-height: 100%; }
   .heard { max-width: calc(100% - 11rem); font-size: 0.75rem; }
 }
 
-@media (min-width: 60rem) { .toast { left: 22rem; right: 20rem; transform: none; max-width: none; width: fit-content; margin: 0 auto; } }
+@media (min-width: 60rem) { .toast { top: 3.2rem; left: 18rem; right: 20rem; transform: none; max-width: none; width: fit-content; margin: 0 auto; } }
 
 .board {
   position: absolute;

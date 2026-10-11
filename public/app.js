@@ -105,7 +105,7 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "snap") {
     clockOffset = Date.now() - m.at;
     m.players = m.p.map(([id, x, y, , ship]) => ({ id, x: x / 100, y: y / 100, ship: ship === "" ? null : ship, name: roster.get(id)?.name ?? "", hue: roster.get(id)?.hue ?? 0 }));
-    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull]) => ({ id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
+    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks]) => ({ id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
     snaps.push(m);
     if (snaps.length > 6) snaps.shift();
   } else if (m.t === "near") {
@@ -589,8 +589,24 @@ function makeShip() {
   const handle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), mat(0x8a6a3a));
   handle.position.set(pumpAt.x, DECK_TOP + 0.75, pumpAt.y - 0.3);
   g.add(handle);
-  g.userData = { water, pads, sail };
+  g.userData = { water, pads, sail, leaks: new Map() };
   return g;
+}
+
+function leakPatch(g, l) {
+  const k = `${l.x},${l.y}`;
+  let patch = g.userData.leaks.get(k);
+  if (!patch) {
+    patch = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.92), mat(0x7a1a1a));
+    patch.rotation.x = -Math.PI / 2;
+    patch.position.set(l.x + 0.5, DECK_TOP + 0.012, l.y + 0.5);
+    const sign = makeLabel("hole", "rgba(122,26,26,0.8)", "#ffffff", 1.2);
+    sign.position.set(l.x + 0.5, DECK_TOP + 0.8, l.y + 0.5);
+    patch.userData.sign = sign;
+    g.add(patch, sign);
+    g.userData.leaks.set(k, patch);
+  }
+  return patch;
 }
 
 const shipMeshes = new Map();
@@ -625,6 +641,14 @@ function syncShips(shipsNow) {
     g.userData.water.scale.y = Math.max(0.01, h);
     g.userData.water.position.y = DECK_TOP + 0.02 + h / 2;
     for (const [name, padMesh] of Object.entries(g.userData.pads)) padMesh.material.color.set(s.holders[name] ? 0xffe08a : 0xd9c48a);
+    const open = new Set();
+    for (const l of s.leaks) {
+      open.add(`${l.x},${l.y}`);
+      const patch = leakPatch(g, l);
+      patch.visible = patch.userData.sign.visible = true;
+      patch.material.color.setHSL(0.02, 0.75, 0.46 - 0.26 * Math.min(1, l.amount / 40));
+    }
+    for (const [k, patch] of g.userData.leaks) if (!open.has(k)) patch.visible = patch.userData.sign.visible = false;
   }
   for (const [id, g] of shipMeshes) if (!seen.has(id)) { scene.remove(g); shipMeshes.delete(id); }
 }
@@ -898,7 +922,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}% · Heading ${deg}° · ${crew} aboard`;
+    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard`;
     status.classList.toggle("warn", ship.water >= 50);
     status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
   } else {
@@ -914,6 +938,8 @@ function updateHud(self, shipsNow) {
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
   else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
+  else if (ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y))) text = holding ? "Patching the hole." : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
+  else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
   else text = key("Walk to a station. Q to go ashore.", "Walk to a station. Ashore takes you back.");
   if (text !== lastHint) {
     lastHint = text;
