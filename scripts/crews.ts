@@ -123,9 +123,18 @@ function waypoints(chart: Msg, from: { x: number; y: number }, to: { x: number; 
 
 async function run(crew: number, target: Target): Promise<Outcome> {
   const isl = new Island();
+  const bots: Bot[] = [];
+  try {
+    return await sail(isl, bots, crew, target);
+  } finally {
+    for (const b of bots) b.w.close();
+    await isl.stop();
+  }
+}
+
+async function sail(isl: Island, bots: Bot[], crew: number, target: Target): Promise<Outcome> {
   await isl.start({ WALK_TEST: "1", WALK_TODAY: "2026-10-13", SIM_SPEED: String(SPEED), SHIP_PARAMS: PARAMS });
   const island = ISLANDS.find((i) => i.id === target)!;
-  const bots: Bot[] = [];
   for (let n = 0; n < crew; n++) bots.push(await Bot.join(isl, n));
   const first = bots[0];
   const shipId = await first.w.board();
@@ -199,10 +208,7 @@ async function run(crew: number, target: Target): Promise<Outcome> {
     }
   }
   const s = first.ship(shipId);
-  const out: Outcome = { crew, target, result: "timeout", t: LIMIT, far, water: s?.water ?? 0, hull: s?.hull ?? 0 };
-  for (const b of bots) b.w.close();
-  await isl.stop();
-  return out;
+  return { crew, target, result: "timeout", t: LIMIT, far, water: s?.water ?? 0, hull: s?.hull ?? 0 };
 }
 
 async function runSafe(crew: number, target: Target): Promise<Outcome> {
