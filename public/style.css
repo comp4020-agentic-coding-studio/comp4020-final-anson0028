@@ -169,6 +169,8 @@ canvas#view:focus-visible { box-shadow: inset 0 0 0 3px #f0b94a; }
   gap: 0.3rem;
 }
 
+.chart:not([hidden]) ~ .emotes { display: none; }
+
 .emotes button {
   font: inherit;
   font-size: 0.85rem;

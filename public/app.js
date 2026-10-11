@@ -36,6 +36,7 @@ let me = null;
 let deck = null;
 let stations = null;
 let sayRange = 8;
+let boardRange = 9;
 let pier = { x: 9.5, y: 31.5 };
 let day = "";
 let wrecks = [];
@@ -70,6 +71,7 @@ ws.addEventListener("message", (e) => {
     deck = m.deck;
     stations = m.stations;
     sayRange = m.sayRange;
+    boardRange = m.boardRange ?? boardRange;
     pier = m.pier;
     day = m.day;
     wrecks = m.wrecks;
@@ -189,13 +191,27 @@ function drawBoard() {
   }));
 }
 
-let toastTimer;
+const toastQueue = [];
+let toastBusy = false;
 function say(text) {
+  if (toastQueue.at(-1) === text || (toastBusy && toast.textContent === text)) return;
+  toastQueue.push(text);
+  if (!toastBusy) nextToast();
+}
+function nextToast() {
+  const text = toastQueue.shift();
+  if (text === undefined) {
+    toastBusy = false;
+    toast.classList.remove("show");
+    return;
+  }
+  toastBusy = true;
   toast.textContent = text;
   toast.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove("show"), 4000);
+  setTimeout(nextToast, toastQueue.length ? 2600 : 4000);
 }
+const touch = matchMedia("(pointer: coarse)").matches;
+const key = (desk, tap) => (touch ? tap : desk);
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -525,6 +541,9 @@ function makeShip() {
     padMesh.position.set(c.x, DECK_TOP + 0.01, c.y);
     g.add(padMesh);
     pads[name] = padMesh;
+    const sign = makeLabel(stationLabel[name], "rgba(21,23,28,0.55)", "#ffffff", 1.5);
+    sign.position.set(c.x, DECK_TOP + 1.05, c.y);
+    g.add(sign);
   }
   const helm = tileCentre("helm");
   const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.1), mat(0x5a3d26));
@@ -564,10 +583,23 @@ function makeShip() {
 }
 
 const shipMeshes = new Map();
+const lastHolders = new Map();
+function crewChanges(s) {
+  const prev = lastHolders.get(s.id);
+  lastHolders.set(s.id, { ...s.holders });
+  if (!prev || aboardNow !== s.id || !me) return;
+  for (const station of Object.keys(s.holders)) {
+    const now = s.holders[station] || null, was = prev[station] || null;
+    if (now === was) continue;
+    if (now && now !== me.id) say(`${roster.get(now)?.name ?? "Someone"} took the ${stationLabel[station]}.`);
+    else if (!now && was && was !== me.id) say(`${roster.get(was)?.name ?? "Someone"} left the ${stationLabel[station]}.`);
+  }
+}
 function syncShips(shipsNow) {
   const seen = new Set();
   for (const s of shipsNow) {
     seen.add(s.id);
+    crewChanges(s);
     let g = shipMeshes.get(s.id);
     if (!g) {
       g = makeShip();
@@ -854,7 +886,8 @@ function updateHud(self, shipsNow) {
     status.hidden = false;
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
-    status.textContent = `Sail ${Math.round(ship.sail * 100)}% · Water ${Math.round(ship.water)}% · Hull ${100 - Math.round(ship.hull)}% · Heading ${deg}° · ${crew} aboard`;
+    const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
+    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}% · Heading ${deg}° · ${crew} aboard`;
     status.classList.toggle("warn", ship.water >= 50);
   } else {
     status.hidden = true;
@@ -862,14 +895,14 @@ function updateHud(self, shipsNow) {
   const st = stationUnder(self);
   let text = "";
   if (!ship) {
-    const nearShip = shipsNow.some((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= 7);
-    if (ownNoteNear !== null) text = "Your note is here. X removes it.";
-    else text = nearShip ? "A ship is close. Press E to board." : "WASD to walk, arrows or drag to look. N leaves a note.";
-  } else if (st === "helm") text = holding ? "Holding the helm. A or D to turn." : "Hold E to take the helm.";
-  else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : "Hold E to raise the sail.";
-  else if (st === "pump") text = holding ? "Pumping." : "Hold E to pump.";
+    const nearShip = shipsNow.some((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange);
+    if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
+    else text = nearShip ? key("A ship is close. Press E to board.", "A ship is close. Tap Use to board.") : key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
+  } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm.", "Hold Use to take the helm.");
+  else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
+  else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
-  else text = "Walk to a station. Q to go ashore.";
+  else text = key("Walk to a station. Q to go ashore.", "Walk to a station. Ashore takes you back.");
   if (text !== lastHint) {
     lastHint = text;
     hint.hidden = !text;
@@ -909,6 +942,21 @@ function drawChart() {
   }
   const cur = current();
   if (cur) for (const sh of cur.ships) {
+    if (cur.self && sh.id === cur.self.ship) {
+      c.save();
+      c.translate(sh.x * sx, sh.y * sy);
+      c.rotate(sh.heading);
+      c.fillStyle = "#b8860b";
+      c.beginPath();
+      c.moveTo(11, 0); c.lineTo(-7, 6); c.lineTo(-7, -6); c.closePath();
+      c.fill();
+      c.restore();
+      c.fillStyle = "#2a1a0a";
+      c.font = "12px system-ui";
+      c.fillText("you", sh.x * sx, sh.y * sy - 10);
+      c.font = "bold 14px system-ui";
+      continue;
+    }
     c.fillStyle = "#1a4a7a";
     c.beginPath();
     c.arc(sh.x * sx, sh.y * sy, 5, 0, Math.PI * 2);
