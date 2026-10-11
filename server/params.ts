@@ -6,7 +6,7 @@ const defaults = {
   REEF_DAMAGE: 15,
   LEAK_PER_DAMAGE: 0.07,
   LEAK_CAP: 40,
-  REPAIR_RATE: 10,
+  REPAIR_RATE: 20,
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 5,
   SIGHT: 8,

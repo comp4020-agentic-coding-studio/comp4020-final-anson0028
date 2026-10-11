@@ -120,7 +120,7 @@ function refillBerths(now: number): void {
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
 const gzipped = new Map<string, Buffer>();
 const noticeAt = new Map<string, number>();
-const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. A hole opens on deck; stand on it to patch it." };
+const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. Moving over it holes the deck; stand on a hole to patch it." };
 
 function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
   const key = `${s.id}:${kind}`;
@@ -247,7 +247,7 @@ function join_(ws: WebSocket, token: string): void {
   logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, deck: DECK, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => handle(c, data.toString()));
@@ -260,7 +260,7 @@ function join_(ws: WebSocket, token: string): void {
   });
 }
 
-type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; name?: string; to?: string; kind?: string; id?: number; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean };
+type Incoming = { t?: string; dx?: number; dy?: number; x?: number; y?: number; text?: string; name?: string; to?: string; kind?: string; id?: number; seq?: number; on?: boolean; op?: string; ship?: number; heading?: number; hull?: number; water?: number; reef?: boolean; sail?: number };
 
 function handle(c: Client, raw: string): void {
   let msg: Incoming;
@@ -410,6 +410,7 @@ function handle(c: Client, raw: string): void {
       s.heading = Number(msg.heading) || 0;
       s.state = "sailing";
       s.landedOn = null;
+      if (msg.sail !== undefined) s.sail = Math.min(1, Math.max(0, Number(msg.sail)));
       if (msg.hull !== undefined) {
         s.hull = Number(msg.hull);
         s.leaks = s.hull > 0 ? [{ x: 1, y: 0, amount: s.hull }] : [];

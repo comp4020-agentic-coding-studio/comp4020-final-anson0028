@@ -242,7 +242,8 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   }
   const hits = hullPoints(s.x, s.y, s.heading).map(([px, py]) => tileAt(px, py) === REEF);
   const struck = hits.filter(Boolean).length;
-  hits.forEach((hit, part) => hit && hole(s, part, (P.REEF_DAMAGE * dt) / struck, events));
+  const way = s.state === "sailing" ? s.sail : 0;
+  if (way > 0) hits.forEach((hit, part) => hit && hole(s, part, (P.REEF_DAMAGE * way * dt) / struck, events));
   if (struck && !s.onReef) events.push({ kind: "reef" });
   s.onReef = struck > 0;
   for (const b of c.patching) {

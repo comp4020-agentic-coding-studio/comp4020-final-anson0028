@@ -33,9 +33,9 @@ What holds each claim (`spec/ship.test.ts` unless noted):
 2. An unheld sail loosens and the ship slows.
 3. Sail and helm held by two bodies keep speed through a turn; one body
    running between them loses it.
-4. A reef holes the hull where it struck; a body standing on the hole patches
-   it; open holes take water, a held pump empties it, and at full water the
-   ship sinks.
+4. A reef under a moving hull holes it where it struck, and a ship lying
+   still takes no more; a body standing on the hole patches it; open holes
+   take water, a held pump empties it, and at full water the ship sinks.
 5. A sinking puts everyone ashore and writes a wreck naming them that
    nothing can change or delete.
 6. A ship nobody is aboard keeps running down.

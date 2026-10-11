@@ -86,10 +86,11 @@ Each of these becomes a test.
 4. Chart. Only a body standing at the chart table is sent the map beyond the
    ship's own sight, and only that body's view switches to the chart.
    Everyone else sees the water around the ship and nothing more.
-5. Reefs. A reef tile under the bow, the centre or the stern opens a hole at
-   that part of the deck, and water rises every tick while any hole is open.
-   A body standing on a hole and holding patches it; a held pump lowers the
-   water. At full water the ship sinks.
+5. Reefs. A reef tile under the bow, the centre or the stern of a moving
+   ship opens a hole at that part of the deck, as fast as the ship is
+   going; a ship lying still on a reef takes no more. Water rises every
+   tick while any hole is open. A body standing on a hole and holding
+   patches it; a held pump lowers the water. At full water the ship sinks.
 6. Sinking. Everyone aboard is put ashore at the harbour. A wreck is written
    with the spot, the day, the names of everyone aboard, and the distance
    from harbour. The database refuses to change or delete it. The wreck is
@@ -189,8 +190,9 @@ lesson each, and whether it is kept or left out.
 - An unheld sail loosens and the ship slows.
 - Two different bodies on sail and helm keep speed through a turn; one body
   alternating loses it.
-- A reef tile opens a hole where it struck; a body standing on it patches
-  it; open holes make the water rise and a held pump lowers it.
+- A reef tile under a moving ship opens a hole where it struck, and none
+  under a ship lying still; a body standing on it patches it; open holes
+  make the water rise and a held pump lowers it.
 - Full water sinks the ship, puts everyone ashore, and writes a wreck that
   names them, survives a restart, and refuses update and delete.
 - With nobody aboard the water keeps rising.

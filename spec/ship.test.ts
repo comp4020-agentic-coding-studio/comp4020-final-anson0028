@@ -140,7 +140,7 @@ describe("water", { timeout: 60000 }, () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0104"));
     const shipId = await a.board();
-    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, reef: true });
+    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, reef: true, sail: 0.6 });
     const wet = await a.until((s) => s.water >= 5, shipId, 6000);
     expect(wet.water).toBeGreaterThan(0);
     await a.man("pump");
@@ -286,6 +286,8 @@ describe("landing", { timeout: 60000 }, () => {
     expect(landing.landing.size).toBe(2);
     expect(landing.landing.crew.sort()).toEqual([a.name, b.name].sort());
     expect(landing.first).toBe(true);
+    a.test({ op: "place", ship: shipId, x: 20, y: 10, heading: 0, sail: 0 });
+    await settle(300);
     a.close();
     b.close();
 

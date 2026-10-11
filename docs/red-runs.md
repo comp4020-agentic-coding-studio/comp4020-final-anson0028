@@ -17,5 +17,6 @@ named commit with only the new spec files copied in.
 | gestures | the working tree before `emote` | failed: no `emote` message within 2 s |
 | "open where the hull scraped … close under a body that patches them" | `356e559` (hull as one number) | failed: no snapshot with a hole within 6 s |
 | the same test with `REPAIR_RATE` mutated to 0 | the working tree | failed: the hole never closed within 8 s |
+| "… not under a ship lying still …" | `1fab797` (damage whenever a reef is under the hull) | failed: a ship placed on a reef with no sail had two holes after a second |
 
 The same specs pass against the commits that followed each of them.
