@@ -454,8 +454,12 @@ const tileGeo = new THREE.BoxGeometry(1, 1, 1);
 const pools = {
   [LAND]: { mesh: new THREE.InstancedMesh(tileGeo, mat(0xb9a66b), 400), h: TOP[LAND] },
   [PIER]: { mesh: new THREE.InstancedMesh(tileGeo, mat(0x8a6a3a), 400), h: TOP[PIER] },
-  [REEF]: { mesh: new THREE.InstancedMesh(tileGeo, mat(0x1f5f6b), 400), h: 0.35 },
+  [REEF]: { mesh: new THREE.InstancedMesh(tileGeo, mat(0x6b665a), 400), h: 0.35 },
 };
+const foam = new THREE.InstancedMesh(new THREE.BoxGeometry(1.4, 0.02, 1.4), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 }), 400);
+foam.count = 0;
+foam.frustumCulled = false;
+scene.add(foam);
 for (const pool of Object.values(pools)) {
   pool.mesh.count = 0;
   pool.mesh.frustumCulled = false;
@@ -470,16 +474,23 @@ function setTiles() {
     const pool = pools[kind];
     if (!pool) continue;
     ground.set(`${x},${y}`, kind);
-    const h = kind === REEF ? 0.25 + 0.35 * hash(x, y) : pool.h;
+    const h = kind === REEF ? 0.35 + 0.35 * hash(x, y) : pool.h;
     const sink = kind === REEF ? 0.12 : 0;
-    m4.makeScale(1, h, 1);
+    m4.makeScale(kind === REEF ? 0.8 : 1, h, kind === REEF ? 0.8 : 1);
     m4.setPosition(x + 0.5, h / 2 - sink, y + 0.5);
     pool.mesh.setMatrixAt(counts[kind]++, m4);
+    if (kind === REEF) {
+      m4.makeRotationY(hash(y, x) * Math.PI);
+      m4.setPosition(x + 0.5, 0.015, y + 0.5);
+      foam.setMatrixAt(counts[kind] - 1, m4);
+    }
   }
   for (const kind of Object.keys(pools)) {
     pools[kind].mesh.count = counts[kind];
     pools[kind].mesh.instanceMatrix.needsUpdate = true;
   }
+  foam.count = counts[REEF];
+  foam.instanceMatrix.needsUpdate = true;
 }
 
 const labels = new Map();
@@ -889,6 +900,7 @@ function updateHud(self, shipsNow) {
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
     status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}% · Heading ${deg}° · ${crew} aboard`;
     status.classList.toggle("warn", ship.water >= 50);
+    status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
   } else {
     status.hidden = true;
   }

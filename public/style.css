@@ -248,6 +248,8 @@ body.page { display: block; min-height: 100%; }
 
 .status.warn { background: rgba(140, 30, 20, 0.9); }
 
+.status.hurt { background: rgba(130, 85, 20, 0.9); }
+
 .hint {
   position: absolute;
   top: 3.2rem;
