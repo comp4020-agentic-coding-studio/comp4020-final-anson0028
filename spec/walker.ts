@@ -13,8 +13,8 @@ export const bodies = (snap: Msg): Body[] =>
   (snap.p as [string, number, number, number, number | ""][]).map(([id, x, y, seq, ship]) => ({ id, x: x / 100, y: y / 100, seq, ship: ship === "" ? null : ship }));
 
 export const ships = (snap: Msg): Ship[] =>
-  (snap.s as [number, number, number, number, number, number, string, string, string, string, string][]).map(([id, x, y, h, sail, water, state, sh, he, ch, pu]) => ({
-    id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state,
+  (snap.s as [number, number, number, number, number, number, string, string, string, string, string, number][]).map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull]) => ({
+    id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0,
     holders: { sail: sh || null, helm: he || null, chart: ch || null, pump: pu || null },
   }));
 

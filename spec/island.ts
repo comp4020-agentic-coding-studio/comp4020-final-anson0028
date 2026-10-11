@@ -1,11 +1,23 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { mkdtempSync } from "node:fs";
+import { createServer, type AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", () => {
+      const { port } = probe.address() as AddressInfo;
+      probe.close(() => resolve(port));
+    });
+  });
+}
+
 export class Island {
   readonly dataDir = mkdtempSync(join(tmpdir(), "walk-"));
-  readonly port = 8100 + Math.floor(Math.random() * 800);
+  port = 0;
   private child: ChildProcess | null = null;
   private env: Record<string, string> = {};
 
@@ -19,6 +31,7 @@ export class Island {
 
   async start(extra: Record<string, string> = {}): Promise<void> {
     this.env = extra;
+    this.port = await freePort();
     const env: NodeJS.ProcessEnv = { ...process.env, PORT: String(this.port), DATA_DIR: this.dataDir };
     delete env.WALK_TODAY;
     delete env.WALK_TEST;
