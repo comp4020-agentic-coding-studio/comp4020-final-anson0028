@@ -219,6 +219,9 @@ the treasure).
 ## Decisions taken for the first slice
 
 Each of these is a default I chose to get building. Any of them can change.
+The ones that were argued over have a record in `docs/decisions/`: one body
+one station (1), the block view (2), berths that refill (3), typed names
+(4), a board that ranks nothing (5), notes and no wide channel (6).
 
 1. Name: still Earshot, until a better one turns up.
 2. Third person, when the block view lands.
