@@ -5,6 +5,8 @@ const defaults = {
   TURN_RATE: 0.8,
   REEF_DAMAGE: 15,
   LEAK_PER_DAMAGE: 0.07,
+  LEAK_CAP: 40,
+  REPAIR_RATE: 10,
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 5,
   SIGHT: 8,

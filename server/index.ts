@@ -12,7 +12,7 @@ import {
 } from "./db.ts";
 import {
   type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
-  deckToWorld, distanceFromPier, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tiles, within,
+  deckToWorld, distanceFromPier, leakUnder, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tiles, within,
 } from "./world.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -93,8 +93,8 @@ function freeSlot(): (typeof SLOTS)[number] | null {
 
 function launchAt(slot: { x: number; y: number; heading: number } | null): LiveShip | null {
   if (!slot) return null;
-  const id = createShip({ x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, state: "moored", ready_at: null });
-  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
+  const id = createShip({ x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, leaks: [], state: "moored", ready_at: null });
+  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, leaks: [], state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
   ships.set(id, s);
   return s;
 }
@@ -120,7 +120,7 @@ function refillBerths(now: number): void {
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
 const gzipped = new Map<string, Buffer>();
 const noticeAt = new Map<string, number>();
-const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. It's taking water." };
+const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. A hole opens on deck; stand on it to patch it." };
 
 function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
   const key = `${s.id}:${kind}`;
@@ -215,7 +215,7 @@ function worldPos(c: Client): { x: number; y: number } {
 }
 
 function pubShip(s: LiveShip) {
-  return { id: s.id, x: s.x, y: s.y, heading: s.heading, sail: s.sail, water: s.water, hull: s.hull, state: s.state };
+  return { id: s.id, x: s.x, y: s.y, heading: s.heading, sail: s.sail, water: s.water, hull: s.hull, leaks: s.leaks, state: s.state };
 }
 
 function aboard(s: LiveShip): Client[] {
@@ -388,8 +388,12 @@ function handle(c: Client, raw: string): void {
     b.holding = !!msg.on;
     if (!b.holding) return;
     const st = stationUnder(b);
-    if (!st) return send(c.ws, { t: "toast", text: "Nothing to hold here." });
     const s = b.ship === null ? null : ships.get(b.ship);
+    if (!st) {
+      const leak = s ? leakUnder(s, b) : null;
+      if (leak) return logLine(`${whoIs(c)} patches the hull of ship ${s!.id} at deck (${leak.x}, ${leak.y})`);
+      return send(c.ws, { t: "toast", text: "Nothing to hold here." });
+    }
     const holder = s?.holders[st];
     if (holder && holder !== c) {
       logLine(`${whoIs(c)} is refused the ${st} of ship ${b.ship}: ${whoIs(holder)} holds it`);
@@ -406,7 +410,10 @@ function handle(c: Client, raw: string): void {
       s.heading = Number(msg.heading) || 0;
       s.state = "sailing";
       s.landedOn = null;
-      if (msg.hull !== undefined) s.hull = Number(msg.hull);
+      if (msg.hull !== undefined) {
+        s.hull = Number(msg.hull);
+        s.leaks = s.hull > 0 ? [{ x: 1, y: 0, amount: s.hull }] : [];
+      }
       if (msg.water !== undefined) s.water = Number(msg.water);
       if (msg.reef) setTile(s.x, s.y, REEF);
     }
@@ -450,7 +457,8 @@ function loop(): void {
   for (const c of clients.values()) {
     const b = c.body;
     if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, ...spawnFor(c.id), holding: false, tx: null, ty: null });
-    const parked = b.holding && stationUnder(b) !== null;
+    const s = b.ship === null ? undefined : ships.get(b.ship);
+    const parked = b.holding && (stationUnder(b) !== null || (s !== undefined && leakUnder(s, b) !== null));
     if (!parked) stepBody(b, now, b.ship !== null ? onDeck : standable);
   }
   for (const s of ships.values()) {
@@ -473,19 +481,26 @@ function loop(): void {
   }
   for (const s of [...ships.values()]) {
     if (s.state === "building") continue;
-    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump };
+    const crew = aboard(s);
+    const patching = crew.filter((c) => c.body.holding && stationUnder(c.body) === null).map((c) => ({ x: c.body.x, y: c.body.y }));
+    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump, patching };
     for (const ev of stepShip(s, control, dt, clearOf(s))) {
       if (ev.kind === "sank") {
         sink(s);
         break;
       }
       if (ev.kind === "landed") land(s, ev.island);
-      else notice(s, ev.kind, now);
+      else if (ev.kind === "holed") logLine(`ship ${s.id} is holed at deck (${ev.x}, ${ev.y}); ${s.leaks.length} open`);
+      else if (ev.kind === "patched") {
+        const by = crew.filter((c) => c.body.holding && Math.floor(c.body.x) === ev.x && Math.floor(c.body.y) === ev.y).map(whoIs).join(", ") || "nobody";
+        logLine(`ship ${s.id} is patched at deck (${ev.x}, ${ev.y}) by ${by}; ${s.leaks.length} open`);
+        if (!s.leaks.length) for (const c of crew) send(c.ws, { t: "toast", text: "The hull is whole again. Pump out what came in." });
+      } else notice(s, ev.kind, now);
     }
   }
   if (tick % (TICK_HZ / SNAP_HZ) === 0) {
     const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq, c.body.ship ?? ""]);
-    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull)]);
+    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)])]);
     const snap = JSON.stringify({ t: "snap", at: now, p, s });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }

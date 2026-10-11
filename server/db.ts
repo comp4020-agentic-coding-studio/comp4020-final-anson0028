@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import type { Leak } from "./world.ts";
 
 const dir = process.env.DATA_DIR ?? ".data";
 mkdirSync(dir, { recursive: true });
@@ -29,6 +30,7 @@ db.exec(`
     sail REAL NOT NULL DEFAULT 0 CHECK (sail BETWEEN 0 AND 1),
     water REAL NOT NULL DEFAULT 0 CHECK (water BETWEEN 0 AND 100),
     hull REAL NOT NULL DEFAULT 0 CHECK (hull BETWEEN 0 AND 100),
+    leaks TEXT NOT NULL DEFAULT '[]',
     state TEXT NOT NULL CHECK (state IN ('moored', 'sailing', 'building')),
     ready_at TEXT,
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
@@ -101,8 +103,12 @@ db.exec(`
   );
 `);
 
+if (!(db.prepare("PRAGMA table_info(ships)").all() as { name: string }[]).some((col) => col.name === "leaks")) {
+  db.exec("ALTER TABLE ships ADD COLUMN leaks TEXT NOT NULL DEFAULT '[]'");
+}
+
 export type PlayerRow = { token: string; name: string; hue: number; x: number; y: number };
-export type ShipRow = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: "moored" | "sailing" | "building"; ready_at: string | null };
+export type ShipRow = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; leaks: Leak[]; state: "moored" | "sailing" | "building"; ready_at: string | null };
 export type WreckRow = { id: number; x: number; y: number; day: string; crew: string[]; distance: number; at: string };
 export type LandingRow = { island: string; day: string; crew: string[]; size: number; visits: number; at: string };
 export type VisitRow = { id: number; island: string; day: string; crew: string[]; size: number; distance: number; at: string };
@@ -149,21 +155,30 @@ export function renamePlayer(token: string, name: string): void {
   setName.run(name, token);
 }
 
-const listShips = db.prepare("SELECT id, x, y, heading, sail, water, hull, state, ready_at FROM ships ORDER BY id");
-const insertShip = db.prepare("INSERT INTO ships (x, y, heading, sail, water, hull, state, ready_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id");
-const updateShip = db.prepare("UPDATE ships SET x = ?, y = ?, heading = ?, sail = ?, water = ?, hull = ?, state = ?, ready_at = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?");
+const listShips = db.prepare("SELECT id, x, y, heading, sail, water, hull, leaks, state, ready_at FROM ships ORDER BY id");
+const insertShip = db.prepare("INSERT INTO ships (x, y, heading, sail, water, hull, leaks, state, ready_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id");
+const updateShip = db.prepare("UPDATE ships SET x = ?, y = ?, heading = ?, sail = ?, water = ?, hull = ?, leaks = ?, state = ?, ready_at = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?");
 const deleteShip = db.prepare("DELETE FROM ships WHERE id = ?");
 
+function parseLeaks(raw: unknown): Leak[] {
+  try {
+    const list = JSON.parse(String(raw ?? "[]"));
+    return Array.isArray(list) ? list.filter((l) => Number.isInteger(l?.x) && Number.isInteger(l?.y) && Number.isFinite(l?.amount) && l.amount > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function loadShips(): ShipRow[] {
-  return listShips.all() as ShipRow[];
+  return (listShips.all() as (Omit<ShipRow, "leaks"> & { leaks: string })[]).map((r) => ({ ...r, leaks: parseLeaks(r.leaks) }));
 }
 
 export function createShip(s: Omit<ShipRow, "id">): number {
-  return (insertShip.get(s.x, s.y, s.heading, s.sail, s.water, s.hull, s.state, s.ready_at) as { id: number }).id;
+  return (insertShip.get(s.x, s.y, s.heading, s.sail, s.water, s.hull, JSON.stringify(s.leaks), s.state, s.ready_at) as { id: number }).id;
 }
 
 export function saveShip(s: ShipRow): void {
-  updateShip.run(s.x, s.y, s.heading, Math.min(1, Math.max(0, s.sail)), Math.min(100, Math.max(0, s.water)), Math.min(100, Math.max(0, s.hull)), s.state, s.ready_at, s.id);
+  updateShip.run(s.x, s.y, s.heading, Math.min(1, Math.max(0, s.sail)), Math.min(100, Math.max(0, s.water)), Math.min(100, Math.max(0, s.hull)), JSON.stringify(s.leaks), s.state, s.ready_at, s.id);
 }
 
 export function removeShip(id: number): void {

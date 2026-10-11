@@ -15,5 +15,7 @@ named commit with only the new spec files copied in.
 | "refills a berth a few seconds after its ship leaves" | the working tree before `refillBerths` | failed: no `launched` message within 6 s |
 | notes on the ground (two tests) and crew-only saying | `5a8ae7e` | 3 of 3 failed: no notes in `near`, no toast aboard, no `crew` flag on the bubble |
 | gestures | the working tree before `emote` | failed: no `emote` message within 2 s |
+| "open where the hull scraped … close under a body that patches them" | `356e559` (hull as one number) | failed: no snapshot with a hole within 6 s |
+| the same test with `REPAIR_RATE` mutated to 0 | the working tree | failed: the hole never closed within 8 s |
 
 The same specs pass against the commits that followed each of them.

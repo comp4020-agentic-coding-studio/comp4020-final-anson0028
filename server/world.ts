@@ -160,9 +160,34 @@ export function stationUnder(b: Body): StationName | null {
 }
 
 export type ShipState = "moored" | "sailing" | "building";
-export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
-export type Control = { sail: boolean; helmDir: number; helmHeld: boolean; pump: boolean };
-export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "edge" } | { kind: "collision" } | { kind: "reef" };
+export type Leak = { x: number; y: number; amount: number };
+export const LEAK_SPOTS: [number, number][][] = [
+  [[1, 0], [-1, 0]],
+  [[3, 1], [3, -1]],
+  [[-2, 1], [-2, -1]],
+];
+export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; leaks: Leak[]; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
+export type Control = { sail: boolean; helmDir: number; helmHeld: boolean; pump: boolean; patching: { x: number; y: number }[] };
+export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "edge" } | { kind: "collision" } | { kind: "reef" } | { kind: "holed"; x: number; y: number } | { kind: "patched"; x: number; y: number };
+
+export function leakUnder(s: { leaks: Leak[] }, b: { x: number; y: number }): Leak | null {
+  const tx = Math.floor(b.x);
+  const ty = Math.floor(b.y);
+  return s.leaks.find((l) => l.x === tx && l.y === ty) ?? null;
+}
+
+function hole(s: Ship, part: number, damage: number, events: ShipEvent[]): void {
+  const spots = LEAK_SPOTS[part];
+  let leak = spots.map(([x, y]) => s.leaks.find((l) => l.x === x && l.y === y)).find((l) => l && l.amount < P.LEAK_CAP);
+  if (!leak) {
+    const free = spots.find(([x, y]) => !s.leaks.some((l) => l.x === x && l.y === y));
+    if (!free) return;
+    leak = { x: free[0], y: free[1], amount: 0 };
+    s.leaks.push(leak);
+    events.push({ kind: "holed", x: leak.x, y: leak.y });
+  }
+  leak.amount = Math.min(P.LEAK_CAP, leak.amount + damage);
+}
 export const inBounds = (x: number, y: number): boolean => x >= 0 && y >= 0 && x < W && y < H;
 export type Clear = (x: number, y: number) => boolean;
 
@@ -215,10 +240,21 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
       s.y = ny;
     }
   }
-  const onReef = hullPoints(s.x, s.y, s.heading).some(([px, py]) => tileAt(px, py) === REEF);
-  if (onReef) s.hull = Math.min(100, s.hull + P.REEF_DAMAGE * dt);
-  if (onReef && !s.onReef) events.push({ kind: "reef" });
-  s.onReef = onReef;
+  const hits = hullPoints(s.x, s.y, s.heading).map(([px, py]) => tileAt(px, py) === REEF);
+  const struck = hits.filter(Boolean).length;
+  hits.forEach((hit, part) => hit && hole(s, part, (P.REEF_DAMAGE * dt) / struck, events));
+  if (struck && !s.onReef) events.push({ kind: "reef" });
+  s.onReef = struck > 0;
+  for (const b of c.patching) {
+    const l = leakUnder(s, b);
+    if (l) l.amount -= P.REPAIR_RATE * dt;
+  }
+  s.leaks = s.leaks.filter((l) => {
+    if (l.amount > 0) return true;
+    events.push({ kind: "patched", x: l.x, y: l.y });
+    return false;
+  });
+  s.hull = Math.min(100, s.leaks.reduce((sum, l) => sum + l.amount, 0));
   const leak = s.hull * P.LEAK_PER_DAMAGE;
   s.water += leak * dt;
   if (c.pump) s.water -= P.PUMP_RATE * dt;

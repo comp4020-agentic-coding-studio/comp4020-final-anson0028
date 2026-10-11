@@ -57,8 +57,8 @@ them broken, change README.md first and say why.
   spec pins its own fast numbers, so a tuning change never moves a test;
   if it does, the test was about a number, not a rule.
 - Snapshots carry public ids, positions, each body's input number and ship,
-  and each ship's position, heading, sail, water, state and holders. Names
-  and colours travel once, on join.
+  and each ship's position, heading, sail, water, hull, open holes, state
+  and holders. Names and colours travel once, on join.
 - Before a UI change is done: board, walk to a station, raise the sail, turn
   the ship and turn the camera at 390 × 844 by touch (d-pad and drag), at
   1920 × 1080 with a mouse with a resize halfway, and with the keyboard only
