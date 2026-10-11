@@ -149,7 +149,8 @@ export function stationUnder(b: Body): StationName | null {
 export type ShipState = "moored" | "sailing" | "building";
 export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean };
 export type Control = { sail: boolean; helmDir: number; pump: boolean };
-export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "collision" } | { kind: "reef" };
+export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "edge" } | { kind: "collision" } | { kind: "reef" };
+export const inBounds = (x: number, y: number): boolean => x >= 0 && y >= 0 && x < W && y < H;
 export type Clear = (x: number, y: number) => boolean;
 
 export function hullPoints(x: number, y: number, heading: number): [number, number][] {
@@ -186,7 +187,10 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   if (s.state === "sailing" && speed > 0) {
     const nx = Math.min(W - 0.5, Math.max(0.5, s.x + Math.cos(s.heading) * speed * dt));
     const ny = Math.min(H - 0.5, Math.max(0.5, s.y + Math.sin(s.heading) * speed * dt));
-    if (!hullPoints(nx, ny, s.heading).every(([px, py]) => sailable(px, py))) {
+    const points = hullPoints(nx, ny, s.heading);
+    if (points.some(([px, py]) => !inBounds(px, py))) {
+      events.push({ kind: "edge" });
+    } else if (!points.every(([px, py]) => sailable(px, py))) {
       events.push({ kind: "aground" });
     } else if (!clear(nx, ny)) {
       events.push({ kind: "collision" });

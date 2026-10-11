@@ -115,14 +115,14 @@ function refillBerths(now: number): void {
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
 const gzipped = new Map<string, Buffer>();
 const noticeAt = new Map<string, number>();
-const NOTICES = { aground: "Aground. Turn the helm away from the land.", collision: "Another ship is in the way.", reef: "Reef under the hull. It's taking water." };
+const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. It's taking water." };
 
 function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
   const key = `${s.id}:${kind}`;
   if (now - (noticeAt.get(key) ?? 0) < 4000) return;
   noticeAt.set(key, now);
   for (const c of aboard(s)) send(c.ws, { t: "toast", text: NOTICES[kind] });
-  logLine(`ship ${s.id} ${{ aground: "runs aground", collision: "is blocked by another ship", reef: "scrapes a reef" }[kind]} at (${s.x.toFixed(0)}, ${s.y.toFixed(0)}) with ${aboard(s).map(whoIs).join(", ") || "nobody"} aboard`);
+  logLine(`ship ${s.id} ${{ aground: "runs aground", edge: "reaches the edge of the chart", collision: "is blocked by another ship", reef: "scrapes a reef" }[kind]} at (${s.x.toFixed(0)}, ${s.y.toFixed(0)}) with ${aboard(s).map(whoIs).join(", ") || "nobody"} aboard`);
 }
 
 const clearOf = (s: LiveShip) => (x: number, y: number): boolean =>
