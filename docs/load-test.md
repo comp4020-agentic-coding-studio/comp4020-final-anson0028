@@ -28,5 +28,14 @@ ships moored and the walkers on the pier: p50 58 ms, p95 104 ms, max
 105 ms, 73 MB, a tick taking 1.14 ms at the 95th percentile, and a send
 backlog of 0 bytes. Snapshots now also carry each ship's position, heading,
 sail, water, state, four holder ids and the hull. Run 2 above showed a
-laptop number is not evidence for Fly, and the ship build has not been run
-against Fly yet; that run is owed.
+laptop number is not evidence for Fly, so the ship build was run against
+Fly on 12 October, after the tuned numbers deployed:
+
+| Run | Where | p50 | p95 | Max | Server memory | Tick p95 |
+|---|---|---|---|---|---|---|
+| 5 | Fly, the block-view build, 30 walkers on the pier | 75 ms | 92 ms | 97 ms | 102 MB | 1.4 ms |
+
+Better than run 4 despite the bigger snapshot, with a send backlog of 0
+bytes; the difference is most likely the time of day. Sixty simulated
+walkers from the two runs that day sit in the live players table under
+bird names.
