@@ -35,6 +35,8 @@ const unnoteButton = document.getElementById("unnote");
 let me = null;
 let deck = null;
 let stations = null;
+let leakCap = 40;
+let patchStart = null;
 let sayRange = 8;
 let boardRange = 9;
 let pier = { x: 9.5, y: 31.5 };
@@ -70,6 +72,7 @@ ws.addEventListener("message", (e) => {
     me = m.you;
     deck = m.deck;
     stations = m.stations;
+    leakCap = m.leakCap ?? 40;
     sayRange = m.sayRange;
     boardRange = m.boardRange ?? boardRange;
     pier = m.pier;
@@ -363,15 +366,17 @@ window.addEventListener("blur", () => { moveKeys.clear(); look.clear(); pad = nu
 const padDirs = { "0,-1": { f: 1, r: 0 }, "0,1": { f: -1, r: 0 }, "-1,0": { f: 0, r: -1 }, "1,0": { f: 0, r: 1 } };
 for (const b of document.querySelectorAll(".pad button")) {
   const dir = padDirs[b.dataset.dir];
-  const down = (e) => { e.preventDefault(); pad = dir; sendMove(); };
+  const down = (e) => { e.preventDefault(); grab(b, e); pad = dir; sendMove(); };
   const up = () => { if (pad === dir) pad = null; sendMove(); };
   b.addEventListener("pointerdown", down);
   b.addEventListener("pointerup", up);
   b.addEventListener("pointercancel", up);
-  b.addEventListener("pointerleave", up);
 }
-actButton.addEventListener("pointerdown", (e) => { e.preventDefault(); act(true); });
-for (const ev of ["pointerup", "pointercancel", "pointerleave"]) actButton.addEventListener(ev, () => act(false));
+function grab(el, e) {
+  try { el.setPointerCapture(e.pointerId); } catch {}
+}
+actButton.addEventListener("pointerdown", (e) => { e.preventDefault(); grab(actButton, e); act(true); });
+for (const ev of ["pointerup", "pointercancel"]) actButton.addEventListener(ev, () => act(false));
 leaveButton.addEventListener("click", goAshore);
 
 function sendSay(to) {
@@ -647,7 +652,9 @@ function syncShips(shipsNow) {
       open.add(`${l.x},${l.y}`);
       const patch = leakPatch(g, l);
       patch.visible = patch.userData.sign.visible = true;
-      patch.material.color.setHSL(0.02, 0.75, 0.46 - 0.26 * Math.min(1, l.amount / 40));
+      const size = Math.min(1, l.amount / leakCap);
+      patch.material.color.setHSL(0.02, 0.75, 0.46 - 0.26 * size);
+      patch.scale.setScalar(0.4 + 0.6 * size);
     }
     for (const [k, patch] of g.userData.leaks) if (!open.has(k)) patch.visible = patch.userData.sign.visible = false;
   }
@@ -941,9 +948,16 @@ function updateHud(self, shipsNow) {
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
   else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
-  else if (ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y))) text = holding ? "Patching the hole." : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
-  else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
+  else if (ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y))) {
+    const leak = ship.leaks.find((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y));
+    const k = `${ship.id}:${leak.x},${leak.y}`;
+    if (!holding) patchStart = null;
+    else if (!patchStart || patchStart.k !== k) patchStart = { k, amount: Math.max(leak.amount, 1) };
+    const done = patchStart ? Math.max(0, Math.min(99, Math.round(100 * (1 - leak.amount / patchStart.amount)))) : 0;
+    text = holding ? `Patching the hole… ${done}%` : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
+  } else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
   else text = key("Walk to a station. Q to go ashore.", "Walk to a station. Ashore takes you back.");
+  if (!ship || !ship.leaks.length) patchStart = null;
   if (text !== lastHint) {
     lastHint = text;
     hint.hidden = !text;
