@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
 import { STATIONS, Walker, bodies, settle, ships, uuid, type Msg } from "./walker.ts";
 
-const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, LAUNCH_DELAY_S: 1, HELM_DRIFT: 0 });
+const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, REPAIR_RATE: 60, LAUNCH_DELAY_S: 1, HELM_DRIFT: 0 });
 const env = { WALK_TEST: "1", WALK_TODAY: "2026-10-12", SHIP_PARAMS: FAST };
 
 let island: Island | null = null;
@@ -99,6 +99,34 @@ describe("sailing", { timeout: 60000 }, () => {
     expect(solo.heading).toBeGreaterThan(0.3);
     expect(solo.sail).toBeLessThan(duoSail - 0.3);
     c.close();
+  });
+});
+
+describe("leaks", { timeout: 60000 }, () => {
+  it("open where the hull scraped, show on the deck, and close under a body that patches them", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0113"));
+    const ship = await a.board();
+    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, reef: true });
+    const hurt = await a.until((s) => s.leaks.length > 0, ship, 6000);
+    expect(hurt.leaks[0].amount).toBeGreaterThan(0);
+    expect(hurt.hull).toBeGreaterThan(0);
+    a.test({ op: "place", ship, x: 20, y: 30, heading: Math.PI / 2 });
+    await settle(300);
+    let s = await a.ship(ship);
+    expect(s.leaks.length).toBeGreaterThan(0);
+    for (const leak of s.leaks) {
+      await a.walkTo(leak.x + 0.5, leak.y + 0.5);
+      a.grip(true);
+      s = await a.until((x) => !x.leaks.some((l) => l.x === leak.x && l.y === leak.y), ship, 8000);
+      a.grip(false);
+    }
+    expect(s.leaks).toEqual([]);
+    expect(s.hull).toBe(0);
+    const w1 = s.water;
+    await settle(800);
+    expect((await a.ship(ship)).water).toBeLessThanOrEqual(w1 + 0.01);
+    a.close();
   });
 });
 
