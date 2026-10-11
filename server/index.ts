@@ -11,7 +11,7 @@ import {
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, SPAWN, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
   deckToWorld, distanceFromPier, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tiles, within,
 } from "./world.ts";
 
@@ -43,6 +43,10 @@ function logged(entry: LogEntry): void {
 }
 
 const whoIs = (c: Client) => `${c.name}#${c.id}`;
+function spawnFor(id: string): { x: number; y: number } {
+  const k = parseInt(id.slice(0, 4), 16);
+  return { x: 8.6 + (k % 4) * 0.4, y: 30.8 + ((k >> 4) % 4) * 0.5 };
+}
 function logLine(text: string): void {
   console.log(`${new Date().toISOString()} ${text}`);
 }
@@ -233,16 +237,16 @@ function join_(ws: WebSocket, token: string): void {
     send(ws, { t: "refused", why: "full" });
     return ws.close();
   }
-  const row = loadPlayer(token, SPAWN);
-  const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : SPAWN;
   const id = publicId(token);
+  const row = loadPlayer(token, spawnFor(id));
+  const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
   const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0 };
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
   logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, deck: DECK, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, deck: DECK, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => handle(c, data.toString()));
@@ -374,7 +378,8 @@ function handle(c: Client, raw: string): void {
     const s = ships.get(b.ship);
     const far = !s || distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
     logLine(`${whoIs(c)} goes ashore from ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
-    Object.assign(b, { ship: null, x: SPAWN.x, y: SPAWN.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+    const spot = spawnFor(c.id);
+    Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
     if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
     return;
   }
@@ -413,11 +418,12 @@ function sink(s: LiveShip): void {
   const wreck = recordWreck(s.x, s.y, today(), names, distanceFromPier(s.x, s.y));
   logLine(`ship ${s.id} sinks ${wreck.distance.toFixed(0)} tiles out with ${crew.length ? crew.map(whoIs).join(", ") : "nobody"} aboard; wreck ${wreck.id}`);
   wrecks.push(wreck);
-  crew.forEach((c, i) => Object.assign(c.body, { ship: null, x: SPAWN.x - 1 + (i % 3) * 0.5, y: SPAWN.y - 1 + Math.floor(i / 3) * 0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false }));
+  crew.forEach((c) => Object.assign(c.body, { ship: null, ...spawnFor(c.id), dx: 0, dy: 0, tx: null, ty: null, holding: false }));
   ships.delete(s.id);
   removeShip(s.id);
   broadcast({ t: "wreck", wreck, ship: s.id });
   broadcast({ t: "ship", event: "sunk", id: s.id });
+  for (const c of crew) send(c.ws, { t: "toast", text: `Your ship sank ${Math.round(wreck.distance)} tiles out. You wash up at the pier.` });
   logged(wreckEntry(wreck));
 }
 
@@ -442,7 +448,7 @@ function loop(): void {
   refillBerths(now);
   for (const c of clients.values()) {
     const b = c.body;
-    if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, x: SPAWN.x, y: SPAWN.y, holding: false, tx: null, ty: null });
+    if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, ...spawnFor(c.id), holding: false, tx: null, ty: null });
     const parked = b.holding && stationUnder(b) !== null;
     if (!parked) stepBody(b, now, b.ship !== null ? onDeck : standable);
   }

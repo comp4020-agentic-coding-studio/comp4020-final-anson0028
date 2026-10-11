@@ -8,7 +8,7 @@ const defaults = {
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 5,
   SIGHT: 8,
-  BOARD_RANGE: 7,
+  BOARD_RANGE: 9,
   SHIPS_AT_PIER: 3,
   MAX_SHIPS: 12,
   LANDING_RANGE: 4.5,
