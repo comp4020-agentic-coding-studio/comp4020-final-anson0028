@@ -259,3 +259,7 @@ one station (1), the block view (2), berths that refill (3), typed names
     They carry 8 tiles like a word, plus the whole crew when aboard, one
     every 400 ms, and nothing is recorded. They give the people standing
     around on the pier something to answer with.
+16. The log, for crit 10: one line per act on stdout, naming the person by
+    name and public id, including every refusal, so two people in two
+    browsers can be told apart from `flyctl logs` alone. Positions and
+    inputs are not logged; the stream is for reading, not replaying.

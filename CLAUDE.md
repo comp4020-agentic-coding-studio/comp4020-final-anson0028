@@ -95,6 +95,12 @@ them broken, change README.md first and say why.
   fades them over 14 days and never hides them. Gestures are four kinds
   (`EMOTES`), one per 400 ms per body, animated on the client, never
   stored.
+- The server logs one line per act to stdout, `<iso time> <name>#<id> <did
+  what>`, including refusals (a second tab, a held station, a note that
+  isn't yours) and the ship events (launched, aground, scrape, landing,
+  sinking). Positions and inputs are never logged. `flyctl logs` is the
+  crit 10 narration and the first thing to read when the live app
+  misbehaves. A new act gets a log line in the same commit.
 - `DATA_DIR` is `/data` on Fly. `WALK_TODAY` overrides the Canberra date,
   `SHIP_PARAMS` overrides tuning, `WALK_TEST=1` enables the test-only
   `place` message. All three exist for tests only.
