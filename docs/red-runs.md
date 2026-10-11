@@ -13,5 +13,7 @@ named commit with only the new spec files copied in.
 | "stop short of another ship" | `f8dfc80` | failed: the mover passed through to x 48.3 |
 | `spec/harbour.test.ts`, names and the board | the working tree before `name`, `rename`, `visits` and `log` existed | 4 of 4 failed: no `rename` message, `hello.log` undefined |
 | "refills a berth a few seconds after its ship leaves" | the working tree before `refillBerths` | failed: no `launched` message within 6 s |
+| notes on the ground (two tests) and crew-only saying | `5a8ae7e` | 3 of 3 failed: no notes in `near`, no toast aboard, no `crew` flag on the bubble |
+| gestures | the working tree before `emote` | failed: no `emote` message within 2 s |
 
 The same specs pass against the commits that followed each of them.

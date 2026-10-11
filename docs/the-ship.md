@@ -125,8 +125,10 @@ pair of hands too few further out.
 
 Forever: every wreck, every landing (a line on the harbour board with the
 crew's names and the day; the first one on each island is also the plaque),
-each ship's last state, your bird, its name and where it stood. Expires:
-bubbles (four seconds), who holds which station, the voyage in progress.
+every note until its writer takes it up, each ship's last state, your bird,
+its name and where it stood. Expires: bubbles (eight seconds), what you
+heard (two minutes, on your screen only), who holds which station, the
+voyage in progress.
 
 The map tells the story on its own. Single-handed wrecks pile up near the
 harbour. Far wrecks are rare and have long crew lists. The far plaques name
@@ -241,3 +243,16 @@ Each of these is a default I chose to get building. Any of them can change.
     summary is who got furthest today.
 12. A first-visit card says what this is, lists the keys and asks the name.
     It shows once per browser and ? brings it back.
+13. Notes on the ground, 11 October, borrowed from a classmate's campus
+    (passionleader): written where you stand ashore, 60 characters, three
+    each, read within 1.5 tiles, sent only within sight, fading over 14
+    days but never removed except by the writer. The stronger version,
+    notes on the islands, waits on stepping off a landed ship.
+14. Talk, the same day: bubbles last 8 seconds, the last two minutes of what
+    you heard stay on your own screen, Shift+Enter aboard speaks to the
+    crew only, and a word nobody heard says so. No channel reaches further
+    than 8 tiles; that is the rule the project stands on.
+15. Gestures, the same day, also from the campus: wave, jump, nod and shake.
+    They carry 8 tiles like a word, plus the whole crew when aboard, one
+    every 400 ms, and nothing is recorded. They give the people standing
+    around on the pier something to answer with.

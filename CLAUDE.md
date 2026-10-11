@@ -30,8 +30,13 @@ them broken, change README.md first and say why.
   database.
 - Never add voice, accounts, a chat history or scores. README.md says why
   each one isn't built. A typed name is not an account, and the harbour
-  board is not a ranking: no points, and no order but time.
-- Never update or delete a row in `visits` either; it is the board.
+  board is not a ranking: no points, and no order but time. What a client
+  heard may stay on that client for two minutes; the server keeps no chat.
+- Never update or delete a row in `visits` either; it is the board. A note
+  in `notes` is removed only by its writer, through the server.
+- Never widen earshot. Shift+Enter aboard narrows it to the crew; nothing
+  carries a word or a gesture further than 8 tiles (the crew always sees
+  both), and a note is read within 1.5.
 - Never ship a test hook that works without `WALK_TEST=1`.
 
 ## Every change
@@ -85,7 +90,11 @@ them broken, change README.md first and say why.
   Stations: helm (-3, 0), sail (0, 1), chart (3, 0), pump (0, -2).
 - A name is what the visitor typed, cleaned on the server to letters, digits
   and spaces, 16 at most; the bird name is the default. The board is
-  `visits` and `wrecks` merged, newest first, 40 on hello.
+  `visits` and `wrecks` merged, newest first, 40 on hello. Notes travel in
+  `near` (within `SIGHT`), 60 characters, three per writer; the client
+  fades them over 14 days and never hides them. Gestures are four kinds
+  (`EMOTES`), one per 400 ms per body, animated on the client, never
+  stored.
 - `DATA_DIR` is `/data` on Fly. `WALK_TODAY` overrides the Canberra date,
   `SHIP_PARAMS` overrides tuning, `WALK_TEST=1` enables the test-only
   `place` message. All three exist for tests only.
