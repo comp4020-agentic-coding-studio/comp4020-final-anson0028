@@ -103,31 +103,70 @@ for a reason that was the simulator's again: the route out of the harbour
 began along the row of berths and the ship was blocked by its neighbour.
 The navigator now leaves the harbour eastward before following the route.
 
-## The numbers, 12 October
+**Sweep 5, thinner reefs, 12 October afternoon.** Played on a phone on
+the local network, the sea read as mostly rock, and a ship holed early
+sank with nothing to be done about it. Two rules changed first: a reef now
+holes the hull at the part that struck, bow, centre or stern, the hole
+shows on the deck as a red tile, and a body standing on it and holding
+patches it (`REPAIR_RATE`, each hole at most `LEAK_CAP` 40); water comes
+in only while a hole is open. Then the reefs were thinned. The first
+tables of the afternoon were thrown away: the simulator had a fourth
+fault, a server left running after every landed or wrecked run, and by
+the time it was noticed 398 of them were sharing the ten cores (load
+average 200). With the leak fixed and the strays killed, the shipped
+numbers were measured again on a quiet machine and gave the same ladder
+as the table of the morning, within a run or two per cell, so that table
+stands. Then four thinner seas, twelve runs per cell, bots as before,
+which matters: no bot patches a hole, so every row is a floor for a crew
+that does.
+
+| reefs (rise per tile, cap) | share of the sea that is reef | 1 → middle | 2 → middle | 3 → far | 4 → far |
+|---|---|---|---|---|---|
+| 1/70 to 50% (shipped) | 32% | 0/12 | 8/12 | 3/12 | 12/12 |
+| 1/80 from 16 tiles to 40% | 25% | 12/12 | 12/12 | 3/12 | 12/12 |
+| 1/90 from 14 tiles to 35% | 23% | 12/12 | 12/12 | 2/12 | 12/12 |
+| 1/100 to 30% | 21% | 12/12 | 12/12 | 4/12 | 12/12 |
+| 1/100 to 30%, damage 25 | 21% | 11/12 | 12/12 | 4/12 | 12/12 |
+
+Any thinner sea costs the middle rung: a solo bot steering straight
+reaches the middle island, where in the shipped sea it wrecked every
+time, and the three seas between give nothing back for their extra rock.
+A harder scrape does not restore it either. The near island and the far
+one still separate one from four, and the hole on the deck is now a job a
+second or third body can do, which the bots do not model. The thinnest
+sea was kept, damage left at 15.
+
+One more rule came from the same log: the reef kept tearing a hull that
+had stopped on it, so the player patched one hole while two more opened
+and the ship sank with four. Damage now scales with the sail, and a ship
+lying still takes none; `REPAIR_RATE` went from 10 to 20 by hand, from
+that log and not from a sweep, because the bots never patch. The ladder
+as played, with people who do, is for the crit 10 pod to show.
+
+## The numbers, 12 October, evening
 
 `MAX_SPEED` 1.2, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.12, `TURN_RATE` 0.8,
-`REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `PUMP_RATE` 3, `REEF_FROM` 12,
-`REEF_SLOPE` 70, `REEF_MAX` 0.5, `REEF_CLUMP` 1, `HELM_DRIFT` 0.1. Twelve
-runs per cell, 220 game-seconds each, at five times real time:
+`REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `LEAK_CAP` 40, `REPAIR_RATE`
+20, `PUMP_RATE` 3, `REEF_FROM` 12, `REEF_SLOPE` 100, `REEF_MAX` 0.3,
+`REEF_CLUMP` 1, `HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds
+each, at five times real time, on a quiet machine:
 
 | crew | target | landed | wrecked | timed out | median landing (s) | mean furthest (tiles) |
 |---|---|---|---|---|---|---|
-| 1 | near | 100% | 0% | 0% | 20 | 20 |
-| 1 | middle | 0% | 100% | 0% | – | 35 |
+| 1 | near | 100% | 0% | 0% | 21 | 20 |
+| 1 | middle | 100% | 0% | 0% | 43 | 42 |
 | 1 | far | 0% | 100% | 0% | – | 31 |
-| 2 | near | 100% | 0% | 0% | 18 | 20 |
-| 2 | middle | 58% | 42% | 0% | 38 | 46 |
-| 2 | far | 0% | 100% | 0% | – | 54 |
-| 3 | near | 92% | 0% | 8% | 18 | 18 |
-| 3 | middle | 100% | 0% | 0% | 37 | 41 |
-| 3 | far | 33% | 67% | 0% | 63 | 64 |
-| 4 | near | 100% | 0% | 0% | 19 | 20 |
-| 4 | middle | 100% | 0% | 0% | 41 | 42 |
+| 2 | near | 100% | 0% | 0% | 19 | 19 |
+| 2 | middle | 100% | 0% | 0% | 39 | 42 |
+| 2 | far | 0% | 100% | 0% | – | 58 |
+| 3 | near | 100% | 0% | 0% | 19 | 20 |
+| 3 | middle | 100% | 0% | 0% | 40 | 42 |
+| 3 | far | 33% | 67% | 0% | 63 | 65 |
+| 4 | near | 100% | 0% | 0% | 18 | 20 |
+| 4 | middle | 100% | 0% | 0% | 38 | 42 |
 | 4 | far | 100% | 0% | 0% | 65 | 70 |
 
-The one three-crew near-island timeout was a run whose sailor never got
-the sail; it is left in the table rather than re-rolled. The far island
-takes about a minute of sailing with four aboard. These are bots; a crew of
-strangers who have to find the stations, talk, and notice the water will
-do worse, which is the right side to err on. The next check is the crit 10
-pod.
+The far island takes about a minute of sailing with four aboard. These
+are bots that never patch a hole; a crew of strangers who have to find
+the stations, talk, and notice the water will do worse, and a crew that
+patches will do better. The next check is the crit 10 pod.

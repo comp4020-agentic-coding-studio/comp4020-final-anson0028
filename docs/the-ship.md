@@ -116,8 +116,8 @@ Each of these becomes a test.
 
 | Aboard | What the ship can do | Measured, 12 October (`docs/tuning.md`) |
 |---|---|---|
-| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows. Calm water is fine; the reef field is a wreck. | Near island 12 of 12; middle and far 0 of 12, wrecked at about 35 tiles. |
-| 2 | One on the sail, one who sets the course and then pumps, running back to the helm as the ship wanders. | Near 12 of 12; middle 7 of 12; far 0 of 12. |
+| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows, stand on a hole to patch it. Calm water is fine; the far reef field is a wreck. | Near and middle 12 of 12; far 0 of 12, wrecked at about 31 tiles. |
+| 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Near and middle 12 of 12; far 0 of 12, wrecked at about 58 tiles. |
 | 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Middle 12 of 12; far 4 of 12. |
 | 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Far 12 of 12. |
 | A room of 30 | Three crews on three ships, and more berths refilling. The board says which crew got furthest. | Not yet. |

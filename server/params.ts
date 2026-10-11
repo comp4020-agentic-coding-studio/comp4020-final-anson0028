@@ -15,8 +15,8 @@ const defaults = {
   MAX_SHIPS: 12,
   LANDING_RANGE: 4.5,
   REEF_FROM: 12,
-  REEF_SLOPE: 70,
-  REEF_MAX: 0.5,
+  REEF_SLOPE: 100,
+  REEF_MAX: 0.3,
   REEF_CLUMP: 1,
   HELM_DRIFT: 0.1,
 };

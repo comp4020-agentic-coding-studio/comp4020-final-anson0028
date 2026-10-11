@@ -56,11 +56,11 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     so. (11–14: `spec/harbour.test.ts`)
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
-crews of one reach the near island and wreck before the middle one; two
-reach the middle island half the time; three always, and the far island a
-third of the time; four, with one at the chart table, reach the far island
-every time ([`docs/tuning.md`](docs/tuning.md)). Whether people match the
-bots is for the crit 10 pod.
+crews of one and two reach the near and middle islands and wreck short of
+the far one; three reach the far island a third of the time; four, with
+one at the chart table, reach it every time
+([`docs/tuning.md`](docs/tuning.md)). The bots never patch a hole; whether
+people, who can, match them is for the crit 10 pod.
 
 ## Trying it alone
 
