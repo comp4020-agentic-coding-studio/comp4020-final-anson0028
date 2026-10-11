@@ -103,15 +103,20 @@ describe("sailing", { timeout: 60000 }, () => {
 });
 
 describe("leaks", { timeout: 60000 }, () => {
-  it("open where the hull scraped, show on the deck, and close under a body that patches them", async () => {
+  it("open where a moving hull scraped, not under a ship lying still, and close under a body that patches them", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0113"));
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, reef: true });
+    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, reef: true, sail: 0 });
+    await settle(1000);
+    const still = await a.ship(ship);
+    expect(still.leaks).toEqual([]);
+    expect(still.hull).toBe(0);
+    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0.6 });
     const hurt = await a.until((s) => s.leaks.length > 0, ship, 6000);
     expect(hurt.leaks[0].amount).toBeGreaterThan(0);
     expect(hurt.hull).toBeGreaterThan(0);
-    a.test({ op: "place", ship, x: 20, y: 30, heading: Math.PI / 2 });
+    a.test({ op: "place", ship, x: 20, y: 30, heading: Math.PI / 2, sail: 0 });
     await settle(300);
     let s = await a.ship(ship);
     expect(s.leaks.length).toBeGreaterThan(0);
