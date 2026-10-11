@@ -105,3 +105,104 @@ describe("the harbour board", { timeout: 30000 }, () => {
     db.close();
   });
 });
+
+describe("notes on the ground", { timeout: 30000 }, () => {
+  it("is left where you stand, seen only within sight, kept across a restart, removed only by its author, and capped at three", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0205"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0205"));
+    a.send({ t: "note", text: "  gone to the far island,   back by dark  " });
+    const seen = await a.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
+    expect(seen.notes[0].text).toBe("gone to the far island, back by dark");
+    expect(seen.notes[0].name).toBe(a.name);
+    expect(seen.notes[0].author).toBe(a.id);
+    expect(Math.hypot(seen.notes[0].x - 9.5, seen.notes[0].y - 31.5)).toBeLessThan(1);
+    await b.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
+    b.send({ t: "unnote", id: seen.notes[0].id });
+    await b.walkTo(4.5, 31.5);
+    await b.walkTo(4.5, 52.5);
+    const far = await b.next((m) => m.t === "near" && Math.abs(m.at.y - 52.5) < 1, 6000);
+    expect(far.notes).toEqual([]);
+    a.close();
+    b.close();
+
+    await isl.restart();
+    const c = await Walker.join(isl.wsBase, uuid("aaaa0205"));
+    const still = await c.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
+    expect(still.notes[0].text).toBe("gone to the far island, back by dark");
+    for (const text of ["two", "three", "four"]) c.send({ t: "note", text });
+    const capped = await c.next((m) => m.t === "near" && m.notes?.length === 3 && m.notes.some((n: Msg) => n.text === "four"), 3000);
+    expect(capped.notes.map((n: Msg) => n.text).sort()).toEqual(["four", "three", "two"]);
+    c.send({ t: "unnote", id: capped.notes.find((n: Msg) => n.text === "four").id });
+    const removed = await c.next((m) => m.t === "near" && m.notes?.length === 2, 3000);
+    expect(removed.notes.map((n: Msg) => n.text).sort()).toEqual(["three", "two"]);
+    c.close();
+  });
+
+  it("can't be left aboard", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0207"));
+    await a.board();
+    a.send({ t: "note", text: "on deck" });
+    const told = await a.next((m) => m.t === "toast" && /ground/.test(m.text), 2000);
+    expect(told.text).toMatch(/ashore/);
+    await settle(1200);
+    expect(a.inbox.some((m) => m.t === "near" && m.notes?.length > 0)).toBe(false);
+    a.close();
+  });
+});
+
+describe("gestures", { timeout: 30000 }, () => {
+  it("carry 8 tiles like a word, come in four kinds, and no faster than one every 400 ms", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0208"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0208"));
+    const c = await Walker.join(isl.wsBase, uuid("cccc0208"));
+    await c.walkTo(4.5, 31.5);
+    await c.walkTo(4.5, 52.5);
+    a.send({ t: "emote", kind: "wave" });
+    const seen = await b.next((m) => m.t === "emote", 2000);
+    expect(seen.id).toBe(a.id);
+    expect(seen.kind).toBe("wave");
+    await settle(300);
+    expect(c.inbox.some((m) => m.t === "emote")).toBe(false);
+    b.inbox.length = 0;
+    a.send({ t: "emote", kind: "flip" });
+    a.send({ t: "emote", kind: "jump" });
+    a.send({ t: "emote", kind: "yes" });
+    await settle(600);
+    expect(b.inbox.filter((m) => m.t === "emote").map((m) => m.kind)).toEqual([]);
+    await settle(400);
+    a.send({ t: "emote", kind: "no" });
+    expect((await b.next((m) => m.t === "emote", 2000)).kind).toBe("no");
+    a.close();
+    b.close();
+    c.close();
+  });
+});
+
+describe("saying", { timeout: 30000 }, () => {
+  it("reaches only the crew when asked, and tells you when nobody heard", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0206"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0206"));
+    const c = await Walker.join(isl.wsBase, uuid("cccc0206"));
+    const ship = await a.board();
+    expect(await b.board()).toBe(ship);
+    a.send({ t: "say", text: "crew only", to: "crew" });
+    const heard = await b.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
+    expect(heard.crew).toBe(true);
+    await settle(400);
+    expect(c.inbox.some((m) => m.t === "bubble" && m.text === "crew only")).toBe(false);
+    a.send({ t: "say", text: "everyone" });
+    await c.next((m) => m.t === "bubble" && m.text === "everyone", 2000);
+    await c.walkTo(4.5, 31.5);
+    await c.walkTo(4.5, 55.5);
+    c.send({ t: "say", text: "hello?" });
+    const lonely = await c.next((m) => m.t === "toast" && /earshot/i.test(m.text), 2000);
+    expect(lonely.text).toMatch(/Nobody/);
+    a.close();
+    b.close();
+    c.close();
+  });
+});

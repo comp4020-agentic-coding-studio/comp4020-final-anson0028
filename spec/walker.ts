@@ -99,7 +99,7 @@ export class Walker {
 
   async walkTo(tx: number, ty: number): Promise<void> {
     const from = await this.pos();
-    const budget = (Math.hypot(tx - from.x, ty - from.y) / 5) * 1000 + 3000;
+    const budget = (Math.hypot(tx - from.x, ty - from.y) / 5) * 1000 + 5000;
     this.inbox.length = 0;
     this.send({ t: "goto", seq: Date.now(), x: tx, y: ty });
     const id = this.id;
