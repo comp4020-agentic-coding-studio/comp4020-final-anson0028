@@ -18,6 +18,7 @@ function freePort(): Promise<number> {
 export class Island {
   readonly dataDir = mkdtempSync(join(tmpdir(), "walk-"));
   port = 0;
+  readonly stdout: string[] = [];
   private child: ChildProcess | null = null;
   private env: Record<string, string> = {};
 
@@ -37,7 +38,14 @@ export class Island {
     delete env.WALK_TEST;
     delete env.SHIP_PARAMS;
     Object.assign(env, extra);
-    this.child = spawn(process.execPath, ["server/index.ts"], { env, stdio: ["ignore", "ignore", "pipe"] });
+    this.child = spawn(process.execPath, ["server/index.ts"], { env, stdio: ["ignore", "pipe", "pipe"] });
+    let pending = "";
+    this.child.stdout?.on("data", (d) => {
+      pending += d.toString();
+      const lines = pending.split("\n");
+      pending = lines.pop() ?? "";
+      this.stdout.push(...lines.filter((l) => l.length));
+    });
     this.child.stderr?.on("data", (d) => {
       const s = d.toString();
       if (!/ExperimentalWarning|--trace-warnings/.test(s)) process.stderr.write(s);

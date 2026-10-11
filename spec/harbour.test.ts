@@ -181,6 +181,37 @@ describe("gestures", { timeout: 30000 }, () => {
   });
 });
 
+describe("the log", { timeout: 30000 }, () => {
+  it("says who did what, by name and id, including what was refused", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0209"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0209"));
+    a.send({ t: "name", name: "Anson" });
+    await a.next((m) => m.t === "rename", 2000);
+    const ship = await a.board();
+    expect(await b.board()).toBe(ship);
+    await a.man("helm");
+    await b.walkTo(-2.5, 0.5);
+    b.grip(true);
+    await b.next((m) => m.t === "toast" && /already at the helm/.test(m.text), 2000);
+    b.send({ t: "say", text: "hello crew", to: "crew" });
+    await a.next((m) => m.t === "bubble", 2000);
+    await settle(300);
+    const lines = isl.stdout.join("\n");
+    const who = (id: string) => new RegExp(`[A-Za-z ]+#${id}`);
+    expect(lines).toMatch(new RegExp(`Anson#${a.id} boards ship ${ship}`));
+    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} boards ship ${ship}`));
+    expect(lines).toMatch(new RegExp(`Anson#${a.id} takes the helm of ship ${ship}`));
+    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} is refused the helm of ship ${ship}: Anson#${a.id} holds it`));
+    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} says to the crew of ship ${ship}: "hello crew"`));
+    expect(lines).toMatch(new RegExp(`#${a.id} is now called Anson`));
+    expect(lines).toMatch(who(a.id));
+    expect(lines.split("\n").filter((l) => l.includes(`#${a.id}`)).length).toBeGreaterThanOrEqual(4);
+    a.close();
+    b.close();
+  });
+});
+
 describe("saying", { timeout: 30000 }, () => {
   it("reaches only the crew when asked, and tells you when nobody heard", async () => {
     const isl = await fresh();
