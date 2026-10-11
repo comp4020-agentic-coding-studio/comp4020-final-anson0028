@@ -10,6 +10,7 @@
     "dev": "node --watch server/index.ts",
     "start": "node server/index.ts",
     "sim": "node scripts/sim.ts",
+    "crews": "node scripts/crews.ts",
     "test": "vitest run"
   },
   "devDependencies": {
