@@ -120,7 +120,7 @@ function refillBerths(now: number): void {
 const types: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml" };
 const gzipped = new Map<string, Buffer>();
 const noticeAt = new Map<string, number>();
-const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way.", reef: "Reef under the hull. Moving over it holes the deck; stand on a hole to patch it." };
+const NOTICES = { aground: "Aground. Turn the helm away from the land.", edge: "The chart ends here. Turn back.", collision: "Another ship is in the way. Turn the helm to pass it.", reef: "Reef under the hull. Moving over it holes the deck; stand on a hole to patch it." };
 
 function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
   const key = `${s.id}:${kind}`;

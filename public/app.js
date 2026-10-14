@@ -179,7 +179,7 @@ nameForm.addEventListener("submit", (e) => {
   if (name && me && name !== me.name && ws.readyState === 1) ws.send(JSON.stringify({ t: "name", name }));
   hideIntro();
 });
-helpButton.addEventListener("click", showIntro);
+helpButton.addEventListener("click", () => (intro.hidden ? showIntro() : hideIntro()));
 boardToggle.addEventListener("click", () => {
   const open = boardBox.classList.toggle("open");
   boardToggle.setAttribute("aria-expanded", String(open));
@@ -941,6 +941,7 @@ function updateHud(self, shipsNow) {
   const ship = self.ship === null ? null : shipsNow.find((s) => s.id === self.ship);
   if (self.ship !== aboardNow) {
     yawOffset = ship ? 0 : lastViewYaw;
+    if (ship && !noteForm.hidden) closeNote();
     sayInput.placeholder = "Say something (Enter · heard within 8 tiles)";
   }
   aboardNow = self.ship;
@@ -972,7 +973,7 @@ function updateHud(self, shipsNow) {
     else if (nearShip) text = key(`${nearName} is close. Space to jump aboard.`, `${nearName} is close. Tap Jump to get aboard.`);
     else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
-  } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm.", "Hold Use to take the helm.");
+  } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
   else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
