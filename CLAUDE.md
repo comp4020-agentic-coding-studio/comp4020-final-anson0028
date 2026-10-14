@@ -16,7 +16,7 @@ them broken, change README.md first and say why.
 - Never send a cookie, or any part of one, to anyone but its owner. Public
   ids are a hash of the cookie.
 - Never let the client decide the world. It sends intent: a held direction,
-  a point to walk to, a message, board, ashore, hold. The server decides
+  a point to walk to, a message, board, ashore, jump, hold. The server decides
   positions, who holds a station, how a ship moves, floods, sinks and lands.
 - Never gate play on a headcount. Nothing checks how many people are
   present. One body in one place, stations tiles apart, and things that run

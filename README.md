@@ -55,6 +55,8 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     writer.
 14. Shift+Enter aboard speaks to the crew alone; a word nobody heard says
     so. (11–14: `spec/harbour.test.ts`)
+15. A jump boards the nearest moored ship, lands you on the island beside
+    your ship, or puts you in the sea and home to the pier.
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
 crews of one and two reach the near and middle islands and wreck short of

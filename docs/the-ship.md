@@ -97,7 +97,10 @@ Each of these becomes a test.
    drawn where it happened and fades with age but never goes.
 7. Islands. The first time any ship reaches an island, a landing is written
    with the crew's names, the crew size and the day, and a plaque stands on
-   the island. Later landings are counted; the plaque keeps the first.
+   the island. Later landings are counted; the plaque keeps the first. A
+   body aboard a ship beside an island can jump onto it and walk there; a
+   jump with the ship still beside boards it again, and a jump anywhere
+   else is into the sea and home to the pier.
 8. Absence. With nobody aboard, a ship stays where it is: the sail loosens,
    and if it is leaking the water keeps rising. The next visitor finds it as
    it was left. A ship that sinks empty leaves a wreck named "nobody
@@ -195,6 +198,9 @@ lesson each, and whether it is kept or left out.
   make the water rise and a held pump lowers it.
 - Full water sinks the ship, puts everyone ashore, and writes a wreck that
   names them, survives a restart, and refuses update and delete.
+- A jump boards the nearest moored ship, lands you on the island beside
+  your ship, boards it again from the island, or puts you in the sea and
+  home to the pier.
 - With nobody aboard the water keeps rising.
 - Two ships move independently; taking a moored ship leaves the others at
   the pier.

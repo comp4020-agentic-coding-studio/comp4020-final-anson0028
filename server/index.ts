@@ -11,8 +11,8 @@ import {
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, ISLANDS, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
-  deckToWorld, distanceFromPier, leakUnder, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tiles, within,
+  type Body, DECK, H, ISLANDS, LAND, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  deckToWorld, distanceFromPier, leakUnder, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
 } from "./world.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -366,22 +366,35 @@ function handle(c: Client, raw: string): void {
   }
   if (msg.t === "board") {
     if (b.ship !== null) return send(c.ws, { t: "toast", text: "You're already aboard." });
-    const here = worldPos(c);
-    const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && within(s, here, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
-    const s = choices[0];
-    if (!s) return send(c.ws, { t: "toast", text: "No ship close enough to board." });
-    Object.assign(b, { ship: s.id, x: -2.5, y: -0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false });
-    logLine(`${whoIs(c)} boards ship ${s.id}; ${aboard(s).length} aboard`);
+    if (!boardNearest(c)) send(c.ws, { t: "toast", text: "No ship close enough to board." });
     return;
   }
   if (msg.t === "ashore") {
     if (b.ship === null) return send(c.ws, { t: "toast", text: "You're already ashore." });
+    washUp(c, "goes ashore from");
+    return;
+  }
+  if (msg.t === "jump") {
+    const from = worldPos(c);
+    for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind: "jump" });
+    if (b.ship === null) {
+      if (boardNearest(c)) return;
+      const island = ISLANDS.find((i) => within(from, { x: i.cx, y: i.cy }, i.r + 1));
+      if (!island) return send(c.ws, { t: "toast", text: "No ship close enough to jump onto." });
+      logLine(`${whoIs(c)} jumps off ${island.name} into the sea and swims back to the pier`);
+      const spot = spawnFor(c.id);
+      Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+      return send(c.ws, { t: "toast", text: "You swim back to the pier." });
+    }
     const s = ships.get(b.ship);
-    const far = !s || distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
-    logLine(`${whoIs(c)} goes ashore from ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
-    const spot = spawnFor(c.id);
-    Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
-    if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
+    const island = s?.landedOn ? ISLANDS.find((i) => i.id === s.landedOn) : undefined;
+    if (s && island) {
+      const spot = shoreOf(island, s);
+      Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+      logLine(`${whoIs(c)} jumps onto ${island.name} from ship ${s.id}; ${aboard(s).length} aboard`);
+      return send(c.ws, { t: "toast", text: `You're on ${island.name}. Jump again to get back aboard, or into the sea to swim home.` });
+    }
+    washUp(c, "jumps into the sea from");
     return;
   }
   if (msg.t === "hold") {
@@ -419,6 +432,42 @@ function handle(c: Client, raw: string): void {
       if (msg.reef) setTile(s.x, s.y, REEF);
     }
   }
+}
+
+function boardNearest(c: Client): LiveShip | null {
+  const here = worldPos(c);
+  const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && within(s, here, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
+  const s = choices[0];
+  if (!s) return null;
+  Object.assign(c.body, { ship: s.id, x: -2.5, y: -0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+  logLine(`${whoIs(c)} boards ship ${s.id}; ${aboard(s).length} aboard`);
+  return s;
+}
+
+function washUp(c: Client, how: string): void {
+  const b = c.body;
+  const s = b.ship === null ? undefined : ships.get(b.ship);
+  const far = !s || distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
+  logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
+  const spot = spawnFor(c.id);
+  Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+  if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
+}
+
+function shoreOf(island: { cx: number; cy: number; r: number }, from: { x: number; y: number }): { x: number; y: number } {
+  let best = { x: island.cx, y: island.cy };
+  let bestD = Infinity;
+  for (let ty = Math.floor(island.cy - island.r - 1); ty <= island.cy + island.r + 1; ty++) {
+    for (let tx = Math.floor(island.cx - island.r - 1); tx <= island.cx + island.r + 1; tx++) {
+      if (tileAt(tx + 0.5, ty + 0.5) !== LAND) continue;
+      const d = Math.hypot(tx + 0.5 - from.x, ty + 0.5 - from.y);
+      if (d < bestD) {
+        bestD = d;
+        best = { x: tx + 0.5, y: ty + 0.5 };
+      }
+    }
+  }
+  return best;
 }
 
 function sink(s: LiveShip): void {
