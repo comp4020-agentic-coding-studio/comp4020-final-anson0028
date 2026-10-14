@@ -20,7 +20,7 @@
     </header>
     <main>
       <h1 class="sr-only">Earshot</h1>
-      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Q to go ashore." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Q to leave the ship." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
       <div id="status" class="status" aria-live="polite" hidden></div>
       <div id="hint" class="hint" aria-live="polite" hidden></div>
@@ -39,15 +39,15 @@
       <section id="intro" class="intro" aria-label="Welcome" hidden>
         <div class="intro-card">
           <h2>Earshot</h2>
-          <p>A harbour with three ships, and a sea that gets harder further out.</p>
-          <p>Board a ship and hold E at a station: sail, helm, chart table, pump. A body holds one station at a time, and every station runs down when it's left. One person can sail, badly. More hands get further.</p>
-          <p>Rocks ringed with white water are reefs. One under the hull opens a hole on deck. Stand on it and hold E to patch it, then pump out what came in.</p>
-          <p>Where each crew got to goes on the harbour board and the chart, with their names.</p>
-          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore · N leaves a note · H waves, Space jumps, Y and B nod and shake · tap or click to walk there</p>
+          <p>A small online game: you and whoever else is here right now crew one of three ships out of a harbour, into a sea that gets harder further out. The more of you aboard, the further the ship gets.</p>
+          <p>You play as a small block bird. Board a ship and hold E at a station: sail, helm, chart table, pump. You can hold one station at a time, and every station stops the moment it's left. One person can sail, badly. More hands get further.</p>
+          <p>Rocks ringed with white water are reefs. One under a moving hull opens a hole on deck. Stand on it and hold E to patch it, then pump out what came in.</p>
+          <p>The harbour board lists how far each crew got, with their names.</p>
+          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore, off the ship · N leaves a note · H waves, Space jumps, Y and B nod and shake · tap or click to walk there</p>
           <form id="name-form" class="name-form" autocomplete="off">
             <label for="name">What should the crew call you?</label>
             <input id="name" name="name" maxlength="16" />
-            <button type="submit">Go ashore</button>
+            <button type="submit">Start</button>
           </form>
         </div>
       </section>

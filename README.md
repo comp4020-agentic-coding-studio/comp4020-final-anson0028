@@ -1,14 +1,15 @@
 # Earshot
 
-Earshot is a harbour of three ships, built for a room of strangers who
-arrive at different times. One person can do everything aboard, but only
-from where they stand, so how far a ship gets is a record of how many people
-were aboard together.
+Earshot is a small online game for a room of people: whoever is here right
+now crews one of three sailing ships together. One person can do everything
+aboard, but only from where they stand, so the more of you aboard, the
+further the ship gets, and how far it got is kept with the names of who was
+aboard.
 
-You are a block bird. Stand at a station and hold E: the sail rises, the
-helm turns, the pump empties the hull. Every station runs down the moment it
-is left. One person can sail, badly. Two split the work. Further out, the
-reefs thicken and one pair of hands can't keep up.
+You play as a small block bird. Stand at a station and hold E: the sail
+rises, the helm turns, the pump empties the hull. Every station stops the
+moment it is left. One person can sail, badly. Two split the work. Further
+out, the reefs thicken and one pair of hands can't keep up.
 
 ## What good means here
 
