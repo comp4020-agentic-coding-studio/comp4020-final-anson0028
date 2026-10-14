@@ -563,8 +563,10 @@ function makeShip() {
     padMesh.position.set(c.x, DECK_TOP + 0.01, c.y);
     g.add(padMesh);
     pads[name] = padMesh;
+    padMesh.userData.spot = c;
     const sign = makeLabel(stationLabel[name], "rgba(21,23,28,0.55)", "#ffffff", 1.5);
     sign.position.set(c.x, DECK_TOP + 1.05, c.y);
+    sign.userData.spot = c;
     g.add(sign);
   }
   const helm = tileCentre("helm");
@@ -614,6 +616,7 @@ function leakPatch(g, l) {
     const sign = makeLabel("hole", "rgba(122,26,26,0.8)", "#ffffff", 1.2);
     sign.position.set(l.x + 0.5, DECK_TOP + 0.8, l.y + 0.5);
     patch.userData.sign = sign;
+    patch.userData.spot = sign.userData.spot = { x: l.x + 0.5, y: l.y + 0.5 };
     g.add(patch, sign);
     g.userData.leaks.set(k, patch);
   }
@@ -870,7 +873,17 @@ function tapTo(cx, cy) {
   let target = { x: hit.x, y: hit.z };
   if (cur.self.ship !== null) {
     const ship = cur.ships.find((s) => s.id === cur.self.ship);
-    if (ship) target = toDeck(ship, hit.x, hit.z);
+    if (ship) {
+      target = toDeck(ship, hit.x, hit.z);
+      const g = shipMeshes.get(ship.id);
+      const spot = g ? ray.intersectObjects(g.children, false).find((h) => h.object.visible && h.object.userData.spot)?.object.userData.spot : null;
+      if (spot) target = { x: spot.x, y: spot.y };
+      else {
+        const spots = [...Object.values(stations).map((s) => ({ x: s.x + 0.5, y: s.y + 0.5 })), ...ship.leaks.map((l) => ({ x: l.x + 0.5, y: l.y + 0.5 }))];
+        const close = spots.map((p) => ({ p, d: Math.hypot(p.x - target.x, p.y - target.y) })).sort((a, b) => a.d - b.d)[0];
+        if (close && close.d <= 1.1) target = close.p;
+      }
+    }
   }
   ws.send(JSON.stringify({ t: "goto", seq: ++seq, x: target.x, y: target.y }));
 }
