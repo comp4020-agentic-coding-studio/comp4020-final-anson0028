@@ -214,8 +214,15 @@ function worldPos(c: Client): { x: number; y: number } {
   return s ? deckToWorld(s, c.body.x, c.body.y) : { x: c.body.x, y: c.body.y };
 }
 
+const SEABIRDS = ["Gull", "Tern", "Petrel", "Skua", "Fulmar", "Gannet", "Puffin", "Noddy", "Shearwater", "Frigatebird", "Albatross", "Booby"];
+function shipName(id: number): string {
+  const n = SEABIRDS[(id - 1) % SEABIRDS.length];
+  const round = Math.floor((id - 1) / SEABIRDS.length);
+  return round ? `${n} ${round + 1}` : n;
+}
+
 function pubShip(s: LiveShip) {
-  return { id: s.id, x: s.x, y: s.y, heading: s.heading, sail: s.sail, water: s.water, hull: s.hull, leaks: s.leaks, state: s.state };
+  return { id: s.id, name: shipName(s.id), x: s.x, y: s.y, heading: s.heading, sail: s.sail, water: s.water, hull: s.hull, leaks: s.leaks, state: s.state };
 }
 
 function aboard(s: LiveShip): Client[] {
@@ -392,6 +399,7 @@ function handle(c: Client, raw: string): void {
       const spot = shoreOf(island, s);
       Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
       logLine(`${whoIs(c)} jumps onto ${island.name} from ship ${s.id}; ${aboard(s).length} aboard`);
+      tellCrewLeft(c, s);
       return send(c.ws, { t: "toast", text: `You're on ${island.name}. Jump again to get back aboard, or into the sea to swim home.` });
     }
     washUp(c, "jumps into the sea from");
@@ -440,8 +448,14 @@ function boardNearest(c: Client): LiveShip | null {
   const s = choices[0];
   if (!s) return null;
   Object.assign(c.body, { ship: s.id, x: -2.5, y: -0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false });
-  logLine(`${whoIs(c)} boards ship ${s.id}; ${aboard(s).length} aboard`);
+  logLine(`${whoIs(c)} boards ship ${s.id} (${shipName(s.id)}); ${aboard(s).length} aboard`);
+  for (const o of aboard(s)) if (o !== c) send(o.ws, { t: "toast", text: `${c.name} jumped aboard.` });
   return s;
+}
+
+function tellCrewLeft(c: Client, s: LiveShip | undefined): void {
+  if (!s) return;
+  for (const o of aboard(s)) if (o !== c) send(o.ws, { t: "toast", text: `${c.name} left the ship.` });
 }
 
 function washUp(c: Client, how: string): void {
@@ -451,6 +465,7 @@ function washUp(c: Client, how: string): void {
   logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
   const spot = spawnFor(c.id);
   Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+  tellCrewLeft(c, s);
   if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
 }
 

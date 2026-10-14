@@ -44,6 +44,8 @@ let pier = { x: 9.5, y: 31.5 };
 let day = "";
 let wrecks = [];
 let landings = [];
+const shipNames = new Map();
+let sticky = null;
 let log = [];
 let near = [];
 let notes = [];
@@ -82,6 +84,7 @@ ws.addEventListener("message", (e) => {
     wrecks = m.wrecks;
     landings = m.landings;
     log = m.log;
+    for (const s of m.ships ?? []) shipNames.set(s.id, s.name);
     who.textContent = `You are ${me.name}`;
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
@@ -132,14 +135,16 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "wreck") {
     wrecks.push(m.wreck);
     const who = m.wreck.crew[0] === "nobody aboard" ? "nobody aboard" : `${m.wreck.crew.join(", ")} aboard`;
-    say(`A ship went down ${Math.round(m.wreck.distance)} tiles out with ${who}.`);
+    if (m.ship === aboardNow && aboardNow !== null) sticky = { ship: m.ship, text: `${shipNames.get(m.ship) ?? "Your ship"} sank ${Math.round(m.wreck.distance)} tiles out with ${who}. You washed up at the pier.`, until: Date.now() + 40000 };
+    else say(`${shipNames.get(m.ship) ?? "A ship"} went down ${Math.round(m.wreck.distance)} tiles out with ${who}.`);
   } else if (m.t === "landing") {
     const i = landings.findIndex((l) => l.island === m.landing.island);
     if (i >= 0) landings[i] = m.landing;
     else landings.push(m.landing);
     say(m.first ? `First landing on ${m.name}: ${m.landing.crew.join(", ")} (crew of ${m.landing.size}).` : `${m.name} again. First reached by ${m.landing.crew.join(", ")}; ${m.landing.visits} visits now.`);
   } else if (m.t === "ship" && m.event === "launched") {
-    say("A new hull is ready at the pier.");
+    shipNames.set(m.id, m.ship?.name ?? "A new hull");
+    say(`${m.ship?.name ?? "A new hull"} is ready at the pier.`);
   } else if (m.t === "toast") {
     say(m.text);
   } else if (m.t === "refused") {
@@ -926,10 +931,11 @@ function updateHud(self, shipsNow) {
   unnoteButton.hidden = ownNoteNear === null;
   if (ship) {
     status.hidden = false;
+    if (sticky && sticky.ship !== ship.id) sticky = null;
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    status.textContent = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     status.classList.toggle("warn", ship.water >= 50);
     status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
     hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";
@@ -940,9 +946,12 @@ function updateHud(self, shipsNow) {
   const st = stationUnder(self);
   let text = "";
   if (!ship) {
-    const nearShip = shipsNow.some((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange);
+    const nearShip = shipsNow.filter((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange).sort((p, q) => Math.hypot(p.x - self.x, p.y - self.y) - Math.hypot(q.x - self.x, q.y - self.y))[0];
+    const nearName = nearShip ? shipNames.get(nearShip.id) ?? "A ship" : "";
+    if (sticky && Date.now() > sticky.until) sticky = null;
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
-    else if (nearShip) text = key("A ship is close. Space to jump aboard.", "A ship is close. Tap Jump to get aboard.");
+    else if (sticky) text = sticky.text;
+    else if (nearShip) text = key(`${nearName} is close. Space to jump aboard.`, `${nearName} is close. Tap Jump to get aboard.`);
     else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm.", "Hold Use to take the helm.");
