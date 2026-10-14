@@ -127,6 +127,10 @@ export class Walker {
     this.send({ t: "hold", on });
   }
 
+  jump(): void {
+    this.send({ t: "jump" });
+  }
+
   async man(station: Station, dx = 0, dy = 0): Promise<void> {
     const t = STATIONS[station];
     await this.walkTo(t.x, t.y);

@@ -306,6 +306,33 @@ describe("landing", { timeout: 60000 }, () => {
   });
 });
 
+describe("jumping", { timeout: 60000 }, () => {
+  it("puts you aboard from the pier, onto the island beside the ship, back aboard, and into the sea home to the pier", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0114"));
+    const id = a.id;
+    const aboard = (m: Msg) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship !== null);
+    const ashore = (m: Msg) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship === null);
+    a.jump();
+    const ship = bodies(await a.next(aboard, 2000)).find((p) => p.id === id)!.ship!;
+    a.test({ op: "place", ship, x: 28, y: 20, heading: 0, sail: 0 });
+    await settle(400);
+    a.jump();
+    const me = bodies(await a.next(ashore, 2000)).find((p) => p.id === id)!;
+    expect(Math.hypot(me.x - 34, me.y - 20)).toBeLessThanOrEqual(3.5);
+    await a.walkTo(me.x, me.y - 1);
+    a.jump();
+    await a.next(aboard, 2000);
+    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0 });
+    await settle(300);
+    a.jump();
+    const home = bodies(await a.next(ashore, 2000)).find((p) => p.id === id)!;
+    expect(Math.hypot(home.x - 9.5, home.y - 31.5)).toBeLessThanOrEqual(3);
+    expect(isl.stdout.join("\n")).toMatch(/jumps onto Near Island/);
+    a.close();
+  });
+});
+
 describe("what you can see", { timeout: 60000 }, () => {
   it("sends the whole map only to a body standing at the chart table", async () => {
     const isl = await fresh();
