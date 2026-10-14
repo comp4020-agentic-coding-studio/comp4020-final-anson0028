@@ -155,12 +155,13 @@ The map rule changed with it. Reef probability now rises with the distance
 to the nearest of the pier and the three islands (`REEF_FROM` tiles of
 clear water around each, then `1/REEF_SLOPE` per tile to `REEF_MAX`), so
 the lanes between islands are open and the fields sit in the corners of
-the chart; a reef tile with fewer than two reef neighbours is removed. Two
-densities, twelve runs per cell, bots as before and still not patching:
+the chart; a reef cluster of fewer than five tiles is removed, so there are
+no stray rocks. Two densities, twelve runs per cell, bots as before and
+still not patching:
 
 | reefs | share of the sea | 1 → far | 2 → far | 3 → far | 4 → far |
 |---|---|---|---|---|---|
-| 1/50 from 10 tiles to 50% | 5% | 12/12 in 70 s | 12/12 in 63 s | 12/12 in 63 s | 12/12 in 64 s |
+| 1/50 from 10 tiles to 50% | 6% | 12/12 in 70 s | 12/12 in 63 s | 12/12 in 63 s | 12/12 in 64 s |
 | 1/35 from 10 tiles to 60% | 7% | 12/12 in 68 s | 12/12 in 63 s | 12/12 in 63 s | 12/12 in 64 s |
 
 Every crew lands everywhere; a bot steering straight down a lane never

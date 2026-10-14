@@ -76,17 +76,25 @@ for (let y = 0; y < H; y++) {
     tiles[y * W + x] = t;
   }
 }
-for (let y = 0; y < H; y++) {
-  for (let x = 0; x < W; x++) {
-    if (tiles[y * W + x] !== REEF) continue;
-    let around = 0;
+const REEF_CLUSTER_MIN = 5;
+const seen = new Uint8Array(W * H);
+for (let start = 0; start < W * H; start++) {
+  if (tiles[start] !== REEF || seen[start]) continue;
+  const cluster = [start];
+  seen[start] = 1;
+  for (let i = 0; i < cluster.length; i++) {
+    const cx = cluster[i] % W, cy = Math.floor(cluster[i] / W);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      if (!dx && !dy) continue;
-      const nx = x + dx, ny = y + dy;
-      if (nx >= 0 && ny >= 0 && nx < W && ny < H && tiles[ny * W + nx] === REEF) around++;
+      const nx = cx + dx, ny = cy + dy;
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+      const n = ny * W + nx;
+      if (tiles[n] === REEF && !seen[n]) {
+        seen[n] = 1;
+        cluster.push(n);
+      }
     }
-    if (around < 2) tiles[y * W + x] = SEA;
   }
+  if (cluster.length < REEF_CLUSTER_MIN) for (const t of cluster) tiles[t] = SEA;
 }
 
 export function tileAt(x: number, y: number): number {
