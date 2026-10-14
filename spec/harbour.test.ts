@@ -194,7 +194,7 @@ describe("the log", { timeout: 30000 }, () => {
     await b.walkTo(-2.5, 0.5);
     b.grip(true);
     await b.next((m) => m.t === "toast" && /already at the helm/.test(m.text), 2000);
-    b.send({ t: "say", text: "hello crew", to: "crew" });
+    b.send({ t: "say", text: "hello crew" });
     await a.next((m) => m.t === "bubble", 2000);
     await settle(300);
     const lines = isl.stdout.join("\n");
@@ -203,7 +203,7 @@ describe("the log", { timeout: 30000 }, () => {
     expect(lines).toMatch(new RegExp(`${b.name}#${b.id} boards ship ${ship}`));
     expect(lines).toMatch(new RegExp(`Anson#${a.id} takes the helm of ship ${ship}`));
     expect(lines).toMatch(new RegExp(`${b.name}#${b.id} is refused the helm of ship ${ship}: Anson#${a.id} holds it`));
-    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} says to the crew of ship ${ship}: "hello crew"`));
+    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} says: "hello crew"`));
     expect(lines).toMatch(new RegExp(`#${a.id} is now called Anson`));
     expect(lines).toMatch(who(a.id));
     expect(lines.split("\n").filter((l) => l.includes(`#${a.id}`)).length).toBeGreaterThanOrEqual(4);
@@ -213,7 +213,7 @@ describe("the log", { timeout: 30000 }, () => {
 });
 
 describe("saying", { timeout: 30000 }, () => {
-  it("reaches only the crew when asked, and tells you when nobody heard", async () => {
+  it("reaches everyone within earshot and nobody else, whatever the client asks, and tells you when nobody heard", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0206"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0206"));
@@ -222,9 +222,8 @@ describe("saying", { timeout: 30000 }, () => {
     expect(await b.board()).toBe(ship);
     a.send({ t: "say", text: "crew only", to: "crew" });
     const heard = await b.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
-    expect(heard.crew).toBe(true);
-    await settle(400);
-    expect(c.inbox.some((m) => m.t === "bubble" && m.text === "crew only")).toBe(false);
+    expect(heard.crew).toBeFalsy();
+    await c.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
     a.send({ t: "say", text: "everyone" });
     await c.next((m) => m.t === "bubble" && m.text === "everyone", 2000);
     await c.walkTo(4.5, 31.5);
