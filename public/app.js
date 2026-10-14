@@ -30,7 +30,6 @@ const heardList = document.getElementById("heard");
 const noteForm = document.getElementById("note-form");
 const noteInput = document.getElementById("note-text");
 const noteButton = document.getElementById("note");
-const unnoteButton = document.getElementById("unnote");
 
 let me = null;
 let deck = null;
@@ -190,15 +189,29 @@ const dayLabel = (at) => new Date(at).toLocaleDateString("en-AU", { day: "numeri
 function drawBoard() {
   const today = log.filter((e) => e.kind === "landing" && e.day === day);
   const best = today.sort((p, q) => q.distance - p.distance)[0];
-  furthest.textContent = best ? `Furthest today: ${best.name} · ${best.crew.join(", ")} (${best.size})` : "Nobody has landed anywhere today.";
-  logList.replaceChildren(...log.slice(0, 12).map((e) => {
+  furthest.textContent = best ? `Furthest today: ${best.name} · ${crewText(best)}` : "Nobody has landed anywhere today.";
+  const items = [];
+  let lastDay = null;
+  for (const e of log.slice(0, 8)) {
+    const d = dayLabel(e.at);
+    if (d !== lastDay) {
+      const h = document.createElement("li");
+      h.className = "day";
+      h.textContent = d;
+      items.push(h);
+      lastDay = d;
+    }
     const li = document.createElement("li");
-    const what = e.kind === "landing" ? e.name : `Wreck, ${Math.round(e.distance)} tiles out`;
-    const who = e.crew[0] === "nobody aboard" ? "nobody aboard" : `${e.crew.join(", ")} (${e.size})`;
-    li.textContent = `${dayLabel(e.at)} · ${what} · ${who}`;
+    li.textContent = e.kind === "landing" ? `${e.name} · ${crewText(e)}` : `Wreck ${Math.round(e.distance)} tiles out · ${crewText(e)}`;
     if (e.kind === "wreck") li.className = "wreck";
-    return li;
-  }));
+    items.push(li);
+  }
+  logList.replaceChildren(...items);
+}
+
+function crewText(e) {
+  if (e.crew[0] === "nobody aboard") return "nobody aboard";
+  return e.crew.length <= 2 ? e.crew.join(", ") : `${e.crew.slice(0, 2).join(", ")} +${e.crew.length - 2}`;
 }
 
 const toastQueue = [];
@@ -435,11 +448,10 @@ noteForm.addEventListener("submit", (e) => {
   if (text && ws.readyState === 1) ws.send(JSON.stringify({ t: "note", text }));
   closeNote();
 });
-noteButton.addEventListener("click", openNote);
+noteButton.addEventListener("click", () => (ownNoteNear !== null ? removeNote() : openNote()));
 function removeNote() {
   if (ownNoteNear !== null && ws.readyState === 1) ws.send(JSON.stringify({ t: "unnote", id: ownNoteNear }));
 }
-unnoteButton.addEventListener("click", removeNote);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -939,9 +951,9 @@ function updateHud(self, shipsNow) {
     sayInput.placeholder = ship ? "Say something (Enter · Shift+Enter: crew only)" : "Say something (Enter)";
   }
   aboardNow = self.ship;
-  noteButton.hidden = !!ship;
   syncNoteLabels(ship ? null : self);
-  unnoteButton.hidden = ownNoteNear === null;
+  noteButton.classList.toggle("gone", !!ship);
+  noteButton.textContent = ownNoteNear !== null ? key("Remove note (X)", "Remove note") : key("Note (N)", "Note");
   if (ship) {
     status.hidden = false;
     if (sticky && sticky.ship !== ship.id) sticky = null;
