@@ -16,7 +16,7 @@ const chartCanvas = document.getElementById("chartview");
 const sayForm = document.getElementById("say");
 const sayInput = document.getElementById("text");
 const actButton = document.getElementById("act");
-const leaveButton = document.getElementById("leave");
+const jumpButton = document.getElementById("jump");
 const intro = document.getElementById("intro");
 const nameForm = document.getElementById("name-form");
 const nameInput = document.getElementById("name");
@@ -37,6 +37,7 @@ let deck = null;
 let stations = null;
 let leakCap = 40;
 let patchStart = null;
+let pierAt = { x: 9.5, y: 31.5 };
 let sayRange = 8;
 let boardRange = 9;
 let pier = { x: 9.5, y: 31.5 };
@@ -73,6 +74,7 @@ ws.addEventListener("message", (e) => {
     deck = m.deck;
     stations = m.stations;
     leakCap = m.leakCap ?? 40;
+    pierAt = m.pier ?? pierAt;
     sayRange = m.sayRange;
     boardRange = m.boardRange ?? boardRange;
     pier = m.pier;
@@ -108,7 +110,7 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "snap") {
     clockOffset = Date.now() - m.at;
     m.players = m.p.map(([id, x, y, , ship]) => ({ id, x: x / 100, y: y / 100, ship: ship === "" ? null : ship, name: roster.get(id)?.name ?? "", hue: roster.get(id)?.hue ?? 0 }));
-    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks]) => ({ id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
+    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed]) => ({ id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
     snaps.push(m);
     if (snaps.length > 6) snaps.shift();
   } else if (m.t === "near") {
@@ -316,16 +318,14 @@ function setHold(on) {
 }
 
 function act(down) {
-  if (!me || ws.readyState !== 1) return;
-  if (aboardNow === null) {
-    if (down) ws.send(JSON.stringify({ t: "board" }));
-    return;
-  }
+  if (!me || ws.readyState !== 1 || aboardNow === null) return;
   setHold(down);
 }
 
-function goAshore() {
-  if (ws.readyState === 1) ws.send(JSON.stringify({ t: "ashore" }));
+function jump() {
+  if (!me || ws.readyState !== 1) return;
+  setHold(false);
+  ws.send(JSON.stringify({ t: "jump" }));
 }
 
 const moveKeyOf = { w: "w", W: "w", s: "s", S: "s", a: "a", A: "a", d: "d", D: "d" };
@@ -336,12 +336,12 @@ window.addEventListener("keydown", (e) => {
   if (lookKeyOf[e.key]) { e.preventDefault(); look.add(lookKeyOf[e.key]); }
   if (e.key === "Enter") { e.preventDefault(); sayInput.focus(); }
   if ((e.key === "e" || e.key === "E") && !e.repeat) { e.preventDefault(); act(true); }
-  if (e.key === "q" || e.key === "Q") { e.preventDefault(); goAshore(); }
   if (e.key === "?") { e.preventDefault(); showIntro(); }
   if ((e.key === "n" || e.key === "N") && !e.repeat) { e.preventDefault(); openNote(); }
   if (e.key === "x" || e.key === "X") { e.preventDefault(); removeNote(); }
   if (e.target instanceof HTMLButtonElement) return;
-  const gesture = { " ": "jump", h: "wave", H: "wave", y: "yes", Y: "yes", b: "no", B: "no" }[e.key];
+  if (e.key === " " && !e.repeat) { e.preventDefault(); jump(); }
+  const gesture = { h: "wave", H: "wave", y: "yes", Y: "yes", b: "no", B: "no" }[e.key];
   if (gesture && !e.repeat) { e.preventDefault(); emote(gesture); }
 });
 function emote(kind) {
@@ -377,7 +377,7 @@ function grab(el, e) {
 }
 actButton.addEventListener("pointerdown", (e) => { e.preventDefault(); grab(actButton, e); act(true); });
 for (const ev of ["pointerup", "pointercancel"]) actButton.addEventListener(ev, () => act(false));
-leaveButton.addEventListener("click", goAshore);
+jumpButton.addEventListener("click", () => { jump(); canvas.focus(); });
 
 function sendSay(to) {
   const text = sayInput.value.trim();
@@ -921,7 +921,6 @@ function updateHud(self, shipsNow) {
     sayInput.placeholder = ship ? "Say something (Enter · Shift+Enter: crew only)" : "Say something (Enter)";
   }
   aboardNow = self.ship;
-  leaveButton.hidden = !ship;
   noteButton.hidden = !!ship;
   syncNoteLabels(ship ? null : self);
   unnoteButton.hidden = ownNoteNear === null;
@@ -930,7 +929,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard`;
+    status.textContent = `Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || " —"} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     status.classList.toggle("warn", ship.water >= 50);
     status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
     hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";
@@ -943,7 +942,9 @@ function updateHud(self, shipsNow) {
   if (!ship) {
     const nearShip = shipsNow.some((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange);
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
-    else text = nearShip ? key("A ship is close. Press E to board.", "A ship is close. Tap Use to board.") : key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
+    else if (nearShip) text = key("A ship is close. Space to jump aboard.", "A ship is close. Tap Jump to get aboard.");
+    else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
+    else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm.", "Hold Use to take the helm.");
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
   else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
@@ -956,7 +957,8 @@ function updateHud(self, shipsNow) {
     const done = patchStart ? Math.max(0, Math.min(99, Math.round(100 * (1 - leak.amount / patchStart.amount)))) : 0;
     text = holding ? `Patching the hole… ${done}%` : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
   } else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
-  else text = key("Walk to a station. Q to go ashore.", "Walk to a station. Ashore takes you back.");
+  else if (ship.landed) text = key(`Beside ${ship.landed}. Space jumps onto it.`, `Beside ${ship.landed}. Jump gets you onto it.`);
+  else text = key("Walk to a station. Space jumps into the sea and home.", "Walk to a station. Jump is into the sea and home.");
   if (!ship || !ship.leaks.length) patchStart = null;
   if (text !== lastHint) {
     lastHint = text;

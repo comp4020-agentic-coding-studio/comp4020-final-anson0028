@@ -20,7 +20,7 @@
     </header>
     <main>
       <h1 class="sr-only">Earshot</h1>
-      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Q to leave the ship." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Space to jump onto a ship, onto an island, or into the sea." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
       <div id="status" class="status" aria-live="polite" hidden></div>
       <div id="hint" class="hint" aria-live="polite" hidden></div>
@@ -40,10 +40,10 @@
         <div class="intro-card">
           <h2>Earshot</h2>
           <p>A small online game: you and whoever else is here right now crew one of three ships out of a harbour, into a sea that gets harder further out. The more of you aboard, the further the ship gets.</p>
-          <p>You play as a small block bird. Board a ship and hold E at a station: sail, helm, chart table, pump. You can work one station at a time, and every station stops the moment it's left. One person can sail, badly. More hands get further.</p>
+          <p>You play as a small block bird. Jump onto a ship and hold E at a station: sail, helm, chart table, pump. You can work one station at a time, and every station stops the moment it's left. One person can sail, badly. More hands get further.</p>
           <p>Rocks ringed with white water are reefs. A reef under a moving hull opens a hole in the deck. Stand on it and hold E to patch it, then pump out what came in.</p>
           <p>The harbour board lists how far each crew got, with their names.</p>
-          <p class="keys">WASD walks · arrows or drag look round · E uses · Q goes ashore, off the ship · N leaves a note · H waves, Space jumps, Y and B nod and shake · tap or click to walk there</p>
+          <p class="keys">WASD walks · arrows or drag look round · E uses · Space jumps: onto a ship, onto an island, or into the sea and home · N leaves a note, X takes it up · H waves, Y and B nod and shake · tap or click to walk there</p>
           <form id="name-form" class="name-form" autocomplete="off">
             <label for="name">What should the crew call you?</label>
             <input id="name" name="name" maxlength="16" />
@@ -65,13 +65,12 @@
       </form>
       <div class="emotes" aria-label="Gestures">
         <button type="button" data-emote="wave" aria-label="Wave (H)">Wave</button>
-        <button type="button" data-emote="jump" aria-label="Jump (Space)">Jump</button>
         <button type="button" data-emote="yes" aria-label="Nod yes (Y)">Yes</button>
         <button type="button" data-emote="no" aria-label="Shake no (B)">No</button>
       </div>
       <div class="actions">
         <button id="act" type="button" class="act" aria-label="Use what you stand on (hold)">Use (E)</button>
-        <button id="leave" type="button" class="leave" hidden>Ashore (Q)</button>
+        <button id="jump" type="button" class="leave">Jump (Space)</button>
         <button id="note" type="button" class="note-btn" hidden>Note (N)</button>
         <button id="unnote" type="button" class="leave" hidden>Remove note (X)</button>
       </div>
