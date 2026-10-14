@@ -3,7 +3,7 @@
 Earshot is a small online game for a room of people: whoever is here right
 now crews one of three sailing ships together. One person can do everything
 aboard, but only from where they stand, so the more of you aboard, the
-further the ship gets, and how far it got is kept with the names of who was
+further the ship gets. How far it got is kept with the names of who was
 aboard.
 
 You play as a small block bird. Stand at a station and hold E: the sail
