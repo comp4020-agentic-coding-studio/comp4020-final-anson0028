@@ -62,8 +62,9 @@ chart.
 
 ## The world
 
-- A sea of tiles: a harbour with a pier, calm water near it, reef fields
-  that thicken with distance, and islands at increasing distances.
+- A sea of tiles: a harbour with a pier, islands at increasing distances,
+  clear lanes between them, and reef fields in the open water far from any
+  of them.
 - Several ships moored at the pier (three to start). Any crew can take any
   free one. Each ship is a small deck (about 7 by 4 tiles) that carries the
   bodies standing on it, with stations at least three tiles apart: sail,
@@ -117,17 +118,22 @@ Each of these becomes a test.
 
 ## What each extra body adds
 
-| Aboard | What the ship can do | Measured, 12 October (`docs/tuning.md`) |
+| Aboard | What the ship can do | Measured, 14 October (`docs/tuning.md`) |
 |---|---|---|
-| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows, stand on a hole to patch it. Calm water is fine; the far reef field is a wreck. | Near and middle 12 of 12; far 0 of 12, wrecked at about 31 tiles. |
-| 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Near and middle 12 of 12; far 0 of 12, wrecked at about 58 tiles. |
-| 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Middle 12 of 12; far 4 of 12. |
-| 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Far 12 of 12. |
+| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows, stand on a hole to patch it. The lanes are fine; a field is slow work alone. | Every island 12 of 12; the far one in 70 s. |
+| 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Every island 12 of 12; the far one in 63 s. |
+| 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Every island 12 of 12; the far one in 63 s. |
+| 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Every island 12 of 12; the far one in 64 s. |
 | A room of 30 | Three crews on three ships, and more berths refilling. The board says which crew got furthest. | Not yet. |
 
 The ladder is not enforced by counting people. It falls out of one body
 being in one place at a time, of a helm that wanders when nobody holds it,
-and of reef fields with lanes that only the chart shows.
+and of reef fields with lanes that only the chart shows. Since 14 October
+the sea is open: the lanes between islands are clear, the fields sit far
+from any island, and anyone can reach the far island by sailing. What
+hands buy now is time and a dry hull, not the island itself; the bots,
+which never stray, land everywhere, and the difference between one and
+three is seven seconds of running between stations.
 
 ## What persists, and what expires
 

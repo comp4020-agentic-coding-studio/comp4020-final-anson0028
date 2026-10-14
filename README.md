@@ -8,8 +8,9 @@ aboard.
 
 You play as a small block bird. Stand at a station and hold E: the sail
 rises, the helm turns, the pump empties the hull. Every station stops the
-moment it is left. One person can sail, badly. Two split the work. Further
-out, the reefs thicken and one pair of hands can't keep up.
+moment it is left. One person can sail, badly, running between them while
+the helm wanders. Two split the work. Off the lanes, reef fields hole the
+hull, and a holed hull wants one hand on the patch and one on the pump.
 
 ## What good means here
 
@@ -59,11 +60,11 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     your ship, or puts you in the sea and home to the pier.
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
-crews of one and two reach the near and middle islands and wreck short of
-the far one; three reach the far island a third of the time; four, with
-one at the chart table, reach it every time
-([`docs/tuning.md`](docs/tuning.md)). The bots never patch a hole; whether
-people, who can, match them is for the crit 10 pod.
+crews of any size reach every island; alone, the far island takes seventy
+seconds against sixty-three with a crew, and that gap is the running
+between stations ([`docs/tuning.md`](docs/tuning.md)). The bots sail the
+lanes and never patch a hole; a crew that strays into a field is where
+hands matter, and the crit 10 pod is the test.
 
 ## Trying it alone
 

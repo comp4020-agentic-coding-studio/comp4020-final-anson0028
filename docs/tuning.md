@@ -143,30 +143,55 @@ lying still takes none; `REPAIR_RATE` went from 10 to 20 by hand, from
 that log and not from a sweep, because the bots never patch. The ladder
 as played, with people who do, is for the crit 10 pod to show.
 
-## The numbers, 12 October, evening
+**Sweep 6, the open sea, 14 October.** Three agents played the deployed
+build cold, and the brief for the next change came from me after reading
+them: far fewer reefs, no stray single rocks, dense fields only far from
+any island, a sail that stays up longer, and a sea anyone can cross to the
+far island by just sailing. That is a different game from the ladder
+above, and it is the one I want for a room of strangers: the hands matter
+in how fast and how dry you get there, not in whether you get there.
 
-`MAX_SPEED` 1.2, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.12, `TURN_RATE` 0.8,
+The map rule changed with it. Reef probability now rises with the distance
+to the nearest of the pier and the three islands (`REEF_FROM` tiles of
+clear water around each, then `1/REEF_SLOPE` per tile to `REEF_MAX`), so
+the lanes between islands are open and the fields sit in the corners of
+the chart; a reef tile with fewer than two reef neighbours is removed. Two
+densities, twelve runs per cell, bots as before and still not patching:
+
+| reefs | share of the sea | 1 → far | 2 → far | 3 → far | 4 → far |
+|---|---|---|---|---|---|
+| 1/50 from 10 tiles to 50% | 5% | 12/12 in 70 s | 12/12 in 63 s | 12/12 in 63 s | 12/12 in 64 s |
+| 1/35 from 10 tiles to 60% | 7% | 12/12 in 68 s | 12/12 in 63 s | 12/12 in 63 s | 12/12 in 64 s |
+
+Every crew lands everywhere; a bot steering straight down a lane never
+meets a field. The extra density bought nothing measurable, so the thinner
+sea was kept. What the bots cannot show is a crew that strays: the fields
+are still there for them, and a holed hull still needs a hand on the patch
+and one on the pump. That is for the crit 10 pod.
+
+## The numbers, 14 October
+
+`MAX_SPEED` 1.2, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.05, `TURN_RATE` 0.8,
 `REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `LEAK_CAP` 40, `REPAIR_RATE`
-20, `PUMP_RATE` 3, `REEF_FROM` 12, `REEF_SLOPE` 100, `REEF_MAX` 0.3,
+20, `PUMP_RATE` 3, `REEF_FROM` 10, `REEF_SLOPE` 50, `REEF_MAX` 0.5,
 `REEF_CLUMP` 1, `HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds
 each, at five times real time, on a quiet machine:
 
 | crew | target | landed | wrecked | timed out | median landing (s) | mean furthest (tiles) |
 |---|---|---|---|---|---|---|
-| 1 | near | 100% | 0% | 0% | 21 | 20 |
-| 1 | middle | 100% | 0% | 0% | 43 | 42 |
-| 1 | far | 0% | 100% | 0% | – | 31 |
-| 2 | near | 100% | 0% | 0% | 19 | 19 |
-| 2 | middle | 100% | 0% | 0% | 39 | 42 |
-| 2 | far | 0% | 100% | 0% | – | 58 |
-| 3 | near | 100% | 0% | 0% | 19 | 20 |
-| 3 | middle | 100% | 0% | 0% | 40 | 42 |
-| 3 | far | 33% | 67% | 0% | 63 | 65 |
-| 4 | near | 100% | 0% | 0% | 18 | 20 |
+| 1 | near | 100% | 0% | 0% | 19 | 20 |
+| 1 | middle | 100% | 0% | 0% | 38 | 42 |
+| 1 | far | 100% | 0% | 0% | 70 | 70 |
+| 2 | near | 100% | 0% | 0% | 18 | 19 |
+| 2 | middle | 100% | 0% | 0% | 37 | 42 |
+| 2 | far | 100% | 0% | 0% | 63 | 70 |
+| 3 | near | 100% | 0% | 0% | 18 | 20 |
+| 3 | middle | 100% | 0% | 0% | 37 | 42 |
+| 3 | far | 100% | 0% | 0% | 63 | 69 |
+| 4 | near | 100% | 0% | 0% | 19 | 20 |
 | 4 | middle | 100% | 0% | 0% | 38 | 42 |
-| 4 | far | 100% | 0% | 0% | 65 | 70 |
+| 4 | far | 100% | 0% | 0% | 64 | 70 |
 
-The far island takes about a minute of sailing with four aboard. These
-are bots that never patch a hole; a crew of strangers who have to find
-the stations, talk, and notice the water will do worse, and a crew that
-patches will do better. The next check is the crit 10 pod.
+Alone, the far island takes seven seconds longer than with a crew, which
+is the running between stations. These are bots that never stray and
+never patch; the measurement that matters now is people.

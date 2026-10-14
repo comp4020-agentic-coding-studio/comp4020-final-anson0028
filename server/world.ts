@@ -66,15 +66,26 @@ for (let y = 0; y < H; y++) {
     if (x >= 8 && x <= 10 && y >= 30 && y <= 33) t = PIER;
     for (const i of ISLANDS) if (Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) <= i.r) t = LAND;
     if (t === SEA) {
-      const d = Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y);
-      const nearIsland = ISLANDS.some((i) => Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) <= i.r + 2.5);
+      const d = Math.min(Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y), ...ISLANDS.map((i) => Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) - i.r));
       const nearSlot = SLOTS.some((s) => Math.hypot(x + 0.5 - s.x, y + 0.5 - s.y) <= 5);
       const base = d < P.REEF_FROM ? 0 : Math.min(P.REEF_MAX, (d - P.REEF_FROM) / P.REEF_SLOPE);
       const clump = 1 + P.REEF_CLUMP * (2 * lattice(x, y, 7) - 1) * 1.6;
       const p = Math.min(0.9, Math.max(0, base * clump));
-      if (!nearIsland && !nearSlot && noise(x, y) < p) t = REEF;
+      if (!nearSlot && noise(x, y) < p) t = REEF;
     }
     tiles[y * W + x] = t;
+  }
+}
+for (let y = 0; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    if (tiles[y * W + x] !== REEF) continue;
+    let around = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      if (!dx && !dy) continue;
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && ny >= 0 && nx < W && ny < H && tiles[ny * W + nx] === REEF) around++;
+    }
+    if (around < 2) tiles[y * W + x] = SEA;
   }
 }
 

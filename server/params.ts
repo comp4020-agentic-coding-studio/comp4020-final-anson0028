@@ -1,6 +1,6 @@
 const defaults = {
   SAIL_RISE: 0.25,
-  SAIL_LOOSEN: 0.12,
+  SAIL_LOOSEN: 0.05,
   MAX_SPEED: 1.2,
   TURN_RATE: 0.8,
   REEF_DAMAGE: 15,
@@ -14,9 +14,9 @@ const defaults = {
   SHIPS_AT_PIER: 3,
   MAX_SHIPS: 12,
   LANDING_RANGE: 4.5,
-  REEF_FROM: 12,
-  REEF_SLOPE: 100,
-  REEF_MAX: 0.3,
+  REEF_FROM: 10,
+  REEF_SLOPE: 50,
+  REEF_MAX: 0.5,
   REEF_CLUMP: 1,
   HELM_DRIFT: 0.1,
 };
