@@ -156,8 +156,6 @@ canvas#view:focus-visible { box-shadow: inset 0 0 0 3px #f0b94a; }
   pointer-events: none;
 }
 
-.heard li.crew { color: #ffe08a; }
-
 .note-btn { background: #8a6a3a; }
 
 .emotes {

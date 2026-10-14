@@ -319,13 +319,12 @@ function handle(c: Client, raw: string): void {
   if (msg.t === "say") {
     const text = String(msg.text ?? "").trim().slice(0, 40);
     if (!text) return;
-    const crew = msg.to === "crew" && b.ship !== null;
     const from = worldPos(c);
-    const hearers = crew ? aboard(ships.get(b.ship!)!) : [...clients.values()].filter((o) => within(worldPos(o), from, SAY_RANGE));
-    for (const o of hearers) send(o.ws, { t: "bubble", from: c.id, text, crew });
+    const hearers = [...clients.values()].filter((o) => within(worldPos(o), from, SAY_RANGE));
+    for (const o of hearers) send(o.ws, { t: "bubble", from: c.id, text });
     const others = hearers.filter((o) => o !== c);
-    logLine(`${whoIs(c)} says${crew ? ` to the crew of ship ${b.ship}` : ""}: "${text}" (heard by ${others.length ? others.map(whoIs).join(", ") : "nobody"})`);
-    if (!others.length) send(c.ws, { t: "toast", text: crew ? "Nobody else is aboard to hear that." : "Nobody within earshot heard that." });
+    logLine(`${whoIs(c)} says: "${text}" (heard by ${others.length ? others.map(whoIs).join(", ") : "nobody"})`);
+    if (!others.length) send(c.ws, { t: "toast", text: "Nobody within earshot heard that." });
     return;
   }
   if (msg.t === "emote") {

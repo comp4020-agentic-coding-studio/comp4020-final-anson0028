@@ -19,5 +19,6 @@ named commit with only the new spec files copied in.
 | the same test with `REPAIR_RATE` mutated to 0 | the working tree | failed: the hole never closed within 8 s |
 | "… not under a ship lying still …" | `1fab797` (damage whenever a reef is under the hull) | failed: a ship placed on a reef with no sail had two holes after a second |
 | "puts you aboard from the pier, onto the island beside the ship, …" | `5bcaae8` (no `jump` message) | failed: no snapshot aboard within 2 s |
+| "reaches everyone within earshot and nobody else, whatever the client asks" | `3655dd7` (crew-only channel still served) | failed: the bubble came flagged `crew` and the pier never got it |
 
 The same specs pass against the commits that followed each of them.

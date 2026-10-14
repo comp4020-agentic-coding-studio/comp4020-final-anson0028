@@ -34,9 +34,11 @@ them broken, change README.md first and say why.
   heard may stay on that client for two minutes; the server keeps no chat.
 - Never update or delete a row in `visits` either; it is the board. A note
   in `notes` is removed only by its writer, through the server.
-- Never widen earshot. Shift+Enter aboard narrows it to the crew; nothing
-  carries a word or a gesture further than 8 tiles (the crew always sees
-  both), and a note is read within 1.5.
+- Never widen earshot, and never narrow it either: one channel, 8 tiles.
+  Nothing carries a word or a gesture further (the crew always sees a
+  gesture), and a note is read within 1.5. The crew-only channel was
+  removed on 14 October: two channels that looked the same confused
+  players.
 - Never ship a test hook that works without `WALK_TEST=1`.
 
 ## Every change

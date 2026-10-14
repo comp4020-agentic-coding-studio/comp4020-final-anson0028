@@ -47,4 +47,7 @@ plus the crew, and are not recorded.
   point.
 - "What you heard" is on the client only, so a reload loses it. Deliberate:
   the README still says there is no chat history.
-- Crew-only talk is the one case where earshot is narrowed, never widened.
+- Crew-only talk was the one case where earshot was narrowed. Revised 14
+  October: removed. Cold play found two channels that looked the same and
+  a crew-only word that reached the pier anyway, since the pier is within
+  earshot of the berths. One channel, 8 tiles, is the whole rule now.

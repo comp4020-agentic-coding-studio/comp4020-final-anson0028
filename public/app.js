@@ -128,8 +128,8 @@ ws.addEventListener("message", (e) => {
     const g = birdMeshes.get(m.id);
     if (g) g.userData.emote = { kind: m.kind, t0: performance.now() };
   } else if (m.t === "bubble") {
-    bubbles.set(m.from, { text: m.text, until: performance.now() + 8000, crew: !!m.crew });
-    heard.push({ at: Date.now(), name: roster.get(m.from)?.name ?? "", text: m.text, crew: !!m.crew });
+    bubbles.set(m.from, { text: m.text, until: performance.now() + 8000 });
+    heard.push({ at: Date.now(), name: roster.get(m.from)?.name ?? "", text: m.text });
     drawHeard();
   } else if (m.t === "wreck") {
     wrecks.push(m.wreck);
@@ -408,12 +408,6 @@ sayForm.addEventListener("submit", (e) => {
   e.preventDefault();
   sendSay();
 });
-sayInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && e.shiftKey) {
-    e.preventDefault();
-    sendSay(aboardNow === null ? undefined : "crew");
-  }
-});
 sayInput.addEventListener("input", () => { countEl.textContent = `${sayInput.value.length}/40`; });
 
 function drawHeard() {
@@ -424,7 +418,6 @@ function drawHeard() {
   heardList.replaceChildren(...show.map((h) => {
     const li = document.createElement("li");
     li.textContent = `${h.name}: ${h.text}`;
-    if (h.crew) li.className = "crew";
     return li;
   }));
 }
@@ -948,7 +941,7 @@ function updateHud(self, shipsNow) {
   const ship = self.ship === null ? null : shipsNow.find((s) => s.id === self.ship);
   if (self.ship !== aboardNow) {
     yawOffset = ship ? 0 : lastViewYaw;
-    sayInput.placeholder = ship ? "Say something (Enter · Shift+Enter: crew only)" : "Say something (Enter)";
+    sayInput.placeholder = "Say something (Enter · heard within 8 tiles)";
   }
   aboardNow = self.ship;
   syncNoteLabels(ship ? null : self);

@@ -53,8 +53,8 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     and day.
 13. A note left ashore is seen within sight, kept, and taken up only by its
     writer.
-14. Shift+Enter aboard speaks to the crew alone; a word nobody heard says
-    so. (11–14: `spec/harbour.test.ts`)
+14. A word reaches everyone within earshot and nobody else, whatever the
+    client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
 15. A jump boards the nearest moored ship, lands you on the island beside
     your ship, or puts you in the sea and home to the pier.
 

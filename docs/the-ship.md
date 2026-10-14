@@ -264,10 +264,14 @@ one station (1), the block view (2), berths that refill (3), typed names
     days but never removed except by the writer. The stronger version,
     notes on the islands, waits on stepping off a landed ship.
 14. Talk, the same day: bubbles last 8 seconds, the last two minutes of what
-    you heard stay on your own screen, Shift+Enter aboard speaks to the
-    crew only, and a word nobody heard says so. No channel reaches further
-    than 8 tiles; that is the rule the project stands on.
-15. Gestures, the same day, also from the campus: wave, jump, nod and shake.
+    you heard stay on your own screen, and a word nobody heard says so. No
+    channel reaches further than 8 tiles; that is the rule the project
+    stands on. A crew-only channel (Shift+Enter) lived three days and was
+    removed on 14 October: cold players could not tell it from the open
+    one, and it reached the pier anyway.
+15. Gestures, the same day, also from the campus: wave, nod and shake. The
+    jump became an act on 14 October: it boards a ship, lands you on an
+    island, or is into the sea and home.
     They carry 8 tiles like a word, plus the whole crew when aboard, one
     every 400 ms, and nothing is recorded. They give the people standing
     around on the pier something to answer with.
