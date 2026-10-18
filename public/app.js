@@ -798,7 +798,7 @@ function syncBirds(players, shipsNow) {
       g.userData.bubble = null;
       g.userData.bubbleText = "";
     }
-    const waitText = p.ship === null && typeof nextShip === "number" ? `next ship in ${nextShip} s` : "";
+    const waitText = p.ship === null && typeof nextShip === "number" && Math.hypot(w.x - pierAt.x, w.y - pierAt.y) <= 12 ? `next ship in ${nextShip} s` : "";
     if (g.userData.waitText !== waitText) {
       if (g.userData.wait) g.remove(g.userData.wait);
       g.userData.wait = null;
@@ -863,7 +863,7 @@ function syncFlags() {
     g.userData.cloth.material.color.set(l ? 0xf0b94a : 0xe9dcbf);
     if (g.userData.text !== text) {
       if (g.userData.label) g.remove(g.userData.label);
-      const label = makeLabel(text, "rgba(21,23,28,0.7)", "#ffffff", Math.min(4, 1.2 + text.length * 0.09));
+      const label = makeLabel(text, "rgba(21,23,28,0.7)", "#ffffff", Math.min(3.2, 1 + text.length * 0.07));
       label.position.y = 3.0;
       g.add(label);
       g.userData.label = label;
@@ -1030,7 +1030,7 @@ function updateHud(self, shipsNow) {
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
     else if (sticky) text = sticky.text;
     else if (nearShip) text = key(`${nearName} is alongside. Press E to board.`, `${nearName} is alongside. Tap Use to board.`);
-    else if (typeof nextShip === "number") text = `Next ship in ${nextShip} s.`;
+    else if (typeof nextShip === "number" && Math.hypot(self.x - pierAt.x, self.y - pierAt.y) <= 12) text = `Next ship in ${nextShip} s.`;
     else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
