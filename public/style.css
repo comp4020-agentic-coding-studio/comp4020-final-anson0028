@@ -252,12 +252,15 @@ body.page { display: block; min-height: 100%; }
   position: absolute;
   top: 3.2rem;
   left: 0.75rem;
-  max-width: 16rem;
-  padding: 0.35rem 0.7rem;
+  max-width: 22rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 0.5rem;
   background: #f4e9cf;
   color: var(--ink);
-  font-size: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chart {

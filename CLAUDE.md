@@ -83,9 +83,11 @@ them broken, change README.md first and say why.
   Check memory with `/health` after anything that adds per-player or
   per-ship state.
 - The sea is generated from a fixed seed in `server/world.ts`; the spec
-  relies on the pier at (9.5, 31.5), three berths at x 13.5 (y 26, 32, 38,
-  each facing open water) and the near island at (34, 20). A berth empty
-  for `LAUNCH_DELAY_S` is refilled while the fleet is under `MAX_SHIPS`.
+  relies on the pier at (9.5, 31.5), one berth at (13.5, 32) facing open
+  water, and the near island at (34, 20). The berth, once its ship is
+  clear, is refilled after `LAUNCH_DELAY_S` while the fleet is under
+  `MAX_SHIPS`; a ship left empty away from it is scuttled after
+  `DERELICT_S`. Nothing lies within 30 tiles of the pier.
 - A ship is three points, centre, bow 3.5 ahead and stern 2.5 behind. Land
   and reefs are checked at all three, ships keep 5 tiles between centres
   (`SHIP_CLEARANCE`), and the crew are told when the hull is stopped or
