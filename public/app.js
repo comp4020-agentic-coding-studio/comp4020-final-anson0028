@@ -86,6 +86,8 @@ ws.addEventListener("message", (e) => {
     landings = m.landings;
     log = m.log;
     for (const s of m.ships ?? []) shipNames.set(s.id, s.name);
+    islands = m.islands ?? [];
+    syncFlags();
     who.textContent = `You are ${me.name}`;
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
@@ -143,6 +145,7 @@ ws.addEventListener("message", (e) => {
     const i = landings.findIndex((l) => l.island === m.landing.island);
     if (i >= 0) landings[i] = m.landing;
     else landings.push(m.landing);
+    syncFlags();
     say(m.first ? `First landing on ${m.name}: ${m.landing.crew.join(", ")} (crew of ${m.landing.size}).` : `${m.name} again. First reached by ${m.landing.crew.join(", ")}; ${m.landing.visits} visits now.`);
   } else if (m.t === "ship" && m.event === "scuttled") {
     shipNames.delete(m.id);
@@ -207,7 +210,7 @@ function drawBoard() {
       lastDay = d;
     }
     const li = document.createElement("li");
-    li.textContent = e.kind === "landing" ? `${e.name} · ${crewText(e)}` : `Wreck ${Math.round(e.distance)} tiles out · ${crewText(e)}`;
+    li.textContent = e.kind === "landing" ? `${crewText(e)} reached ${e.name}` : e.crew[0] === "nobody aboard" ? `an empty ship sank ${Math.round(e.distance)} tiles out` : `${crewText(e)} sank ${Math.round(e.distance)} tiles out`;
     if (e.kind === "wreck") li.className = "wreck";
     items.push(li);
   }
@@ -836,6 +839,38 @@ function syncWrecks() {
   }
 }
 
+let islands = [];
+const flagMeshes = new Map();
+function syncFlags() {
+  for (const i of islands) {
+    const l = landings.find((x) => x.island === i.id);
+    const text = l ? `${i.name} · first: ${l.crew.join(", ")}` : i.name;
+    let g = flagMeshes.get(i.id);
+    if (!g) {
+      g = new THREE.Group();
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.6, 8), mat(0x5a3d26));
+      pole.position.y = 1.3;
+      g.add(pole);
+      const cloth = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.7), new THREE.MeshBasicMaterial({ color: 0xf0b94a, side: THREE.DoubleSide }));
+      cloth.position.set(0.62, 2.2, 0);
+      g.add(cloth);
+      g.userData = { cloth, text: "" };
+      g.position.set(i.cx, TOP[LAND] ?? 0.4, i.cy);
+      flagMeshes.set(i.id, g);
+      scene.add(g);
+    }
+    g.userData.cloth.material.color.set(l ? 0xf0b94a : 0xe9dcbf);
+    if (g.userData.text !== text) {
+      if (g.userData.label) g.remove(g.userData.label);
+      const label = makeLabel(text, "rgba(21,23,28,0.7)", "#ffffff", Math.min(4, 1.2 + text.length * 0.09));
+      label.position.y = 3.0;
+      g.add(label);
+      g.userData.label = label;
+      g.userData.text = text;
+    }
+  }
+}
+
 const noteMeshes = new Map();
 const noteAge = (n) => Math.max(0.35, 1 - Math.max(0, (Date.now() - Date.parse(n.at)) / 86400000) / 14);
 function syncNotes() {
@@ -975,7 +1010,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    status.textContent = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    status.textContent = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     status.classList.toggle("warn", ship.water >= 50);
     status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
     hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";

@@ -254,7 +254,7 @@ function join_(ws: WebSocket, token: string): void {
   logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, islands: ISLANDS, deck: DECK, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => handle(c, data.toString()));
