@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
 import { STATIONS, Walker, bodies, settle, ships, uuid, type Msg } from "./walker.ts";
 
-const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, REPAIR_RATE: 60, LAUNCH_DELAY_S: 1, HELM_DRIFT: 0 });
+const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, REPAIR_RATE: 60, LAUNCH_DELAY_S: 1, DERELICT_S: 2, HELM_DRIFT: 0 });
 const env = { WALK_TEST: "1", WALK_TODAY: "2026-10-12", SHIP_PARAMS: FAST };
 
 let island: Island | null = null;
@@ -199,19 +199,41 @@ describe("sinking", { timeout: 60000 }, () => {
   it("refills a berth a few seconds after its ship leaves, so there is always a ship to take", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0107"));
-    expect(a.hello.ships).toHaveLength(3);
+    expect(a.hello.ships).toHaveLength(1);
     const shipId = await a.board();
     const berth = ships(await a.snap()).find((s) => s.id === shipId)!;
     await a.man("sail");
     await a.until((s) => Math.hypot(s.x - berth.x, s.y - berth.y) > 3, shipId, 6000);
     const gone = await a.snap();
-    expect(ships(gone).filter((s) => s.state === "moored")).toHaveLength(2);
+    expect(ships(gone).filter((s) => s.state === "moored")).toHaveLength(0);
+    const counting = await a.next((m) => m.t === "snap" && typeof m.next === "number" && m.next > 0, 6000);
+    expect(counting.next).toBeLessThanOrEqual(1);
     const launched = await a.next((m) => m.t === "ship" && m.event === "launched", 6000);
     expect(Math.hypot(launched.ship.x - berth.x, launched.ship.y - berth.y)).toBeLessThan(0.5);
     const back = await a.snap();
-    expect(ships(back).filter((s) => s.state === "moored")).toHaveLength(3);
-    expect(ships(back)).toHaveLength(4);
+    expect(ships(back).filter((s) => s.state === "moored")).toHaveLength(1);
+    expect(ships(back)).toHaveLength(2);
+    expect(back.next).toBeNull();
     a.close();
+  });
+
+  it("scuttles a ship left empty away from its berth, and keeps one somebody is aboard", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0115"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0115"));
+    const one = await a.board();
+    a.test({ op: "place", ship: one, x: 30, y: 30, heading: 0, sail: 0 });
+    await a.next((m) => m.t === "ship" && m.event === "launched", 6000);
+    const two = await b.board();
+    b.test({ op: "place", ship: two, x: 30, y: 45, heading: 0, sail: 0 });
+    await a.ashore();
+    await settle(3500);
+    const snap = await b.snap();
+    expect(ships(snap).some((s) => s.id === one)).toBe(false);
+    expect(ships(snap).some((s) => s.id === two)).toBe(true);
+    expect(isl.stdout.join("\n")).toMatch(new RegExp(`ship ${one} .*scuttled`));
+    a.close();
+    b.close();
   });
 });
 
@@ -223,6 +245,7 @@ describe("ships", { timeout: 60000 }, () => {
     const one = await a.board();
     await a.man("sail");
     await a.until((s) => s.sail >= 0.9, one);
+    await b.next((m) => m.t === "ship" && m.event === "launched", 8000);
     const two = await b.board();
     expect(two).not.toBe(one);
     const before = await b.snap();
@@ -232,7 +255,7 @@ describe("ships", { timeout: 60000 }, () => {
     const otherAfter = ships(after).find((s) => s.id === two)!;
     expect(Math.hypot(otherAfter.x - otherBefore.x, otherAfter.y - otherBefore.y)).toBeLessThan(0.01);
     expect(ships(after).find((s) => s.id === one)!.x).toBeGreaterThan(otherBefore.x + 1);
-    expect(ships(after).filter((s) => s.state === "moored").length).toBeGreaterThanOrEqual(2);
+    expect(ships(after).filter((s) => s.state === "moored").length).toBeGreaterThanOrEqual(1);
     a.close();
     b.close();
   });
@@ -254,6 +277,7 @@ describe("ships", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0111"));
     const one = await a.board();
     a.test({ op: "place", ship: one, x: 20, y: 24, heading: Math.PI / 2 });
+    await b.next((m) => m.t === "ship" && m.event === "launched", 6000);
     const two = await b.board();
     expect(two).not.toBe(one);
     b.test({ op: "place", ship: two, x: 20, y: 31, heading: -Math.PI / 2 });
@@ -307,7 +331,7 @@ describe("landing", { timeout: 60000 }, () => {
 });
 
 describe("jumping", { timeout: 60000 }, () => {
-  it("puts you aboard from the pier, onto the island beside the ship, back aboard, and into the sea home to the pier", async () => {
+  it("never boards from the pier; from a ship beside an island it lands you there, back aboard, and into the sea home", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0114"));
     const id = a.id;
@@ -318,7 +342,10 @@ describe("jumping", { timeout: 60000 }, () => {
       a.jump();
     };
     jump();
-    const ship = bodies(await a.next(aboard, 2000)).find((p) => p.id === id)!.ship!;
+    const refused = await a.next((m) => m.t === "toast", 2000);
+    expect(refused.text).toMatch(/E to board/);
+    expect(bodies(await a.snap()).find((p) => p.id === id)!.ship).toBeNull();
+    const ship = await a.board();
     a.test({ op: "place", ship, x: 28, y: 20, heading: 0, sail: 0 });
     await settle(400);
     jump();
