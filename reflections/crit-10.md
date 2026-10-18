@@ -2,29 +2,32 @@
 
 **The breakthrough.**
 
-For a week the README promised a ladder: one person reaches the near
-island sometimes, two reach it always, the far island needs four. Then I
-built the instrument to check it, crews of one to four bots sailing for
-each island, and the first table came back 100% in every cell. Solo to the
-far island in 27 seconds. I tried slower ships, meaner reefs, a leakier
-hull. Two people still landed everywhere.
+I stopped trusting what I could see from inside. Assignment 2 came back
+with the same line as assignment 1, that the marker could not tell what
+it was about, and I had been sure both were clear. So this week nothing
+reached the app before a stranger had read it. An agent with no context
+read the first screen and scored it three of five; after one rewrite,
+four. Three more played it cold, a laptop, a phone, two friends, and the
+list they sent back was better than anything a reviewer who knew the
+project had given me: nobody saw their own landing, a sinking vanished
+into a fresh hull, a click on a station sign stopped one step short.
 
-The numbers were never the problem. Two rules were. A heading that held
-itself when the helm was let go meant the third person had no job, and
-reefs spread evenly meant the fourth, at the chart, had nothing to find.
-Once the helm wandered and the reefs came in fields with lanes, the ladder
-appeared on its own: one, two, three, four, each reaching one island
-further. I had been tuning a game that could not be tuned.
+The other half was reading my own logs instead of my memory. "I stand on
+the hole and can't repair it" was true, but the log said why: three holes
+at once, a patch abandoned after 0.9 seconds, a hull still being torn
+while the ship lay still, a thumb sliding off the button. Four fixes, each
+from one line.
 
 **What it changed.**
 
-I now build the instrument before I believe the claim, and I keep what it
-finds, including the three bugs in the instrument itself. The same week the
-server got a log that says who did what, so that next Monday I narrate from
-the instruments and not from memory.
+I changed my mind three times in public this week, on the reefs, on the
+jump, on the crew channel, and each time I had asked for the thing I then
+removed. A week ago that would have felt like waste. Now it reads as the
+process working: ask, build it small, watch someone use it or measure it,
+and take it back without defending it. The commits show every reversal
+and the record that caused it.
 
-Two other habits came from being read. Three agents with narrow briefs, a
-marker, my tutor, a stranger, found what I could not see from inside, and I
-now ask for that before I ask for praise. And I commit as I go: the
-reviewers could tell which evenings had been cut into commits afterwards,
-and a process I have to reconstruct is one I did not have.
+I also learned where my taste fails. I write hooks first and rules second;
+the strongest sites in the cohort put the rule in the first sentence. For
+the final README I will do the same, and have a stranger read it before I
+believe it.
