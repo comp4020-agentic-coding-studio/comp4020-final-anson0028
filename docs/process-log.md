@@ -306,6 +306,44 @@ same hour
 ([`2cb79bc`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2cb79bc)).
 The same check is now the last step before any crit.
 
+## 14 to 18 October: played cold, and three reversals
+
+Three agents with no context played the deployed build (a laptop alone, a
+phone, two friends on two laptops) and reported in the first person. They
+knew what it was within a minute and could not say what counted as
+success. From their lists: flags on the islands that name the first crew
+([`729c7c8`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/729c7c8)), a sinking that stays on screen and ships with seabird
+names ([`7429834`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/7429834)), a click on a station sign that walks to the
+middle of its tile ([`4e62725`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/4e62725)), three buttons that never move and a
+board grouped by day ([`3655dd7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/3655dd7)), and the crew-only channel removed,
+test first ([`ed65651`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/ed65651), [`8c35c89`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/8c35c89)).
+
+Three things I asked for and then took back, each after watching it:
+
+- **The open sea.** I asked for far fewer reefs and a far island anyone
+  could reach; the bots then landed everywhere at any crew size, and the
+  ladder the README argued for was gone ([`7eb0313`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/7eb0313)). Played, it was
+  empty. A thin scatter that thickens on the way out came back, nothing
+  within thirty tiles of the pier, measured twice ([`0b91d33`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0b91d33),
+  [`45fc95a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/45fc95a)): near and middle for everyone, the far island alone
+  three times in four and with anyone else aboard every time.
+- **The jump.** Space boarded a ship, landed you on an island beside it,
+  or put you in the sea ([`6f29ed6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6f29ed6) red, [`6f18d05`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6f18d05),
+  [`8407841`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/8407841)). Boarding by jump felt like teleporting, and a Space
+  press aboard put me in the sea by accident. Four days later the pier is
+  the only way on or off, by E, and Space is a hop again ([`682c79f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/682c79f)
+  red, [`66f786e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/66f786e)).
+- **Three berths.** They had filled the pier with drifted, half-boarded
+  hulls. One berth now, a countdown over everyone waiting, derelicts
+  scuttled after five minutes ([`a0262da`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a0262da) red, [`ef82d9f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/ef82d9f)).
+
+One rule caught me: island positions went into `hello` for the flags and
+the chart test went red, since nobody but the body at the table is sent
+the map. The islands travel with `near` now, only within sight
+([`fd3a03b`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/fd3a03b)). The same days, all 125 of the class's final sites were
+read by four agents and the strongest seven compared against this one; the
+finding that stuck was that their first sentence is the rule itself.
+
 ## How the work was directed
 
 - **CLAUDE.md is the README as rules**, and each rule has a date and a
