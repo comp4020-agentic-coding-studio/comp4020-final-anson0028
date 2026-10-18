@@ -45,6 +45,8 @@ let wrecks = [];
 let landings = [];
 const shipNames = new Map();
 let sticky = null;
+let lastAlongside = null;
+let nextShip = null;
 let log = [];
 let near = [];
 let notes = [];
@@ -111,6 +113,7 @@ ws.addEventListener("message", (e) => {
     bubbles.delete(m.id);
   } else if (m.t === "snap") {
     clockOffset = Date.now() - m.at;
+    nextShip = typeof m.next === "number" ? m.next : null;
     m.players = m.p.map(([id, x, y, , ship]) => ({ id, x: x / 100, y: y / 100, ship: ship === "" ? null : ship, name: roster.get(id)?.name ?? "", hue: roster.get(id)?.hue ?? 0 }));
     m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed]) => ({ id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
     snaps.push(m);
@@ -141,6 +144,8 @@ ws.addEventListener("message", (e) => {
     if (i >= 0) landings[i] = m.landing;
     else landings.push(m.landing);
     say(m.first ? `First landing on ${m.name}: ${m.landing.crew.join(", ")} (crew of ${m.landing.size}).` : `${m.name} again. First reached by ${m.landing.crew.join(", ")}; ${m.landing.visits} visits now.`);
+  } else if (m.t === "ship" && m.event === "scuttled") {
+    shipNames.delete(m.id);
   } else if (m.t === "ship" && m.event === "launched") {
     shipNames.set(m.id, m.ship?.name ?? "A new hull");
     say(`${m.ship?.name ?? "A new hull"} is ready at the pier.`);
@@ -336,7 +341,11 @@ function setHold(on) {
 }
 
 function act(down) {
-  if (!me || ws.readyState !== 1 || aboardNow === null) return;
+  if (!me || ws.readyState !== 1) return;
+  if (aboardNow === null) {
+    if (down) ws.send(JSON.stringify({ t: "board" }));
+    return;
+  }
   setHold(down);
 }
 
@@ -786,6 +795,18 @@ function syncBirds(players, shipsNow) {
       g.userData.bubble = null;
       g.userData.bubbleText = "";
     }
+    const waitText = p.ship === null && typeof nextShip === "number" ? `next ship in ${nextShip} s` : "";
+    if (g.userData.waitText !== waitText) {
+      if (g.userData.wait) g.remove(g.userData.wait);
+      g.userData.wait = null;
+      if (waitText) {
+        const tag = makeLabel(waitText, "rgba(240,185,74,0.92)", "#15171c", 2.2);
+        tag.position.y = 1.72;
+        g.add(tag);
+        g.userData.wait = tag;
+      }
+      g.userData.waitText = waitText;
+    }
   }
   for (const [id, g] of birdMeshes) if (!seen.has(id)) { scene.remove(g); birdMeshes.delete(id); }
 }
@@ -967,10 +988,13 @@ function updateHud(self, shipsNow) {
   if (!ship) {
     const nearShip = shipsNow.filter((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange).sort((p, q) => Math.hypot(p.x - self.x, p.y - self.y) - Math.hypot(q.x - self.x, q.y - self.y))[0];
     const nearName = nearShip ? shipNames.get(nearShip.id) ?? "A ship" : "";
+    if (nearShip && nearShip.id !== lastAlongside) say(`${nearName} is alongside. ${key("Press E", "Tap Use")} to board.`);
+    lastAlongside = nearShip ? nearShip.id : null;
     if (sticky && Date.now() > sticky.until) sticky = null;
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
     else if (sticky) text = sticky.text;
-    else if (nearShip) text = key(`${nearName} is close. Space to jump aboard.`, `${nearName} is close. Tap Jump to get aboard.`);
+    else if (nearShip) text = key(`${nearName} is alongside. Press E to board.`, `${nearName} is alongside. Tap Use to board.`);
+    else if (typeof nextShip === "number") text = `Next ship in ${nextShip} s.`;
     else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");

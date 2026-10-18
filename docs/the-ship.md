@@ -105,11 +105,14 @@ Each of these becomes a test.
 8. Absence. With nobody aboard, a ship stays where it is: the sail loosens,
    and if it is leaking the water keeps rising. The next visitor finds it as
    it was left. A ship that sinks empty leaves a wreck named "nobody
-   aboard".
-9. The pier. Ships are shared, not owned. A berth left empty, because its
-   ship sailed or sank, is refilled five seconds later, so there is always
-   a ship to take; ships at sea stay where they were left, up to a cap on
-   the fleet. Each berth faces open water.
+   aboard". A ship left empty away from the berth for five minutes is
+   scuttled without a record (18 October: the harbour had filled with
+   drifted hulls).
+9. The pier. Ships are shared, not owned. There is one berth. Ten seconds
+   after its ship is clear of it a new one is launched, and everyone not
+   aboard sees the countdown over their head; ships at sea stay where they
+   were left, up to a cap on the fleet. Boarding is E beside the ship,
+   within five tiles or so.
 10. Talking is unchanged: a bubble reaches 8 tiles. Aboard, that is the whole
     ship. Ship to ship, and ship to shore, it isn't.
 11. Hulls are solid. A ship stops short of another ship and of the shore,
@@ -124,7 +127,7 @@ Each of these becomes a test.
 | 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Every island 12 of 12; the far one in 63 s. |
 | 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Every island 12 of 12; the far one in 63 s. |
 | 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Every island 12 of 12; the far one in 64 s. |
-| A room of 30 | Three crews on three ships, and more berths refilling. The board says which crew got furthest. | Not yet. |
+| A room of 30 | One berth, a new ship ten seconds after the last one clears, so crews form on the pier while they wait. The board says which crew got furthest. | Not yet. |
 
 The ladder is not enforced by counting people. It falls out of one body
 being in one place at a time, of a helm that wanders when nobody holds it,
@@ -204,9 +207,11 @@ lesson each, and whether it is kept or left out.
   make the water rise and a held pump lowers it.
 - Full water sinks the ship, puts everyone ashore, and writes a wreck that
   names them, survives a restart, and refuses update and delete.
-- A jump boards the nearest moored ship, lands you on the island beside
-  your ship, boards it again from the island, or puts you in the sea and
-  home to the pier.
+- E boards a ship alongside and a jump never does; a jump lands you on the
+  island beside your ship, boards it again from the island, or puts you in
+  the sea and home to the pier.
+- The one berth is refilled ten seconds after its ship is clear, with a
+  countdown in every snapshot; a ship left empty away from it is scuttled.
 - With nobody aboard the water keeps rising.
 - Two ships move independently; taking a moored ship leaves the others at
   the pier.
@@ -243,11 +248,13 @@ one station (1), the block view (2), berths that refill (3), typed names
 
 1. Name: still Earshot, until a better one turns up.
 2. Third person, when the block view lands.
-3. Three berths at the pier; a berth is refilled five seconds after its
-   ship leaves (`LAUNCH_DELAY_S`), with at most twelve ships in the world
-   (`MAX_SHIPS`). Changed on 11 October from "a new hull five minutes after
-   a sinking", after a reviewer showed three ships abandoned intact at sea
-   left the harbour empty for good.
+3. One berth at the pier, refilled ten seconds after its ship is clear
+   (`LAUNCH_DELAY_S`), with at most twelve ships in the world (`MAX_SHIPS`)
+   and a ship left empty away from the berth scuttled after `DERELICT_S`.
+   Changed on 11 October from "a new hull five minutes after a sinking",
+   after a reviewer showed three ships abandoned intact at sea left the
+   harbour empty for good; and on 18 October from three berths to one,
+   after the harbour filled with drifted, half-boarded hulls.
 4. When a ship sinks, everyone is put ashore at the pier. Leaving a ship at
    sea also puts you ashore ("you swim back"), and the ship stays where it
    is.

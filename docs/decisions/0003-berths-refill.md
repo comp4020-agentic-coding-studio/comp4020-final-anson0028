@@ -44,3 +44,13 @@ ship that moves the moment its sail rises should not point at a reef.
   is the ship left at sea, not a penalty.
 - The "building" state and the five-minute hull are gone; old rows are
   dropped at boot.
+
+## Revised, 18 October 2026
+
+Three berths refilling in five seconds produced the opposite problem: a
+pier crowded with hulls, some drifted off their berths, some half boarded,
+all colliding, and no one sure which to take. Now there is one berth, the
+next ship comes ten seconds after the last one is clear of it, everyone on
+the pier sees the countdown over their head, and a ship left empty away
+from the berth for five minutes is scuttled without a record. A queue of
+one is also where a crew forms: people wait together, and board together.

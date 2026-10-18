@@ -17,11 +17,7 @@ export const H = 64;
 
 export const PIER_CENTRE = { x: 9.5, y: 31.5 };
 export const SPAWN = { x: 9.5, y: 31.5 };
-export const SLOTS = [
-  { x: 13.5, y: 26, heading: 0.35 },
-  { x: 13.5, y: 32, heading: 0 },
-  { x: 13.5, y: 38, heading: -0.2 },
-];
+export const SLOTS = [{ x: 13.5, y: 32, heading: 0 }];
 export const SHIP_CLEARANCE = 5;
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };

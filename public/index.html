@@ -20,7 +20,7 @@
     </header>
     <main>
       <h1 class="sr-only">Earshot</h1>
-      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to use what you stand on, Space to jump onto a ship, onto an island, or into the sea." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to board or to use what you stand on, Space to jump onto an island or into the sea." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
       <div id="status" class="status" aria-live="polite" hidden></div>
       <div id="hint" class="hint" aria-live="polite" hidden></div>
@@ -40,10 +40,10 @@
         <div class="intro-card">
           <h2>Earshot</h2>
           <p>A small online game: you and whoever else is here right now crew one of three ships out of a harbour, into a sea that gets harder further out. The more of you aboard, the further the ship gets.</p>
-          <p>You play as a small block bird. Jump onto a ship and hold E at a station: sail, helm, chart table, pump. You can work one station at a time, and every station stops the moment it's left. One person can sail, badly. More hands get further.</p>
+          <p>You play as a small block bird. Walk up to the ship, press E to board, then hold E at a station: sail, helm, chart table, pump. You can work one station at a time, and every station stops the moment it's left. One person can sail, badly. More hands get further.</p>
           <p>Rocks ringed with white water are reefs. A reef under a moving hull opens a hole in the deck. Stand on it and hold E to patch it, then pump out what came in.</p>
           <p>The harbour board lists how far each crew got, with their names.</p>
-          <p class="keys">WASD walks · arrows or drag look round · E uses · Space jumps: onto a ship, onto an island, or into the sea and home · N leaves a note, X takes it up · H waves, Y and B nod and shake · tap or click to walk there</p>
+          <p class="keys">WASD walks · arrows or drag look round · E boards and uses · Space jumps onto an island beside the ship, or into the sea and home · N leaves a note, X takes it up · H waves, Y and B nod and shake · tap or click to walk there</p>
           <form id="name-form" class="name-form" autocomplete="off">
             <label for="name">What should the crew call you?</label>
             <input id="name" name="name" maxlength="16" />

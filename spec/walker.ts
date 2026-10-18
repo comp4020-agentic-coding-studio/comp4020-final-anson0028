@@ -112,7 +112,7 @@ export class Walker {
     this.inbox.length = 0;
     this.send({ t: "board" });
     const id = this.id;
-    const s = await this.next((m) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship !== null), 2000);
+    const s = await this.next((m) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship !== null), 4000);
     return bodies(s).find((p) => p.id === id)!.ship!;
   }
 

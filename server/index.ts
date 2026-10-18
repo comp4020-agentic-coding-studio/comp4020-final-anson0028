@@ -24,7 +24,7 @@ const today = () => process.env.WALK_TODAY ?? canberraDay.format(new Date());
 
 type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number };
 const EMOTES = new Set(["wave", "jump", "yes", "no"]);
-type LiveShip = Ship & { holders: Record<StationName, Client | null> };
+type LiveShip = Ship & { holders: Record<StationName, Client | null>; emptySince?: number };
 
 const clients = new Map<WebSocket, Client>();
 const ships = new Map<number, LiveShip>();
@@ -384,9 +384,9 @@ function handle(c: Client, raw: string): void {
     const from = worldPos(c);
     for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind: "jump" });
     if (b.ship === null) {
-      if (boardNearest(c)) return;
       const island = ISLANDS.find((i) => within(from, { x: i.cx, y: i.cy }, i.r + 1));
-      if (!island) return send(c.ws, { t: "toast", text: "No ship close enough to jump onto." });
+      if (!island) return send(c.ws, { t: "toast", text: "Walk up to a ship and press E to board. A jump is for islands and the sea." });
+      if (boardNearest(c)) return;
       logLine(`${whoIs(c)} jumps off ${island.name} into the sea and swims back to the pier`);
       const spot = spawnFor(c.id);
       Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
@@ -562,10 +562,25 @@ function loop(): void {
       } else notice(s, ev.kind, now);
     }
   }
+  for (const s of [...ships.values()]) {
+    const idle = s.state !== "building" && aboard(s).length === 0 && !SLOTS.some((slot) => within(s, slot, 2));
+    if (!idle) {
+      s.emptySince = undefined;
+      continue;
+    }
+    s.emptySince ??= now;
+    if (now - s.emptySince < P.DERELICT_S * 1000) continue;
+    logLine(`ship ${s.id} (${shipName(s.id)}) left empty at (${s.x.toFixed(0)}, ${s.y.toFixed(0)}) for ${P.DERELICT_S} s is scuttled`);
+    ships.delete(s.id);
+    removeShip(s.id);
+    broadcast({ t: "ship", event: "scuttled", id: s.id });
+  }
   if (tick % (TICK_HZ / SNAP_HZ) === 0) {
+    const since = emptySince.get(0);
+    const next = since === undefined ? null : Math.max(0, Math.ceil((since + P.LAUNCH_DELAY_S * 1000 - now) / 1000));
     const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq, c.body.ship ?? ""]);
     const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)]), x.landedOn ? islandName(x.landedOn) : ""]);
-    const snap = JSON.stringify({ t: "snap", at: now, p, s });
+    const snap = JSON.stringify({ t: "snap", at: now, p, s, next });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }
   if (tick % (TICK_HZ / 2) === 0) {

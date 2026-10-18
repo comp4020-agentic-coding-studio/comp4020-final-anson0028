@@ -41,8 +41,10 @@ What holds each claim (`spec/ship.test.ts` unless noted):
 5. A sinking puts everyone ashore and writes a wreck naming them that
    nothing can change or delete.
 6. A ship nobody is aboard keeps running down.
-7. Ships move independently and stop short of each other; an empty berth is
-   refilled in five seconds.
+7. Ships move independently and stop short of each other; the one berth is
+   refilled ten seconds after its ship is clear of it, with a countdown over
+   everyone waiting, and a ship left empty away from it for five minutes is
+   scuttled.
 8. An island's first landing is written once, with the crew; later visits
    are counted.
 9. Only a body at the chart table is sent the map.
@@ -56,8 +58,9 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     writer.
 14. A word reaches everyone within earshot and nobody else, whatever the
     client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
-15. A jump boards the nearest moored ship, lands you on the island beside
-    your ship, or puts you in the sea and home to the pier.
+15. E boards a ship alongside; a jump never does. A jump lands you on the
+    island beside your ship, boards it again from there, or puts you in the
+    sea and home to the pier.
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
 crews of any size reach every island; alone, the far island takes seventy
