@@ -7,10 +7,9 @@ with the same line as assignment 1, that the marker could not tell what
 it was about, and I had been sure both were clear. So this week nothing
 reached the app before a stranger had read it. An agent with no context
 read the first screen and scored it three of five; after one rewrite,
-four. Three more played it cold, a laptop, a phone, two friends, and the
-list they sent back was better than anything a reviewer who knew the
-project had given me: nobody saw their own landing, a sinking vanished
-into a fresh hull, a click on a station sign stopped one step short.
+four. Three more played it cold, and their list beat anything a reviewer
+who knew the project had given me: nobody saw their own landing, a
+sinking vanished into a fresh hull, a click on a sign stopped a step short.
 
 The other half was reading my own logs instead of my memory. "I stand on
 the hole and can't repair it" was true, but the log said why: three holes
