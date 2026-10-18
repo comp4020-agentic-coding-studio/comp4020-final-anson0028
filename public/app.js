@@ -86,8 +86,6 @@ ws.addEventListener("message", (e) => {
     landings = m.landings;
     log = m.log;
     for (const s of m.ships ?? []) shipNames.set(s.id, s.name);
-    islands = m.islands ?? [];
-    syncFlags();
     who.textContent = `You are ${me.name}`;
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
@@ -123,8 +121,10 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "near") {
     near = m.tiles;
     notes = m.notes ?? [];
+    islands = m.islands ?? [];
     setTiles();
     syncNotes();
+    syncFlags();
   } else if (m.t === "chart") {
     chart = m.tiles ? m : null;
     chartBox.hidden = !chart;
@@ -842,6 +842,7 @@ function syncWrecks() {
 let islands = [];
 const flagMeshes = new Map();
 function syncFlags() {
+  for (const [id, g] of flagMeshes) if (!islands.some((i) => i.id === id)) { scene.remove(g); flagMeshes.delete(id); }
   for (const i of islands) {
     const l = landings.find((x) => x.island === i.id);
     const text = l ? `${i.name} · first: ${l.crew.join(", ")}` : i.name;

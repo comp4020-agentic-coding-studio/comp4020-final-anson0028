@@ -254,7 +254,7 @@ function join_(ws: WebSocket, token: string): void {
   logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, islands: ISLANDS, deck: DECK, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => handle(c, data.toString()));
@@ -590,7 +590,7 @@ function loop(): void {
       if (key !== c.nearKey || now - c.nearAt > 1000) {
         c.nearKey = key;
         c.nearAt = now;
-        send(c.ws, { t: "near", at: { x: w.x, y: w.y }, tiles: nearTiles(w.x, w.y, P.SIGHT), notes: notesNear(w.x, w.y) });
+        send(c.ws, { t: "near", at: { x: w.x, y: w.y }, tiles: nearTiles(w.x, w.y, P.SIGHT), notes: notesNear(w.x, w.y), islands: ISLANDS.filter((i) => within({ x: i.cx, y: i.cy }, w, P.SIGHT + i.r)) });
       }
       const onChart = c.body.ship !== null && stationUnder(c.body) === "chart";
       if (onChart !== c.onChart) {
