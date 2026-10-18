@@ -153,8 +153,9 @@ describe("water", { timeout: 60000 }, () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0105"));
     const shipId = await a.board();
-    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, hull: 50 });
     await a.ashore();
+    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, hull: 50 });
+    await settle(200);
     const w1 = (await a.ship(shipId)).water;
     await settle(1500);
     const w2 = (await a.ship(shipId)).water;
@@ -222,11 +223,11 @@ describe("sinking", { timeout: 60000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0115"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0115"));
     const one = await a.board();
+    await a.ashore();
     a.test({ op: "place", ship: one, x: 30, y: 30, heading: 0, sail: 0 });
     await a.next((m) => m.t === "ship" && m.event === "launched", 6000);
     const two = await b.board();
     b.test({ op: "place", ship: two, x: 30, y: 45, heading: 0, sail: 0 });
-    await a.ashore();
     await settle(3500);
     const snap = await b.snap();
     expect(ships(snap).some((s) => s.id === one)).toBe(false);

@@ -16,7 +16,7 @@ const chartCanvas = document.getElementById("chartview");
 const sayForm = document.getElementById("say");
 const sayInput = document.getElementById("text");
 const actButton = document.getElementById("act");
-const jumpButton = document.getElementById("jump");
+const leaveButton = document.getElementById("leave");
 const intro = document.getElementById("intro");
 const nameForm = document.getElementById("name-form");
 const nameInput = document.getElementById("name");
@@ -343,19 +343,19 @@ function setHold(on) {
   actButton.classList.toggle("down", on);
 }
 
+let atPier = false;
 function act(down) {
   if (!me || ws.readyState !== 1) return;
   if (aboardNow === null) {
     if (down) ws.send(JSON.stringify({ t: "board" }));
     return;
   }
+  const self = current()?.self;
+  if (down && atPier && self && !stationUnder(self)) {
+    ws.send(JSON.stringify({ t: "ashore" }));
+    return;
+  }
   setHold(down);
-}
-
-function jump() {
-  if (!me || ws.readyState !== 1) return;
-  setHold(false);
-  ws.send(JSON.stringify({ t: "jump" }));
 }
 
 const moveKeyOf = { w: "w", W: "w", s: "s", S: "s", a: "a", A: "a", d: "d", D: "d" };
@@ -370,8 +370,7 @@ window.addEventListener("keydown", (e) => {
   if ((e.key === "n" || e.key === "N") && !e.repeat) { e.preventDefault(); openNote(); }
   if (e.key === "x" || e.key === "X") { e.preventDefault(); removeNote(); }
   if (e.target instanceof HTMLButtonElement) return;
-  if (e.key === " " && !e.repeat) { e.preventDefault(); jump(); }
-  const gesture = { h: "wave", H: "wave", y: "yes", Y: "yes", b: "no", B: "no" }[e.key];
+  const gesture = { " ": "jump", h: "wave", H: "wave", y: "yes", Y: "yes", b: "no", B: "no" }[e.key];
   if (gesture && !e.repeat) { e.preventDefault(); emote(gesture); }
 });
 function emote(kind) {
@@ -407,7 +406,7 @@ function grab(el, e) {
 }
 actButton.addEventListener("pointerdown", (e) => { e.preventDefault(); grab(actButton, e); act(true); });
 for (const ev of ["pointerup", "pointercancel"]) actButton.addEventListener(ev, () => act(false));
-jumpButton.addEventListener("click", () => { jump(); canvas.focus(); });
+leaveButton.addEventListener("click", () => { if (ws.readyState === 1) ws.send(JSON.stringify({ t: "ashore" })); canvas.focus(); });
 
 function sendSay(to) {
   const text = sayInput.value.trim();
@@ -1005,6 +1004,8 @@ function updateHud(self, shipsNow) {
   syncNoteLabels(ship ? null : self);
   noteButton.classList.toggle("gone", !!ship);
   noteButton.textContent = ownNoteNear !== null ? key("Remove note (X)", "Remove note") : key("Note (N)", "Note");
+  atPier = !!ship && Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y) <= boardRange;
+  leaveButton.classList.toggle("gone", !(atPier && !stationUnder(self)));
   if (ship) {
     status.hidden = false;
     if (sticky && sticky.ship !== ship.id) sticky = null;
@@ -1031,7 +1032,6 @@ function updateHud(self, shipsNow) {
     else if (sticky) text = sticky.text;
     else if (nearShip) text = key(`${nearName} is alongside. Press E to board.`, `${nearName} is alongside. Tap Use to board.`);
     else if (typeof nextShip === "number" && Math.hypot(self.x - pierAt.x, self.y - pierAt.y) <= 12) text = `Next ship in ${nextShip} s.`;
-    else if (Math.hypot(self.x - pierAt.x, self.y - pierAt.y) > 20) text = key("You're on the island. Space jumps back aboard a ship beside it, or into the sea to swim home.", "You're on the island. Jump gets you back aboard a ship beside it, or into the sea to swim home.");
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
   else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
@@ -1045,8 +1045,9 @@ function updateHud(self, shipsNow) {
     const done = patchStart ? Math.max(0, Math.min(99, Math.round(100 * (1 - leak.amount / patchStart.amount)))) : 0;
     text = holding ? `Patching the hole… ${done}%` : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
   } else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
-  else if (ship.landed) text = key(`Beside ${ship.landed}. Space jumps onto it.`, `Beside ${ship.landed}. Jump gets you onto it.`);
-  else text = key("Walk to a station. Space jumps into the sea and home.", "Walk to a station. Jump is into the sea and home.");
+  else if (ship.landed) text = `At ${ship.landed}. It is on the board with your names.`;
+  else if (atPier) text = key("At the pier. Walk to a station, or press E here to step off.", "At the pier. Walk to a station, or tap Use here to step off.");
+  else text = "Walk to a station. Nothing leaves a ship at sea.";
   if (!ship || !ship.leaks.length) patchStart = null;
   if (text !== lastHint) {
     lastHint = text;

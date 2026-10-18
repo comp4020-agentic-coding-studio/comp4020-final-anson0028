@@ -58,9 +58,8 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     writer.
 14. A word reaches everyone within earshot and nobody else, whatever the
     client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
-15. E boards a ship alongside; a jump never does. A jump lands you on the
-    island beside your ship, boards it again from there, or puts you in the
-    sea and home to the pier.
+15. The pier is the only way on or off a ship: E boards one alongside and
+    steps off one there; nothing leaves a ship at sea but a sinking.
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
 crews of any size reach every island; alone, the far island takes seventy

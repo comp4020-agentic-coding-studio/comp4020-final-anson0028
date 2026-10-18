@@ -98,10 +98,10 @@ Each of these becomes a test.
    drawn where it happened and fades with age but never goes.
 7. Islands. The first time any ship reaches an island, a landing is written
    with the crew's names, the crew size and the day, and a plaque stands on
-   the island. Later landings are counted; the plaque keeps the first. A
-   body aboard a ship beside an island can jump onto it and walk there; a
-   jump with the ship still beside boards it again, and a jump anywhere
-   else is into the sea and home to the pier.
+   the island. Later landings are counted; the plaque is a flag on the
+   island that names the first crew. (Jumping onto islands lived for four
+   days in October and was removed on the 18th: a Space press aboard put
+   people in the sea by accident, and nobody needed the island itself.)
 8. Absence. With nobody aboard, a ship stays where it is: the sail loosens,
    and if it is leaking the water keeps rising. The next visitor finds it as
    it was left. A ship that sinks empty leaves a wreck named "nobody
@@ -207,9 +207,8 @@ lesson each, and whether it is kept or left out.
   make the water rise and a held pump lowers it.
 - Full water sinks the ship, puts everyone ashore, and writes a wreck that
   names them, survives a restart, and refuses update and delete.
-- E boards a ship alongside and a jump never does; a jump lands you on the
-  island beside your ship, boards it again from the island, or puts you in
-  the sea and home to the pier.
+- The pier is the only way on or off: E boards a ship alongside and steps
+  off one there; at sea, stepping off is refused and a jump is only a hop.
 - The one berth is refilled ten seconds after its ship is clear, with a
   countdown in every snapshot; a ship left empty away from it is scuttled.
 - With nobody aboard the water keeps rising.
@@ -282,9 +281,9 @@ one station (1), the block view (2), berths that refill (3), typed names
     stands on. A crew-only channel (Shift+Enter) lived three days and was
     removed on 14 October: cold players could not tell it from the open
     one, and it reached the pier anyway.
-15. Gestures, the same day, also from the campus: wave, nod and shake. The
-    jump became an act on 14 October: it boards a ship, lands you on an
-    island, or is into the sea and home.
+15. Gestures, the same day, also from the campus: wave, jump, nod and
+    shake. The jump was an act for four days in October (boarding, landing
+    on islands, into the sea) and went back to being a hop on the 18th.
     They carry 8 tiles like a word, plus the whole crew when aboard, one
     every 400 ms, and nothing is recorded. They give the people standing
     around on the pier something to answer with.

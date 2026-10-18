@@ -377,31 +377,14 @@ function handle(c: Client, raw: string): void {
   }
   if (msg.t === "ashore") {
     if (b.ship === null) return send(c.ws, { t: "toast", text: "You're already ashore." });
-    washUp(c, "goes ashore from");
+    const s = ships.get(b.ship);
+    if (s && distanceFromPier(s.x, s.y) > P.BOARD_RANGE) return send(c.ws, { t: "toast", text: "You can step off only at the pier. Bring the ship back, or stay with it." });
+    washUp(c, "steps ashore from");
     return;
   }
   if (msg.t === "jump") {
     const from = worldPos(c);
     for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind: "jump" });
-    if (b.ship === null) {
-      const island = ISLANDS.find((i) => within(from, { x: i.cx, y: i.cy }, i.r + 1));
-      if (!island) return send(c.ws, { t: "toast", text: "Walk up to a ship and press E to board. A jump is for islands and the sea." });
-      if (boardNearest(c)) return;
-      logLine(`${whoIs(c)} jumps off ${island.name} into the sea and swims back to the pier`);
-      const spot = spawnFor(c.id);
-      Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
-      return send(c.ws, { t: "toast", text: "You swim back to the pier." });
-    }
-    const s = ships.get(b.ship);
-    const island = s?.landedOn ? ISLANDS.find((i) => i.id === s.landedOn) : undefined;
-    if (s && island) {
-      const spot = shoreOf(island, s);
-      Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
-      logLine(`${whoIs(c)} jumps onto ${island.name} from ship ${s.id}; ${aboard(s).length} aboard`);
-      tellCrewLeft(c, s);
-      return send(c.ws, { t: "toast", text: `You're on ${island.name}. Jump again to get back aboard, or into the sea to swim home.` });
-    }
-    washUp(c, "jumps into the sea from");
     return;
   }
   if (msg.t === "hold") {
@@ -468,21 +451,6 @@ function washUp(c: Client, how: string): void {
   if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
 }
 
-function shoreOf(island: { cx: number; cy: number; r: number }, from: { x: number; y: number }): { x: number; y: number } {
-  let best = { x: island.cx, y: island.cy };
-  let bestD = Infinity;
-  for (let ty = Math.floor(island.cy - island.r - 1); ty <= island.cy + island.r + 1; ty++) {
-    for (let tx = Math.floor(island.cx - island.r - 1); tx <= island.cx + island.r + 1; tx++) {
-      if (tileAt(tx + 0.5, ty + 0.5) !== LAND) continue;
-      const d = Math.hypot(tx + 0.5 - from.x, ty + 0.5 - from.y);
-      if (d < bestD) {
-        bestD = d;
-        best = { x: tx + 0.5, y: ty + 0.5 };
-      }
-    }
-  }
-  return best;
-}
 
 function sink(s: LiveShip): void {
   const crew = aboard(s);
