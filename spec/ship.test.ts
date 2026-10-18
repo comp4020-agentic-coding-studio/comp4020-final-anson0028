@@ -330,36 +330,30 @@ describe("landing", { timeout: 60000 }, () => {
   });
 });
 
-describe("jumping", { timeout: 60000 }, () => {
-  it("never boards from the pier; from a ship beside an island it lands you there, back aboard, and into the sea home", async () => {
+describe("the pier", { timeout: 60000 }, () => {
+  it("is the only place to board or step off: E does both there, nothing leaves a ship at sea, and a jump is only a hop", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0114"));
     const id = a.id;
     const aboard = (m: Msg) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship !== null);
     const ashore = (m: Msg) => m.t === "snap" && bodies(m).some((p) => p.id === id && p.ship === null);
-    const jump = () => {
-      a.inbox.length = 0;
-      a.jump();
-    };
-    jump();
-    const refused = await a.next((m) => m.t === "toast", 2000);
-    expect(refused.text).toMatch(/E to board/);
-    expect(bodies(await a.snap()).find((p) => p.id === id)!.ship).toBeNull();
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 28, y: 20, heading: 0, sail: 0 });
-    await settle(400);
-    jump();
-    const me = bodies(await a.next(ashore, 2000)).find((p) => p.id === id)!;
-    expect(Math.hypot(me.x - 34, me.y - 20)).toBeLessThanOrEqual(3.5);
-    await a.walkTo(me.x, me.y - 1);
-    jump();
-    await a.next(aboard, 2000);
+    a.inbox.length = 0;
+    a.send({ t: "ashore" });
+    await a.next(ashore, 2000);
+    expect(await a.board()).toBe(ship);
     a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0 });
     await settle(300);
-    jump();
-    const home = bodies(await a.next(ashore, 2000)).find((p) => p.id === id)!;
-    expect(Math.hypot(home.x - 9.5, home.y - 31.5)).toBeLessThanOrEqual(3);
-    expect(isl.stdout.join("\n")).toMatch(/jumps onto Near Island/);
+    a.inbox.length = 0;
+    a.send({ t: "ashore" });
+    const refused = await a.next((m) => m.t === "toast", 2000);
+    expect(refused.text).toMatch(/only at the pier/i);
+    a.inbox.length = 0;
+    a.jump();
+    const hop = await a.next((m) => m.t === "emote", 2000);
+    expect(hop.kind).toBe("jump");
+    await settle(300);
+    expect(bodies(await a.snap()).find((p) => p.id === id)!.ship).toBe(ship);
     a.close();
   });
 });
