@@ -121,22 +121,22 @@ Each of these becomes a test.
 
 ## What each extra body adds
 
-| Aboard | What the ship can do | Measured, 14 October (`docs/tuning.md`) |
+| Aboard | What the ship can do | Measured, 18 October (`docs/tuning.md`) |
 |---|---|---|
-| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows, stand on a hole to patch it. The lanes are fine; a field is slow work alone. | Every island 12 of 12; the far one in 70 s. |
-| 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Every island 12 of 12; the far one in 63 s. |
+| 1 | Leaves harbour. Raise the sail, run to the helm, run back as the sail loosens, run to the pump when the water shows, stand on a hole to patch it. The rocks thicken on the way out; alone, a scrape is the end unless you stop and patch. | Near and middle 12 of 12; far 1 of 12. |
+| 2 | One on the sail, one who sets the course and then pumps or patches, running back to the helm as the ship wanders. | Near and middle 12 of 12; far 11 of 12. |
 | 3 | Sail, helm and pump all held. The ship holds its course and takes scrapes. | Every island 12 of 12; the far one in 63 s. |
-| 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Every island 12 of 12; the far one in 64 s. |
+| 4 | A fourth at the chart table, who alone sees the reef fields and calls a route through the lanes. | Every island 12 of 12; the far one in 66 s. |
 | A room of 30 | One berth, a new ship ten seconds after the last one clears, so crews form on the pier while they wait. The board says which crew got furthest. | Not yet. |
 
 The ladder is not enforced by counting people. It falls out of one body
 being in one place at a time, of a helm that wanders when nobody holds it,
-and of reef fields with lanes that only the chart shows. Since 14 October
-the sea is open: the lanes between islands are clear, the fields sit far
-from any island, and anyone can reach the far island by sailing. What
-hands buy now is time and a dry hull, not the island itself; the bots,
-which never stray, land everywhere, and the difference between one and
-three is seven seconds of running between stations.
+and of rocks that thicken with distance from the pier. The sea was opened
+right out on 14 October and found empty; on the 18th a thin scatter came
+back, growing on the way out, with the dense fields kept to the corners.
+Bots that never patch land on the near and middle islands at any size and
+reach the far one alone once in twelve, with two aboard eleven times, and
+with three or four every time.
 
 ## What persists, and what expires
 

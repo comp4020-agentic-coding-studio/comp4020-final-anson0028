@@ -66,13 +66,15 @@ for (let y = 0; y < H; y++) {
       const nearSlot = SLOTS.some((s) => Math.hypot(x + 0.5 - s.x, y + 0.5 - s.y) <= 5);
       const base = d < P.REEF_FROM ? 0 : Math.min(P.REEF_MAX, (d - P.REEF_FROM) / P.REEF_SLOPE);
       const clump = 1 + P.REEF_CLUMP * (2 * lattice(x, y, 7) - 1) * 1.6;
-      const p = Math.min(0.9, Math.max(0, base * clump));
+      const out = Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y);
+      const scatter = d < 4 || out < P.REEF_FROM ? 0 : Math.min(P.REEF_SCATTER_MAX, (out - P.REEF_FROM) / P.REEF_SCATTER_SLOPE);
+      const p = Math.min(0.9, Math.max(0, base * clump, scatter));
       if (!nearSlot && noise(x, y) < p) t = REEF;
     }
     tiles[y * W + x] = t;
   }
 }
-const REEF_CLUSTER_MIN = 5;
+const REEF_CLUSTER_MIN = 2;
 const seen = new Uint8Array(W * H);
 for (let start = 0; start < W * H; start++) {
   if (tiles[start] !== REEF || seen[start]) continue;

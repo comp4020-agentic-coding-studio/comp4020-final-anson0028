@@ -19,6 +19,8 @@ const defaults = {
   REEF_SLOPE: 50,
   REEF_MAX: 0.5,
   REEF_CLUMP: 1,
+  REEF_SCATTER_MAX: 0.12,
+  REEF_SCATTER_SLOPE: 400,
   HELM_DRIFT: 0.1,
 };
 

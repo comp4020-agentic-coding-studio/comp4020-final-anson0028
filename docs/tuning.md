@@ -170,29 +170,53 @@ sea was kept. What the bots cannot show is a crew that strays: the fields
 are still there for them, and a holed hull still needs a hand on the patch
 and one on the pump. That is for the crit 10 pod.
 
-## The numbers, 14 October
+**Sweep 7, a scatter of rocks, 18 October.** Played again, the open sea
+read as empty: the fields sat in corners nobody sails to. The ask was a
+few small rocks on the way, more the further out, never the wall of a week
+earlier. A second term was added to the map rule: a thin scatter whose
+probability rises with the distance from the pier (`REEF_SCATTER_MAX`,
+`REEF_SCATTER_SLOPE`), kept out of the clear ring round each island; the
+far fields stay; single rocks are removed but pairs are kept. The sea is
+11% reef. Two densities, twelve runs per cell, bots that never patch:
+
+| scatter | 1 → far | 2 → far | 3 → far | 4 → far |
+|---|---|---|---|---|
+| to 12% at 1/400 per tile | 1/12 (10 wrecked) | 11/12 | 12/12 | 12/12 |
+| to 7% at 1/500 per tile | 1/12 (5 wrecked, 6 timed out) | 12/12 | 12/12 | 12/12 |
+
+The near and middle islands stay 12 of 12 for every crew. Any scatter at
+all takes the far island from a solo bot, because it steers straight,
+scrapes, and runs between stations while the water rises; it does not
+patch, which a person can. Two aboard, one of them free to pump or patch,
+reach the far island almost every time. That is the ladder the README
+wanted from the start, and it came from a handful of rocks rather than a
+wall, so the denser setting was kept.
+
+## The numbers, 18 October
 
 `MAX_SPEED` 1.2, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.05, `TURN_RATE` 0.8,
 `REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `LEAK_CAP` 40, `REPAIR_RATE`
 20, `PUMP_RATE` 3, `REEF_FROM` 10, `REEF_SLOPE` 50, `REEF_MAX` 0.5,
-`REEF_CLUMP` 1, `HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds
-each, at five times real time, on a quiet machine:
+`REEF_CLUMP` 1, `REEF_SCATTER_MAX` 0.12, `REEF_SCATTER_SLOPE` 400,
+`HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds each, at five
+times real time, on a quiet machine:
 
 | crew | target | landed | wrecked | timed out | median landing (s) | mean furthest (tiles) |
 |---|---|---|---|---|---|---|
-| 1 | near | 100% | 0% | 0% | 19 | 20 |
-| 1 | middle | 100% | 0% | 0% | 38 | 42 |
-| 1 | far | 100% | 0% | 0% | 70 | 70 |
-| 2 | near | 100% | 0% | 0% | 18 | 19 |
+| 1 | near | 100% | 0% | 0% | 21 | 20 |
+| 1 | middle | 100% | 0% | 0% | 39 | 42 |
+| 1 | far | 8% | 83% | 8% | 168 | 55 |
+| 2 | near | 100% | 0% | 0% | 18 | 20 |
 | 2 | middle | 100% | 0% | 0% | 37 | 42 |
-| 2 | far | 100% | 0% | 0% | 63 | 70 |
+| 2 | far | 92% | 8% | 0% | 63 | 72 |
 | 3 | near | 100% | 0% | 0% | 18 | 20 |
 | 3 | middle | 100% | 0% | 0% | 37 | 42 |
 | 3 | far | 100% | 0% | 0% | 63 | 69 |
 | 4 | near | 100% | 0% | 0% | 19 | 20 |
-| 4 | middle | 100% | 0% | 0% | 38 | 42 |
-| 4 | far | 100% | 0% | 0% | 64 | 70 |
+| 4 | middle | 100% | 0% | 0% | 39 | 42 |
+| 4 | far | 100% | 0% | 0% | 66 | 71 |
 
-Alone, the far island takes seven seconds longer than with a crew, which
-is the running between stations. These are bots that never stray and
-never patch; the measurement that matters now is people.
+These are bots that never patch a hole; a careful person alone, who stops
+on a rock and patches before pumping, will do better than the solo row,
+and a crew of strangers who have to find the stations and talk will do
+worse than the others. The next check is the crit 10 pod.
