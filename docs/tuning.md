@@ -190,31 +190,31 @@ scrapes, and runs between stations while the water rises; it does not
 patch, which a person can. Two aboard, one of them free to pump or patch,
 reach the far island almost every time. That is the ladder the README
 wanted from the start, and it came from a handful of rocks rather than a
-wall, so the denser setting was kept.
+wall, so the denser setting was kept for a day. Played, it was still too much, so the scatter lost 30% (to 8.5% at 1/570 per tile) and now starts only beyond 30 tiles from the pier, past the near island; nothing at all lies within 30 tiles. 6.5% of the sea is reef. Measured once more below: the solo bot now reaches the far island three times in four, and everyone else every time.
 
-## The numbers, 18 October
+## The numbers, 18 October, evening
 
 `MAX_SPEED` 1.2, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.05, `TURN_RATE` 0.8,
 `REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `LEAK_CAP` 40, `REPAIR_RATE`
 20, `PUMP_RATE` 3, `REEF_FROM` 10, `REEF_SLOPE` 50, `REEF_MAX` 0.5,
-`REEF_CLUMP` 1, `REEF_SCATTER_MAX` 0.12, `REEF_SCATTER_SLOPE` 400,
-`HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds each, at five
+`REEF_CLUMP` 1, `REEF_SCATTER_FROM` 30, `REEF_SCATTER_MAX` 0.085,
+`REEF_SCATTER_SLOPE` 570, `HELM_DRIFT` 0.1. Twelve runs per cell, 220 game-seconds each, at five
 times real time, on a quiet machine:
 
 | crew | target | landed | wrecked | timed out | median landing (s) | mean furthest (tiles) |
 |---|---|---|---|---|---|---|
-| 1 | near | 100% | 0% | 0% | 21 | 20 |
+| 1 | near | 100% | 0% | 0% | 20 | 20 |
 | 1 | middle | 100% | 0% | 0% | 39 | 42 |
-| 1 | far | 8% | 83% | 8% | 168 | 55 |
+| 1 | far | 75% | 25% | 0% | 69 | 69 |
 | 2 | near | 100% | 0% | 0% | 18 | 20 |
 | 2 | middle | 100% | 0% | 0% | 37 | 42 |
-| 2 | far | 92% | 8% | 0% | 63 | 72 |
+| 2 | far | 100% | 0% | 0% | 63 | 70 |
 | 3 | near | 100% | 0% | 0% | 18 | 20 |
 | 3 | middle | 100% | 0% | 0% | 37 | 42 |
 | 3 | far | 100% | 0% | 0% | 63 | 69 |
 | 4 | near | 100% | 0% | 0% | 19 | 20 |
-| 4 | middle | 100% | 0% | 0% | 39 | 42 |
-| 4 | far | 100% | 0% | 0% | 66 | 71 |
+| 4 | middle | 100% | 0% | 0% | 38 | 42 |
+| 4 | far | 100% | 0% | 0% | 64 | 70 |
 
 These are bots that never patch a hole; a careful person alone, who stops
 on a rock and patches before pumping, will do better than the solo row,

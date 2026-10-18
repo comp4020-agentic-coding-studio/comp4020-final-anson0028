@@ -63,8 +63,7 @@ What holds each claim (`spec/ship.test.ts` unless noted):
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
 crews of any size reach the near and middle islands; alone, the far island
-is reached once in twelve, with two aboard eleven times, with three or
-four every time ([`docs/tuning.md`](docs/tuning.md)). The bots never
+is reached three times in four, and with anyone else aboard every time ([`docs/tuning.md`](docs/tuning.md)). The bots never
 patch a hole, so a careful person alone can beat that row; whether a crew
 of strangers matches the others is for the crit 10 pod.
 
