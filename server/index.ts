@@ -425,6 +425,7 @@ function handle(c: Client, raw: string): void {
 }
 
 let boardings = 0;
+const BOARD_SPOTS = [{ x: -2.5, y: -0.5 }, { x: -1.5, y: 1.5 }, { x: -1.5, y: -1.5 }, { x: 1.5, y: -0.5 }, { x: 2.5, y: 1.5 }, { x: 2.5, y: -1.5 }];
 const JOBS: Record<number, string[]> = {
   1: ["all"],
   2: ["sail+helm", "pump+patch"],
@@ -476,7 +477,8 @@ function boardNearest(c: Client): LiveShip | null {
   const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && within(s, here, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
   const s = choices[0];
   if (!s) return null;
-  Object.assign(c.body, { ship: s.id, x: -2.5, y: -0.5, dx: 0, dy: 0, tx: null, ty: null, holding: false });
+  const spot = BOARD_SPOTS[aboard(s).length % BOARD_SPOTS.length];
+  Object.assign(c.body, { ship: s.id, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
   c.boardedAt = ++boardings;
   c.idleSince = null;
   const job = jobsOf(s).find(([id]) => id === c.id)?.[1] ?? "all";

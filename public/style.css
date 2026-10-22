@@ -244,6 +244,14 @@ body.page { display: block; min-height: 100%; }
   font-size: 0.85rem;
 }
 
+.status .crew { display: flex; flex-wrap: wrap; gap: 0.25rem 0.4rem; margin-top: 0.3rem; }
+
+.status .crew span { padding: 0.05rem 0.45rem; border-radius: 999px; background: rgba(255, 255, 255, 0.16); }
+
+.status .crew span.idle { background: #b8432f; }
+
+.status .crew span.me { outline: 1px solid #ffe08a; }
+
 .status.warn { background: rgba(140, 30, 20, 0.9); }
 
 .status.hurt { background: rgba(130, 85, 20, 0.9); }
@@ -311,7 +319,7 @@ body.page { display: block; min-height: 100%; }
   .heard { max-width: calc(100% - 11rem); font-size: 0.75rem; }
 }
 
-@media (min-width: 60rem) { .toast { top: 3.2rem; left: 18rem; right: 20rem; transform: none; max-width: none; width: fit-content; margin: 0 auto; } }
+@media (min-width: 60rem) { .toast { top: auto; bottom: 3.6rem; left: 50%; transform: translateX(-50%); max-width: 36rem; width: fit-content; } }
 
 .board {
   position: absolute;
