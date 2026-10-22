@@ -10,6 +10,7 @@ const defaults = {
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 10,
   DERELICT_S: 300,
+  JOB_NUDGE_S: 8,
   SIGHT: 8,
   BOARD_RANGE: 5.5,
   SHIPS_AT_PIER: 1,

@@ -390,10 +390,10 @@ describe("jobs", { timeout: 60000 }, () => {
     await b.board();
     a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
     await a.man("sail");
-    const told = await b.next((m) => m.t === "toast" && /your job/i.test(m.text), 4000);
+    const told = await b.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
-    expect(a.inbox.some((m) => m.t === "toast" && /your job/i.test(m.text))).toBe(false);
+    expect(a.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
     expect(isl.stdout.join("\n")).toMatch(new RegExp(`${b.name}#${b.id} is nudged to the pump of ship ${ship}`));
     a.close();
     b.close();

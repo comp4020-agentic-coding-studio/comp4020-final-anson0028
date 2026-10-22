@@ -22,5 +22,7 @@ named commit with only the new spec files copied in.
 | "reaches everyone within earshot and nobody else, whatever the client asks" | `3655dd7` (crew-only channel still served) | failed: the bubble came flagged `crew` and the pier never got it |
 | one berth with a countdown; a derelict scuttled; a jump never boards from the pier | `7e1fe04` | 3 of 3 failed: three ships in `hello`, the empty ship still in the snapshot after 3 s, no refusal toast |
 | the pier is the only way on or off; a jump is only a hop | `cef4054` (ashore allowed at sea) | failed: stepping off at sea swam you home instead of being refused |
+| "give everyone aboard a job … the rest move up" and "nudge a body whose job is left unworked" | `6d66973` (no jobs) | 2 of 2 failed: `jobs` empty in the snapshot, no "Your job is" toast within 4 s |
+| the nudge test with `nudgeIdle` switched off | the working tree | failed: no nudge within 4 s |
 
 The same specs pass against the commits that followed each of them.
