@@ -60,6 +60,10 @@ What holds each claim (`spec/ship.test.ts` unless noted):
     client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
 15. The pier is the only way on or off a ship: E boards one alongside and
     steps off one there; nothing leaves a ship at sea but a sinking.
+16. Everyone aboard has a job, given by the order they boarded and shown
+    over their head and in the crew list; a job left unworked at sea is
+    named to its owner, and nothing stops anyone working any station.
+    ([decision record 7](docs/decisions/0007-everyone-aboard-has-a-job.md))
 
 Measured, not promised: with the numbers in `server/params.ts`, simulated
 crews of any size reach the near and middle islands; alone, the far island

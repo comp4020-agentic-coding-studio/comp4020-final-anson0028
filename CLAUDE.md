@@ -21,6 +21,9 @@ them broken, change README.md first and say why.
 - Never gate play on a headcount. Nothing checks how many people are
   present. One body in one place, stations tiles apart, and things that run
   down when unheld are what make more hands matter.
+- Never turn a job into a lock. Jobs (decision record 7) are labels the
+  server gives by order of boarding; any body may still hold any free
+  station, and a crew short of its helmsman must still be able to steer.
 - Never update or delete a row in `wrecks` or `landings`. Triggers refuse
   it; don't work around them.
 - Never point the spec at the live app. `spec/ship.test.ts` and
@@ -59,8 +62,8 @@ them broken, change README.md first and say why.
   spec pins its own fast numbers, so a tuning change never moves a test;
   if it does, the test was about a number, not a rule.
 - Snapshots carry public ids, positions, each body's input number and ship,
-  and each ship's position, heading, sail, water, hull, open holes, state
-  and holders. Names and colours travel once, on join.
+  and each ship's position, heading, sail, water, hull, open holes, state,
+  holders and jobs. Names and colours travel once, on join.
 - Before a UI change is done: board, walk to a station, raise the sail, turn
   the ship and turn the camera at 390 × 844 by touch (d-pad and drag), at
   1920 × 1080 with a mouse with a resize halfway, and with the keyboard only

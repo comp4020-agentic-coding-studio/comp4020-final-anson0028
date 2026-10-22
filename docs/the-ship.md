@@ -118,6 +118,14 @@ Each of these becomes a test.
 11. Hulls are solid. A ship stops short of another ship and of the shore,
     the hull is checked at bow, centre and stern, and the crew are told when
     it is stopped or scraped.
+12. Jobs, 23 October. Everyone aboard is given a job by the order they
+    boarded: alone, everything; two, sail and helm then pump and patching;
+    three, helm, sail, pump and patching; four adds the chart table; from
+    five, the pump alone and the rest patch. The rest move up when one
+    steps off. Jobs show over heads, in a crew line under the status (red
+    when nobody is on one), and on the ship at the pier as the job the next
+    body aboard will take. A body holding nothing whose job is unworked at
+    sea for eight seconds is told so. Jobs are advice, never a lock.
 
 ## What each extra body adds
 
@@ -243,7 +251,8 @@ the treasure).
 Each of these is a default I chose to get building. Any of them can change.
 The ones that were argued over have a record in `docs/decisions/`: one body
 one station (1), the block view (2), berths that refill (3), typed names
-(4), a board that ranks nothing (5), notes and no wide channel (6).
+(4), a board that ranks nothing (5), notes and no wide channel (6),
+everyone aboard has a job (7).
 
 1. Name: still Earshot, until a better one turns up.
 2. Third person, when the block view lands.
