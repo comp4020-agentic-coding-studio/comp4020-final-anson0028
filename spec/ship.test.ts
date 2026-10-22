@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
 import { STATIONS, Walker, bodies, settle, ships, uuid, type Msg } from "./walker.ts";
 
-const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, REPAIR_RATE: 60, LAUNCH_DELAY_S: 1, DERELICT_S: 2, HELM_DRIFT: 0 });
+const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, TURN_RATE: 1.5, REEF_DAMAGE: 60, LEAK_PER_DAMAGE: 0.4, PUMP_RATE: 60, REPAIR_RATE: 60, LAUNCH_DELAY_S: 1, DERELICT_S: 2, JOB_NUDGE_S: 1, HELM_DRIFT: 0 });
 const env = { WALK_TEST: "1", WALK_TODAY: "2026-10-12", SHIP_PARAMS: FAST };
 
 let island: Island | null = null;
@@ -356,6 +356,47 @@ describe("the pier", { timeout: 60000 }, () => {
     await settle(300);
     expect(bodies(await a.snap()).find((p) => p.id === id)!.ship).toBe(ship);
     a.close();
+  });
+});
+
+describe("jobs", { timeout: 60000 }, () => {
+  it("give everyone aboard a job by order of boarding, the fifth patches, and the rest move up when one steps off", async () => {
+    const isl = await fresh();
+    const crew = await Promise.all(["aaaa0116", "bbbb0116", "cccc0116", "dddd0116", "eeee0116"].map((t) => Walker.join(isl.wsBase, uuid(t))));
+    const [a, b, c, d, e] = crew;
+    const jobs = async () => (await a.ship(ship)).jobs;
+    const ship = await a.board();
+    expect(await jobs()).toEqual({ [a.id]: "all" });
+    await b.board();
+    expect(await jobs()).toEqual({ [a.id]: "sail+helm", [b.id]: "pump+patch" });
+    await c.board();
+    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump+patch" });
+    await d.board();
+    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump+patch", [d.id]: "chart" });
+    await e.board();
+    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump", [d.id]: "chart", [e.id]: "patch" });
+    await b.ashore();
+    expect(await jobs()).toEqual({ [a.id]: "helm", [c.id]: "sail", [d.id]: "pump+patch", [e.id]: "chart" });
+    await e.man("helm");
+    expect((await a.ship(ship)).holders.helm).toBe(e.id);
+    for (const w of crew) w.close();
+  });
+
+  it("nudge a body whose job is left unworked at sea, and say so in the log", async () => {
+    const isl = await fresh();
+    const a = await Walker.join(isl.wsBase, uuid("aaaa0117"));
+    const b = await Walker.join(isl.wsBase, uuid("bbbb0117"));
+    const ship = await a.board();
+    await b.board();
+    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    await a.man("sail");
+    const told = await b.next((m) => m.t === "toast" && /your job/i.test(m.text), 4000);
+    expect(told.text).toMatch(/pump/i);
+    await settle(200);
+    expect(a.inbox.some((m) => m.t === "toast" && /your job/i.test(m.text))).toBe(false);
+    expect(isl.stdout.join("\n")).toMatch(new RegExp(`${b.name}#${b.id} is nudged to the pump of ship ${ship}`));
+    a.close();
+    b.close();
   });
 });
 
