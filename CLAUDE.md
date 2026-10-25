@@ -71,6 +71,9 @@ them broken, change README.md first and say why.
   (WASD, arrows, E, Q), and read the first-visit card and the board at both
   sizes. E and Q must not submit anything.
 - Words in README.md match the code. Change both in the same commit.
+- Every page keeps a language, one h1, a header, a main and a named nav,
+  a name on every control, live regions for what changes, and a visible
+  focus style (`spec/a11y.test.ts`).
 
 ## Facts about the stack
 

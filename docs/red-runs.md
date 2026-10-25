@@ -24,5 +24,6 @@ named commit with only the new spec files copied in.
 | the pier is the only way on or off; a jump is only a hop | `cef4054` (ashore allowed at sea) | failed: stepping off at sea swam you home instead of being refused |
 | "give everyone aboard a job … the rest move up" and "nudge a body whose job is left unworked" | `6d66973` (no jobs) | 2 of 2 failed: `jobs` empty in the snapshot, no "Your job is" toast within 4 s |
 | the nudge test with `nudgeIdle` switched off | the working tree | failed: no nudge within 4 s |
+| `spec/a11y.test.ts` (language, one h1, landmarks, names, live regions, focus style) | the working tree with `lang` removed from the page, then with the help button stripped of its name | failed each time: no `lang`; a button with no name |
 
 The same specs pass against the commits that followed each of them.
