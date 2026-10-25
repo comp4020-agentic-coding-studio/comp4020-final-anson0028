@@ -17,16 +17,16 @@ thicken, and a holed hull wants one hand on the patch and one on the pump.
 
 **What you can do, and what you know, depends on where your body is.**
 Co-operation comes from that rule, not from a rule that counts heads.
-Nothing waits for a number of players, and your station is a suggestion:
-anyone can work any station.
+Nothing waits for a number of players. You are told which station is
+yours, but nothing stops you working another.
 
 The distance rule comes from Big Walk (House House, 2026), where voices fade
 as friends drift apart; its reviews name its fault, no solo mode. My first
 version had the same fault: alone I could only walk. So one person can
 always sail here.
 Erickson and Kellogg (2000) found a limit works when everyone can see it;
-the chart rule is the same for everyone, and every job shows over its
-owner's head. Several other student projects unlock features once enough
+the chart rule is the same for everyone, and each bird's station is
+written above it for the whole crew to see. Several other student projects unlock features once enough
 players are present ([114 class projects surveyed](docs/cohort-survey.md)); here
 nothing unlocks, and a ship simply gets further the more hands it has
 ([the decision, written up](docs/decisions/0001-one-body-one-station.md)).
@@ -44,7 +44,7 @@ Measured, by simulated crews of one to four bots
 ([how](docs/tuning.md)): every crew size reaches the near and middle
 islands. To the far island, a lone bot sank in 3 of 12 runs; with a
 second bot aboard, none of 36 runs across two to four crew sank. Bots
-never patch holes, so the lone sailor's odds are the floor.
+never patch holes; people can.
 
 Judged, by watching it played from the link alone. Three AI agents told
 to play with no instructions knew within a minute it was a co-op sailing
@@ -59,7 +59,7 @@ so everyone now gets a job ([what changed](PROCESS.md)).
 - Voice: in one room it would feed back; the room already has voices.
 - Accounts, chat history, scores. The board lists crews by time, not by
   points; the wrecks, flags and notes are the record.
-- Locked roles: a crew that loses its helmsman must still be able to steer.
+- Locked stations: a crew that loses its helmsman must still steer.
 
 ## Sources
 
