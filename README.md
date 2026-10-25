@@ -26,9 +26,9 @@ version copied that too: the first classmates to try it stood around
 waiting, and alone I could only walk. So one person can always sail here.
 Erickson and Kellogg (2000) found a limit works when everyone can see it;
 the chart rule is the same for everyone, and every job shows over its
-owner's head. Some of the class unlock things by headcount
-([a survey of 114 class projects](docs/cohort-survey.md)); here the hands
-a ship needs grow with distance from the pier
+owner's head. Several other student projects unlock features once enough
+players are present ([a survey of 114](docs/cohort-survey.md)); here
+nothing unlocks, and a ship simply gets further the more hands it has
 ([the decision, written up](docs/decisions/0001-one-body-one-station.md)).
 
 ## How the rule is checked
@@ -41,9 +41,8 @@ the pier is the only way on or off; everyone aboard gets a job.
 
 Measured, by simulated crews of one to four bots
 ([how](docs/tuning.md)): every crew size reaches the near and middle
-islands; alone, the far island three times in four, with anyone else
-aboard every time. The bots never patch a hole, so people who do
-can only do better.
+islands; alone, the far island in 9 of 12 runs, with anyone else aboard
+in 12 of 12. Bots never patch holes; people can.
 
 Judged, by watching it played from the link alone. Three AI agents told
 to play with no instructions knew within a minute it was a co-op sailing
