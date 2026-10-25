@@ -87,6 +87,7 @@ ws.addEventListener("message", (e) => {
     log = m.log;
     for (const s of m.ships ?? []) shipNames.set(s.id, s.name);
     who.textContent = `You are ${me.name}`;
+    document.getElementById("loading")?.remove();
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
     ring.geometry.dispose();

@@ -39,3 +39,16 @@ Better than run 4 despite the bigger snapshot, with a send backlog of 0
 bytes; the difference is most likely the time of day. Sixty simulated
 walkers from the two runs that day sit in the live players table under
 bird names.
+
+## 26 October, a slow connection and a resize mid-play
+
+Chromium driven by Playwright with the network throttled through the
+DevTools protocol (400 ms added latency, 400 kbit/s down, 200 kbit/s up),
+against the build of this date. The page answered with a name in 11 s,
+almost all of it the gzipped three.js; until then the screen was blank
+blue, so a "Loading the harbour" line now covers it and goes away on the
+first message from the server. Aboard, walking to the helm and holding E
+worked; the window was then resized from 1280 × 720 to 390 × 844 and back
+while aboard, and the status line, hint and crew list kept updating with no
+page errors. Keyboard-only play (WASD, arrows, E) is the regression check
+in `CLAUDE.md`.
