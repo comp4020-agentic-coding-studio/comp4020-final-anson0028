@@ -46,7 +46,8 @@ them broken, change README.md first and say why.
 
 ## Every change
 
-- Each numbered claim in README.md has a test in `spec/` that drives a
+- Each numbered claim in `docs/claims.md` (README.md names the enforced
+  ones and links there) has a test in `spec/` that drives a
   running server, or reads its database once it stops. A new claim lands as
   a failing test first, then the code that makes it pass, in separate
   commits.
