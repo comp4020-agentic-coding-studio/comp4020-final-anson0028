@@ -142,7 +142,8 @@ function cookieToken(req: IncomingMessage): string | null {
 
 function readmeHtml(): string {
   const md = readFileSync(join(root, "README.md"), "utf8");
-  const body = marked.parse(md, { async: false }) as string;
+  const repo = "https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/blob/main/";
+  const body = (marked.parse(md, { async: false }) as string).replace(/href="(?!https?:|#|\/)([^"]+)"/g, (_, path) => `href="${repo}${path}"`);
   const shell = readFileSync(join(root, "public", "readme.html"), "utf8");
   return shell.replace("<!--README-->", body);
 }
