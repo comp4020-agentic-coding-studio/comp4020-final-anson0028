@@ -197,8 +197,8 @@ boardToggle.addEventListener("click", () => {
 const dayLabel = (at) => new Date(at).toLocaleDateString("en-AU", { day: "numeric", month: "short" });
 function drawBoard() {
   const today = log.filter((e) => e.kind === "landing" && e.day === day);
-  const best = today.sort((p, q) => q.distance - p.distance)[0];
-  furthest.textContent = best ? `Furthest today: ${best.name} · ${crewText(best)}` : "Nobody has landed anywhere today.";
+  const wrecksToday = log.filter((e) => e.kind === "wreck" && e.day === day).length;
+  furthest.textContent = today.length || wrecksToday ? `Today: ${today.length} landing${today.length === 1 ? "" : "s"}, ${wrecksToday} wreck${wrecksToday === 1 ? "" : "s"}` : "Nobody has sailed today yet.";
   const items = [];
   let lastDay = null;
   for (const e of log.slice(0, 8)) {

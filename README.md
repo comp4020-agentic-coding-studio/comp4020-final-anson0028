@@ -5,29 +5,29 @@ rises only while someone holds the mast, the helm turns only while someone
 holds the wheel, the map shows only at the chart table, and what you type
 reaches only people within 8 tiles, a little more than a ship's length.
 One person can sail, badly, running between stations. More hands get
-further.
+further, and sink less.
 
 Earshot is a small online co-op game for a room of people. Whoever is here
-crews the ship at the pier, each given a job in the order they boarded,
+crews the ship at the pier, each told which station is theirs in the order
+they boarded,
 and how far they got is kept with their names. Further out the rocks
 thicken, and a holed hull wants one hand on the patch and one on the pump.
-To be two people at once, use a second browser profile or private window.
 
 ## What good means here
 
 **What you can do, and what you know, depends on where your body is.**
 Co-operation comes from that rule, not from a rule that counts heads.
-Nothing waits for a number of players, and anyone can still work any
-station, whatever job they were given.
+Nothing waits for a number of players, and your station is a suggestion:
+anyone can work any station.
 
 The distance rule comes from Big Walk (House House, 2026), where voices fade
-as friends drift apart. Its reviews name its fault: no solo mode. My first
-version copied that too: the first classmates to try it stood around
-waiting, and alone I could only walk. So one person can always sail here.
+as friends drift apart; its reviews name its fault, no solo mode. My first
+version had the same fault: alone I could only walk. So one person can
+always sail here.
 Erickson and Kellogg (2000) found a limit works when everyone can see it;
 the chart rule is the same for everyone, and every job shows over its
 owner's head. Several other student projects unlock features once enough
-players are present ([a survey of 114](docs/cohort-survey.md)); here
+players are present ([114 class projects surveyed](docs/cohort-survey.md)); here
 nothing unlocks, and a ship simply gets further the more hands it has
 ([the decision, written up](docs/decisions/0001-one-body-one-station.md)).
 
@@ -36,13 +36,15 @@ nothing unlocks, and a ship simply gets further the more hands it has
 Tested, by checks that drive a running server, sixteen claims in all
 ([the full list](docs/claims.md)), among them: one body holds one
 station; only the body at the chart table is sent the map; a word reaches
-8 tiles and no further; wrecks and landings can't be changed or deleted;
+8 tiles and no further; the record of every wreck and island landing
+can't be changed or deleted;
 the pier is the only way on or off; everyone aboard gets a job.
 
 Measured, by simulated crews of one to four bots
 ([how](docs/tuning.md)): every crew size reaches the near and middle
-islands; alone, the far island in 9 of 12 runs, with anyone else aboard
-in 12 of 12. Bots never patch holes; people can.
+islands. To the far island, a lone bot sank in 3 of 12 runs; with a
+second bot aboard, none of 36 runs across two to four crew sank. Bots
+never patch holes, so the lone sailor's odds are the floor.
 
 Judged, by watching it played from the link alone. Three AI agents told
 to play with no instructions knew within a minute it was a co-op sailing
@@ -54,9 +56,9 @@ so everyone now gets a job ([what changed](PROCESS.md)).
 
 ## What I didn't build
 
-- Voice: in one room it would feed back, and the room already has voices.
-- Accounts, chat history, scores. The board, wrecks, flags and notes are
-  the record, and nothing is ranked.
+- Voice: in one room it would feed back; the room already has voices.
+- Accounts, chat history, scores. The board lists crews by time, not by
+  points; the wrecks, flags and notes are the record.
 - Locked roles: a crew that loses its helmsman must still be able to steer.
 
 ## Sources
