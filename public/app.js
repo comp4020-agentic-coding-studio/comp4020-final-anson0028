@@ -168,7 +168,7 @@ ws.addEventListener("message", (e) => {
 });
 
 function seenIntro() {
-  try { return localStorage.getItem("earshot-intro-2") === "1"; } catch { return false; }
+  try { return localStorage.getItem("earshot-intro-3") === "1"; } catch { return false; }
 }
 function showIntro() {
   intro.hidden = false;
@@ -177,7 +177,7 @@ function showIntro() {
   nameInput.select();
 }
 function hideIntro() {
-  try { localStorage.setItem("earshot-intro-2", "1"); } catch {}
+  try { localStorage.setItem("earshot-intro-3", "1"); } catch {}
   intro.hidden = true;
   canvas.focus();
 }
