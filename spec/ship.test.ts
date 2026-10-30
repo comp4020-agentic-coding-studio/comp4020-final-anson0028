@@ -382,7 +382,7 @@ describe("jobs", { timeout: 60000 }, () => {
     for (const w of crew) w.close();
   });
 
-  it("nudge a body whose job is left unworked at sea, and say so in the log", async () => {
+  it("nudge a body whose job is left unworked at sea, never for a dry pump, and say so in the log", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0117"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0117"));
@@ -390,6 +390,9 @@ describe("jobs", { timeout: 60000 }, () => {
     await b.board();
     a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
     await a.man("sail");
+    await settle(2500);
+    expect(b.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
+    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, water: 30 });
     const told = await b.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
