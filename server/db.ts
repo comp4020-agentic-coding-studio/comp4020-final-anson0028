@@ -91,6 +91,14 @@ db.exec(`
   BEGIN
     SELECT RAISE(ABORT, 'visits_kept');
   END;
+  CREATE TABLE IF NOT EXISTS aboard (
+    token TEXT PRIMARY KEY,
+    ship INTEGER NOT NULL,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    boarded_at INTEGER NOT NULL,
+    at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+  );
   CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY,
     author TEXT NOT NULL,
@@ -239,6 +247,23 @@ export function addNote(author: string, name: string, x: number, y: number, text
 
 export function loadNotes(): NoteRow[] {
   return listNotes.all() as NoteRow[];
+}
+
+export type AboardRow = { token: string; ship: number; x: number; y: number; boarded_at: number; at: string };
+const putAboard = db.prepare("INSERT INTO aboard (token, ship, x, y, boarded_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(token) DO UPDATE SET ship = excluded.ship, x = excluded.x, y = excluded.y, boarded_at = excluded.boarded_at, at = strftime('%Y-%m-%dT%H:%M:%fZ','now')");
+const dropAboard = db.prepare("DELETE FROM aboard WHERE token = ?");
+const listAboard = db.prepare("SELECT token, ship, x, y, boarded_at, at FROM aboard");
+
+export function rememberAboard(token: string, ship: number, x: number, y: number, boardedAt: number): void {
+  putAboard.run(token, ship, x, y, boardedAt);
+}
+
+export function forgetAboard(token: string): void {
+  dropAboard.run(token);
+}
+
+export function loadAboard(): AboardRow[] {
+  return listAboard.all() as AboardRow[];
 }
 
 export function removeNote(id: number, author: string): boolean {

@@ -27,5 +27,7 @@ named commit with only the new spec files copied in.
 | `spec/a11y.test.ts` (language, one h1, landmarks, names, live regions, focus style) | the working tree with `lang` removed from the page, then with the help button stripped of its name | failed each time: no `lang`; a button with no name |
 | `spec/robust.test.ts`: a directory request, a non-object message, a 64 KB frame | `d795967` | 3 of 3 failed: the server exited with EISDIR on `/vendor/`, with a TypeError on `null`, and the huge frame was accepted |
 | the huge-frame test with `maxPayload` removed | the working tree | failed: no close 1009 within 30 s |
+| "puts you back aboard your ship at sea if you come back within two minutes" | `2aebfee` | failed: the rejoining body was on the pier, not aboard |
+| "… after the server restarts under you" with the shutdown write removed | the working tree | failed: the body came back ashore |
 
 The same specs pass against the commits that followed each of them.

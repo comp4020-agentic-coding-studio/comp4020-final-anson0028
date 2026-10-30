@@ -7,7 +7,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { P } from "./params.ts";
 import {
-  addNote, createShip, loadLandings, loadNotes, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
+  addNote, createShip, forgetAboard, loadAboard, rememberAboard, loadLandings, loadNotes, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
@@ -238,6 +238,29 @@ function aboard(s: LiveShip): Client[] {
   return [...clients.values()].filter((c) => c.body.ship === s.id);
 }
 
+const REJOIN_MS = 120000;
+const awayFrom = new Map<string, { ship: number; x: number; y: number; boardedAt: number; at: number }>();
+for (const r of loadAboard()) {
+  awayFrom.set(r.token, { ship: r.ship, x: r.x, y: r.y, boardedAt: r.boarded_at, at: Date.now() });
+  forgetAboard(r.token);
+}
+const alive = new WeakMap<WebSocket, boolean>();
+setInterval(() => {
+  for (const c of clients.values()) {
+    if (alive.get(c.ws) === false) {
+      logLine(`${whoIs(c)}'s connection stopped answering and is closed`);
+      c.ws.terminate();
+      continue;
+    }
+    alive.set(c.ws, false);
+    try {
+      c.ws.ping();
+    } catch {
+      c.ws.terminate();
+    }
+  }
+}, 15000);
+
 function join_(ws: WebSocket, token: string): void {
   if (!TOKEN.test(token)) {
     logLine("a socket with a token the harbour never issued is refused");
@@ -258,9 +281,18 @@ function join_(ws: WebSocket, token: string): void {
   const row = loadPlayer(token, spawnFor(id));
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
   const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0 };
+  const away = awayFrom.get(token);
+  awayFrom.delete(token);
+  forgetAboard(token);
+  const backTo = away && Date.now() - away.at < REJOIN_MS ? ships.get(away.ship) : undefined;
+  if (away && backTo) Object.assign(c.body, { ship: backTo.id, x: away.x, y: away.y });
+  if (away && backTo) c.boardedAt = away.boardedAt;
+  alive.set(ws, true);
+  ws.on("pong", () => alive.set(ws, true));
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
-  logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
+  if (backTo) logLine(`${whoIs(c)} comes back aboard ship ${backTo.id} after a dropped connection; ${clients.size} here`);
+  else logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
     t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
@@ -278,6 +310,10 @@ function join_(ws: WebSocket, token: string): void {
     clients.delete(ws);
     const w = worldPos(c);
     savePlayer(c.token, w.x, w.y);
+    if (c.body.ship !== null) {
+      awayFrom.set(c.token, { ship: c.body.ship, x: c.body.x, y: c.body.y, boardedAt: c.boardedAt, at: Date.now() });
+      rememberAboard(c.token, c.body.ship, c.body.x, c.body.y, c.boardedAt);
+    }
     for (const o of clients.values()) send(o.ws, { t: "leave", id });
     logLine(`${whoIs(c)} leaves${c.body.ship === null ? "" : ` from ship ${c.body.ship}`}; ${clients.size} here`);
   });
@@ -660,6 +696,8 @@ setInterval(loop, 1000 / TICK_HZ / SIM_SPEED);
 for (const sig of ["SIGTERM", "SIGINT"] as const) {
   process.on(sig, () => {
     persist();
+    for (const [token, a] of awayFrom) if (Date.now() - a.at < REJOIN_MS) rememberAboard(token, a.ship, a.x, a.y, a.boardedAt);
+    for (const c of clients.values()) if (c.body.ship !== null) rememberAboard(c.token, c.body.ship, c.body.x, c.body.y, c.boardedAt);
     process.exit(0);
   });
 }

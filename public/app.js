@@ -69,6 +69,22 @@ let pitch = 0.55;
 const sibling = sessionStorage.getItem("sibling");
 const wsBase = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 const ws = new WebSocket(sibling ? `${wsBase}?token=${sibling}` : wsBase);
+let refused = false;
+ws.addEventListener("close", () => {
+  if (refused) return;
+  const note = document.createElement("p");
+  note.className = "loading";
+  note.setAttribute("role", "status");
+  note.textContent = "The connection dropped. Reconnecting… you'll be put back aboard your ship.";
+  document.querySelector("main").append(note);
+  const retry = async () => {
+    try {
+      if ((await fetch("/health", { cache: "no-store" })).ok) return location.reload();
+    } catch {}
+    setTimeout(retry, 2000);
+  };
+  setTimeout(retry, 1000);
+});
 
 ws.addEventListener("message", (e) => {
   const m = JSON.parse(e.data);
@@ -156,6 +172,7 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "toast") {
     say(m.text);
   } else if (m.t === "refused") {
+    refused = true;
     if (m.why === "full") return say("The harbour is full right now.");
     if (m.why === "bad_token") return say("This browser's ticket isn't one the harbour issued.");
     who.textContent = "You're already on the island in another tab.";

@@ -422,6 +422,21 @@ describe("a dropped connection", { timeout: 60000 }, () => {
     back.close();
     keeper.close();
   });
+
+  it("puts you back aboard after the server restarts under you", async () => {
+    const isl = await fresh();
+    const token = uuid("aaaa0119");
+    const a = await Walker.join(isl.wsBase, token);
+    const ship = await a.board();
+    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    await settle(300);
+    await isl.restart();
+    const back = await Walker.join(isl.wsBase, token);
+    const me = bodies(await back.snap()).find((p) => p.id === back.id)!;
+    expect(me.ship).toBe(ship);
+    a.close();
+    back.close();
+  });
 });
 
 describe("what you can see", { timeout: 60000 }, () => {
