@@ -403,6 +403,27 @@ describe("jobs", { timeout: 60000 }, () => {
   });
 });
 
+describe("a dropped connection", { timeout: 60000 }, () => {
+  it("puts you back aboard your ship at sea if you come back within two minutes, and says so in the log", async () => {
+    const isl = await fresh();
+    const token = uuid("aaaa0118");
+    const a = await Walker.join(isl.wsBase, token);
+    const keeper = await Walker.join(isl.wsBase, uuid("bbbb0118"));
+    const ship = await a.board();
+    await keeper.board();
+    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    await settle(300);
+    a.close();
+    await settle(500);
+    const back = await Walker.join(isl.wsBase, token);
+    const me = bodies(await back.snap()).find((p) => p.id === back.id)!;
+    expect(me.ship).toBe(ship);
+    expect(isl.stdout.join("\n")).toMatch(new RegExp(`#${back.id} comes back aboard ship ${ship}`));
+    back.close();
+    keeper.close();
+  });
+});
+
 describe("what you can see", { timeout: 60000 }, () => {
   it("sends the whole map only to a body standing at the chart table", async () => {
     const isl = await fresh();
