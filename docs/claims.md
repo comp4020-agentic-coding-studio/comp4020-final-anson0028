@@ -32,9 +32,10 @@ database once it stops. `spec/ship.test.ts` unless noted.
     client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
 15. The pier is the only way on or off a ship: E boards one alongside and
     steps off one there; nothing leaves a ship at sea but a sinking.
-16. Everyone aboard has a job, given by the order they boarded and shown
-    over their head and in the crew list; a job left unworked at sea is
-    named to its owner, and nothing stops anyone working any station
+16. Everyone aboard has a job, given by the order they boarded and sent to
+    every client in the snapshot (the page shows it over each head and in
+    the crew list); a job left unworked at sea is named to its owner, and
+    nothing stops anyone working any station
     ([decision record 7](decisions/0007-everyone-aboard-has-a-job.md)).
 
 The red runs that showed each test failing first are in

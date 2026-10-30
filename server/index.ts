@@ -435,11 +435,6 @@ function handle(c: Client, raw: string): void {
     washUp(c, "steps ashore from");
     return;
   }
-  if (msg.t === "jump") {
-    const from = worldPos(c);
-    for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind: "jump" });
-    return;
-  }
   if (msg.t === "hold") {
     b.holding = !!msg.on;
     if (!b.holding) return;
@@ -533,7 +528,8 @@ function boardNearest(c: Client): LiveShip | null {
   const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && within(s, here, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
   const s = choices[0];
   if (!s) return null;
-  const spot = BOARD_SPOTS[aboard(s).length % BOARD_SPOTS.length];
+  const taken = aboard(s).map((o) => `${Math.floor(o.body.x)},${Math.floor(o.body.y)}`);
+  const spot = BOARD_SPOTS.find((p) => !taken.includes(`${Math.floor(p.x)},${Math.floor(p.y)}`)) ?? BOARD_SPOTS[aboard(s).length % BOARD_SPOTS.length];
   Object.assign(c.body, { ship: s.id, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
   c.boardedAt = ++boardings;
   c.idleSince = null;

@@ -129,7 +129,7 @@ export class Walker {
   }
 
   jump(): void {
-    this.send({ t: "jump" });
+    this.send({ t: "emote", kind: "jump" });
   }
 
   async man(station: Station, dx = 0, dy = 0): Promise<void> {

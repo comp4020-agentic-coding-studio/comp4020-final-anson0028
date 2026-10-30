@@ -24,8 +24,9 @@ them broken, change README.md first and say why.
 - Never turn a job into a lock. Jobs (decision record 7) are labels the
   server gives by order of boarding; any body may still hold any free
   station, and a crew short of its helmsman must still be able to steer.
-- Never update or delete a row in `wrecks` or `landings`. Triggers refuse
-  it; don't work around them.
+- Never update or delete a row in `wrecks`, and never delete one in
+  `landings`; a landing's first crew is fixed, and only its visit count may
+  rise. Triggers refuse anything else; don't work around them.
 - Never point the spec at the live app. `spec/ship.test.ts` and
   `spec/persist.test.ts` start their own server on a temporary DATA_DIR
   (`spec/island.ts`). The rest use APP_URL, which is never the Fly URL. The

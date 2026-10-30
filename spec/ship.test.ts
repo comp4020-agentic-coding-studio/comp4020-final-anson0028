@@ -448,7 +448,7 @@ describe("what you can see", { timeout: 60000 }, () => {
     expect(a.hello.islands).toBeUndefined();
     const near = await a.next((m) => m.t === "near");
     expect(near.tiles.length).toBeGreaterThan(0);
-    expect(near.tiles.every(([x, y]: number[]) => Math.hypot(x + 0.5 - near.at.x, y + 0.5 - near.at.y) <= 9)).toBe(true);
+    expect(near.tiles.every(([x, y]: number[]) => Math.hypot(x + 0.5 - near.at.x, y + 0.5 - near.at.y) <= 8.001)).toBe(true);
     await a.board();
     await a.walkTo(STATIONS.chart.x, STATIONS.chart.y);
     const chart = await a.next((m) => m.t === "chart" && Array.isArray(m.tiles), 3000);
