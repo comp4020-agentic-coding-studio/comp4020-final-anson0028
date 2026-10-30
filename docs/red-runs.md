@@ -25,5 +25,7 @@ named commit with only the new spec files copied in.
 | "give everyone aboard a job … the rest move up" and "nudge a body whose job is left unworked" | `6d66973` (no jobs) | 2 of 2 failed: `jobs` empty in the snapshot, no "Your job is" toast within 4 s |
 | the nudge test with `nudgeIdle` switched off | the working tree | failed: no nudge within 4 s |
 | `spec/a11y.test.ts` (language, one h1, landmarks, names, live regions, focus style) | the working tree with `lang` removed from the page, then with the help button stripped of its name | failed each time: no `lang`; a button with no name |
+| `spec/robust.test.ts`: a directory request, a non-object message, a 64 KB frame | `d795967` | 3 of 3 failed: the server exited with EISDIR on `/vendor/`, with a TypeError on `null`, and the huge frame was accepted |
+| the huge-frame test with `maxPayload` removed | the working tree | failed: no close 1009 within 30 s |
 
 The same specs pass against the commits that followed each of them.

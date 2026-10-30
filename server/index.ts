@@ -165,7 +165,7 @@ function serve(req: IncomingMessage, res: ServerResponse): void {
   }
   const file = url.pathname === "/" ? "/index.html" : normalize(url.pathname);
   const path = join(root, "public", file);
-  if (!path.startsWith(join(root, "public")) || !existsSync(path)) {
+  if (!path.startsWith(join(root, "public")) || !existsSync(path) || !statSync(path).isFile()) {
     res.writeHead(404, { "content-type": "text/plain" });
     res.end("not found");
     return;
@@ -190,8 +190,16 @@ function serve(req: IncomingMessage, res: ServerResponse): void {
   res.end(body);
 }
 
-const server = createServer(serve);
-const wss = new WebSocketServer({ noServer: true });
+const server = createServer((req, res) => {
+  try {
+    serve(req, res);
+  } catch (err) {
+    logLine(`a request for ${req.url} failed: ${(err as Error).message}`);
+    if (!res.headersSent) res.writeHead(500, { "content-type": "text/plain" });
+    res.end("server error");
+  }
+});
+const wss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
 
 server.on("upgrade", (req, socket, head) => {
   const url = new URL(req.url ?? "/", "http://x");
@@ -258,7 +266,14 @@ function join_(ws: WebSocket, token: string): void {
     t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
-  ws.on("message", (data) => handle(c, data.toString()));
+  ws.on("message", (data) => {
+    try {
+      handle(c, data.toString());
+    } catch (err) {
+      logLine(`${whoIs(c)} sent a message the server could not handle: ${(err as Error).message}`);
+    }
+  });
+  ws.on("error", (err) => logLine(`${whoIs(c)}'s connection failed: ${err.message}`));
   ws.on("close", () => {
     clients.delete(ws);
     const w = worldPos(c);
@@ -277,6 +292,7 @@ function handle(c: Client, raw: string): void {
   } catch {
     return;
   }
+  if (!msg || typeof msg !== "object" || Array.isArray(msg)) return;
   const b = c.body;
   if (msg.t === "input") {
     const dx = Number(msg.dx) || 0;
