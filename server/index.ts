@@ -22,7 +22,7 @@ const root = new URL("..", import.meta.url).pathname;
 const canberraDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Canberra", year: "numeric", month: "2-digit", day: "2-digit" });
 const today = () => process.env.WALK_TODAY ?? canberraDay.format(new Date());
 
-type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number; boardedAt: number; idleSince: number | null; nudgedAt: number };
+type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number; boardedAt: number; idleSince: number | null; idleJob: string; nudgedAt: number };
 const EMOTES = new Set(["wave", "jump", "yes", "no"]);
 type LiveShip = Ship & { holders: Record<StationName, Client | null>; emptySince?: number };
 
@@ -257,7 +257,7 @@ function join_(ws: WebSocket, token: string): void {
   const id = publicId(token);
   const row = loadPlayer(token, spawnFor(id));
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
-  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, nudgedAt: 0 };
+  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0 };
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
   logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
@@ -463,6 +463,8 @@ function unworkedDuty(s: LiveShip, job: string): string | null {
     if (duty === "patch") {
       const patching = aboard(s).some((c) => c.body.holding && stationUnder(c.body) === null && leakUnder(s, c.body));
       if (s.leaks.length && !patching) return duty;
+    } else if (duty === "pump") {
+      if (s.water >= 5 && !s.holders.pump) return duty;
     } else if ((STATION_NAMES as string[]).includes(duty) && !s.holders[duty as StationName]) return duty;
   }
   return null;
@@ -475,9 +477,10 @@ function nudgeIdle(now: number): void {
       const c = [...clients.values()].find((o) => o.id === id);
       if (!c) continue;
       const duty = atSea && job !== "all" && !c.body.holding ? unworkedDuty(s, job) : null;
-      if (!duty) {
+      if (!duty || c.idleJob !== job) {
         c.idleSince = null;
-        continue;
+        c.idleJob = job;
+        if (!duty) continue;
       }
       c.idleSince ??= now;
       if (now - c.idleSince < P.JOB_NUDGE_S * 1000 || now - c.nudgedAt < P.JOB_NUDGE_S * 1000) continue;

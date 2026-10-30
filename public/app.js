@@ -861,7 +861,7 @@ const jobWords = (job) => job.split("+").map((d) => DUTY[d] ?? d).join(" + ");
 const jobShort = (job) => job.split("+").map((d) => (d === "chart" ? "chart" : DUTY[d] ?? d)).join("+");
 const nextJob = (n) => (JOB_TABLE[n + 1] ?? [])[n] ?? "patch";
 function jobIdle(ship, job) {
-  return job.split("+").some((d) => (d === "patch" ? ship.leaks.length > 0 : !ship.holders[d]));
+  return job.split("+").some((d) => (d === "patch" ? ship.leaks.length > 0 : d === "pump" ? ship.water >= 5 && !ship.holders.pump : !ship.holders[d]));
 }
 let islands = [];
 const flagMeshes = new Map();
