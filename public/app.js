@@ -47,6 +47,7 @@ const shipNames = new Map();
 let sticky = null;
 let lastAlongside = null;
 let nextShip = null;
+let lastStatus = "";
 let log = [];
 let near = [];
 let notes = [];
@@ -1054,27 +1055,34 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    status.replaceChildren();
-    const line = document.createElement("div");
-    status.append(line);
-    line.textContent = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
-    const crewLine = document.createElement("div");
-    crewLine.className = "crew";
-    for (const [id, job] of Object.entries(ship.jobs)) {
-      const chip = document.createElement("span");
+    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
-      chip.className = idle ? "idle" : "ok";
-      chip.textContent = `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}`;
-      if (id === me.id) chip.classList.add("me");
-      crewLine.append(chip);
+      return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}` };
+    });
+    const statusKey = lineText + "|" + chips.map((c) => `${c.idle}${c.me}${c.text}`).join("|") + "|" + narrow.matches;
+    if (statusKey !== lastStatus) {
+      lastStatus = statusKey;
+      const line = document.createElement("div");
+      line.textContent = lineText;
+      const crewLine = document.createElement("div");
+      crewLine.className = "crew";
+      for (const c of chips) {
+        const chip = document.createElement("span");
+        chip.className = c.idle ? "idle" : "ok";
+        if (c.me) chip.classList.add("me");
+        chip.textContent = c.text;
+        crewLine.append(chip);
+      }
+      status.replaceChildren(line, crewLine);
+      status.classList.toggle("warn", ship.water >= 50);
+      status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
+      hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";
+      hint.style.top = narrow.matches ? "" : `calc(1.25rem + ${status.offsetHeight}px)`;
     }
-    status.append(crewLine);
-    status.classList.toggle("warn", ship.water >= 50);
-    status.classList.toggle("hurt", ship.water < 50 && ship.hull > 0);
-    hint.style.bottom = narrow.matches ? `calc(8rem + ${status.offsetHeight}px)` : "";
-    hint.style.top = narrow.matches ? "" : `calc(1.25rem + ${status.offsetHeight}px)`;
   } else {
     status.hidden = true;
+    lastStatus = "";
     hint.style.bottom = "";
     hint.style.top = "";
   }
