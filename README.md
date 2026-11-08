@@ -8,9 +8,9 @@ is heard by your ship and not ashore. One person can sail, badly,
 running the deck. More hands get there faster.
 
 All Hands on Deck is a small online co-op game for a room of people. You
-play a block bird and wake in the crew quarters of the galleon at the
-pier, with whoever else is online. Each of you is told which station is
-yours, and how far you get is kept with your names. Further out the
+play a block bird on a pier with a galleon tied up beside it; whoever is
+online gathers there, boards, and sails. Each of you is told which
+station is yours, and how far you get is kept with your names. Further out the
 rocks hole the deck, and a hole wants one hand on the patch and one on
 the pump.
 

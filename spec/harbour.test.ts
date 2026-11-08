@@ -161,7 +161,8 @@ describe("gestures", { timeout: 30000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0208"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0208"));
     const c = await Walker.join(isl.wsBase, uuid("cccc0208"));
-    await c.ashore();
+    const ship = await a.board();
+    expect(await b.board()).toBe(ship);
     await c.walkTo(24.5, 32.5);
     a.send({ t: "emote", kind: "wave" });
     const seen = await b.next((m) => m.t === "emote", 2000);
@@ -223,6 +224,7 @@ describe("saying", { timeout: 30000 }, () => {
     const c = await Walker.join(isl.wsBase, uuid("cccc0206"));
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
+    expect(await c.board()).toBe(ship);
     await a.walkTo(STATIONS.helm.x, STATIONS.helm.y);
     await b.walkTo(STATIONS.foresail.x, STATIONS.foresail.y);
     a.send({ t: "say", text: "crew only", to: "crew" });

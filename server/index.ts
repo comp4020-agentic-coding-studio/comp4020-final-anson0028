@@ -7,7 +7,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { P } from "./params.ts";
 import {
-  addNote, createShip, forgetAboard, loadAboard, rememberAboard, loadLandings, loadNotes, loadPlayer, playerKnown, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
+  addNote, createShip, forgetAboard, loadAboard, rememberAboard, loadLandings, loadNotes, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
@@ -279,7 +279,6 @@ function join_(ws: WebSocket, token: string): void {
     return ws.close();
   }
   const id = publicId(token);
-  const known = playerKnown(token);
   const row = loadPlayer(token, spawnFor(id));
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
   const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0 };
@@ -289,13 +288,11 @@ function join_(ws: WebSocket, token: string): void {
   const backTo = away && Date.now() - away.at < REJOIN_MS ? ships.get(away.ship) : undefined;
   if (away && backTo) Object.assign(c.body, { ship: backTo.id, x: away.x, y: away.y });
   if (away && backTo) c.boardedAt = away.boardedAt;
-  const woke = backTo || known ? null : wakeAboard(c);
   alive.set(ws, true);
   ws.on("pong", () => alive.set(ws, true));
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
   if (backTo) logLine(`${whoIs(c)} comes back aboard ship ${backTo.id} after a dropped connection; ${clients.size} here`);
-  else if (woke) logLine(`${whoIs(c)} wakes aboard ship ${woke.id} (${shipName(woke.id)}) in the crew quarters; ${aboard(woke).length} aboard; ${clients.size} here`);
   else logLine(`${whoIs(c)} arrives on the jetty at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
@@ -476,7 +473,6 @@ function handle(c: Client, raw: string): void {
 
 let boardings = 0;
 const BOARD_SPOTS = [{ x: -0.5, y: -2.5 }, { x: 0.5, y: -2.5 }, { x: -1.5, y: -2.5 }, { x: 1.5, y: -2.5 }, { x: -0.5, y: -1.5 }, { x: 0.5, y: -1.5 }];
-const CREW_SPOTS = [{ x: 7.5, y: -2.5 }, { x: 8.5, y: -2.5 }, { x: 6.5, y: -2.5 }, { x: 7.5, y: -1.5 }, { x: 8.5, y: -1.5 }, { x: 6.5, y: -1.5 }];
 const JOBS: Record<number, string[]> = {
   1: ["all"],
   2: ["sail+helm", "pump+patch"],
@@ -548,13 +544,6 @@ function putAboard(c: Client, s: LiveShip, spots: { x: number; y: number }[]): v
   c.idleSince = null;
 }
 
-function wakeAboard(c: Client): LiveShip | null {
-  if (c.body.ship !== null) return null;
-  const s = [...ships.values()].find((s) => s.state === "moored" && SLOTS.some((slot) => within(s, slot, 0.5)));
-  if (!s) return null;
-  putAboard(c, s, CREW_SPOTS);
-  return s;
-}
 
 function tellCrewLeft(c: Client, s: LiveShip | undefined): void {
   if (!s) return;

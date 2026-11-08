@@ -1,6 +1,8 @@
 # 8. The galleon
 
-Date: 8 November 2026. Status: accepted.
+Date: 8 November 2026. Status: accepted, except that visitors arrive on
+the jetty, not aboard: that part was taken back the same night (see the
+end of this record).
 
 ## Context
 
@@ -54,7 +56,8 @@ east.
 
 A new visitor wakes aboard. A returning one is where they left: aboard,
 if they were aboard within two minutes (decision record 7's rejoin), or
-on the jetty where they stepped off. Jobs gain the foresail: four aboard
+on the jetty where they stepped off. (Taken back a few hours later: see
+below.) Jobs gain the foresail: four aboard
 is helm, mainsail, pump and patching, foresail; five adds the chart.
 
 Option 3 is not built. It is written here so that the mess hall and the
@@ -74,3 +77,13 @@ dice are a recorded idea, not a forgotten one.
   keel, so a reef under the beam does no harm. Honest in `docs/the-ship.md`.
 - `README.md`, `CLAUDE.md`, `docs/claims.md` and `docs/the-ship.md` change
   in the same commit as the words that describe the deck.
+
+## Taken back: waking aboard
+
+Played the same evening, waking aboard felt wrong to Anson: a crew
+should gather somewhere and then go, and a ship that fills with people
+who never chose to board is not a crew. So a visitor arrives on the jetty
+beside the ship, one press from the gangway, and the pier is the lobby;
+the countdown to the next ship shows there. Claim 17 and its test
+changed with it. The crew quarters stay on the forecastle as a place to
+stand.

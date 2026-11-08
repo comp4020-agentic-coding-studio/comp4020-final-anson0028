@@ -403,6 +403,11 @@ exists. Sweep eight re-measures crews of one to five on the galleon and
 is recorded in `docs/tuning.md`; whatever it says, the README says the
 same.
 
+Waking aboard did not survive the night. Anson played it and wanted the
+pier back as the place a crew forms before it goes, so the arrival test
+was rewritten red, the wake code went, and decision record 8 records the
+reversal at its end.
+
 A second session ran beside this one for part of the evening, renaming
 the project to All Hands on Deck. It began in the same working tree, we
 noticed, talked, and it moved its edits to a worktree on `main`; the

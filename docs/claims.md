@@ -39,9 +39,9 @@ database once it stops. `spec/ship.test.ts` unless noted.
     the crew list); a job left unworked at sea is named to its owner, and
     nothing stops anyone working any station
     ([decision record 7](decisions/0007-everyone-aboard-has-a-job.md)).
-17. A new visitor wakes aboard the ship at the berth, in the crew quarters,
-    and the log says so; the deck is at least 16 tiles long with five
-    stations ([decision record 8](decisions/0008-the-galleon.md)).
+17. A visitor arrives on the jetty beside the berthed ship, one press from
+    boarding, and the log says so; the deck is at least 16 tiles long with
+    five stations ([decision record 8](decisions/0008-the-galleon.md)).
 18. A word said at the helm reaches the pump down in the bilge, the length
     of the deck away, and not the jetty beside the ship
     ([decision record 9](decisions/0009-one-channel-per-place.md)).

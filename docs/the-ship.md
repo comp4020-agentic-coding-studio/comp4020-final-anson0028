@@ -72,9 +72,11 @@ chart.
   a ladder in the bilge. Helm to pump is 9 tiles, helm to foresail 13, so
   the two ends of the ship are out of earshot of each other. Before that
   the deck was 7 by 4 with four stations a few steps apart.
-- A new visitor wakes in the crew quarters on the forecastle. You walk on
-  the deck, and across the gangway onto the jetty when the ship is
-  alongside it.
+- A visitor arrives on the jetty by the gangway; the pier is the lobby
+  where a crew gathers before it boards (for one evening on 8 November a
+  new visitor woke aboard instead; Anson took it back the same night
+  because a crew should form somewhere and then go). You walk on the
+  deck, and across the gangway onto the jetty when the ship is alongside.
 
 ## Rules
 

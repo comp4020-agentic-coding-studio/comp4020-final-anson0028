@@ -8,7 +8,8 @@ away and how each result was checked, is
 ## What I built
 
 A galleon at a jetty, seen over the shoulder of a block bird with a name
-you can change. A new visitor wakes in its crew quarters. Five stations
+you can change. The jetty is the lobby: you arrive beside the ship and
+board when you choose. Five stations
 on three levels, helm and chart table on the quarterdeck, mainsail on
 the main deck, foresail at the bow, the pump down a ladder in the bilge;
 a body works one at a time by standing on it, every station stops when

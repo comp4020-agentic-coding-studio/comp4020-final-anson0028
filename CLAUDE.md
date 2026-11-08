@@ -119,9 +119,10 @@ them broken, change README.md first and say why.
   on the main deck, pump (3, -2) down in the bilge, foresail (7, 1) on the
   forecastle (`LAYOUT` names the levels; the client draws them a step up
   or down, the server moves on one plane). Speed is `MAIN_SHARE` of the
-  mainsail plus the rest of the foresail. A new visitor wakes in the
-  crew quarters of the ship at the berth; a known one is where they left.
-  The gangway amidships on the port side is where E boards and steps off.
+  mainsail plus the rest of the foresail. A visitor arrives on the jetty
+  by the gangway (the pier is the lobby: the crew gathers there and boards);
+  a known one is where they left. The gangway amidships on the port side
+  is where E boards and steps off.
 - A name is what the visitor typed, cleaned on the server to letters, digits
   and spaces, 16 at most; the bird name is the default. The board is
   `visits` and `wrecks` merged, newest first, 40 on hello. Notes travel in
