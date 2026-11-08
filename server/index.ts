@@ -11,7 +11,7 @@ import {
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, HULL, ISLANDS, JETTY, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  type Body, DECK, H, HARBOUR_CALM, HULL, ISLANDS, JETTY, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
   alongside, deckToWorld, leakUnder, nearTiles, nearestPierDistance, onDeck, setTile, shipsApart, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
 } from "./world.ts";
 
@@ -300,7 +300,7 @@ function join_(ws: WebSocket, token: string): void {
   else logLine(`${whoIs(c)} arrives on the jetty at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], jetty: JETTY, hull: HULL, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], jetty: JETTY, hull: HULL, calm: HARBOUR_CALM, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => {

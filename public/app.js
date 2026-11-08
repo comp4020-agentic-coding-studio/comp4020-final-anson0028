@@ -38,6 +38,7 @@ let layout = null;
 let hullShape = { bow: 10.5, stern: 8.5, keel: 0.5 };
 let jetty = null;
 let berth = { x: 20, y: 36.5 };
+let calm = 14;
 let stations = null;
 let leakCap = 40;
 let patchStart = null;
@@ -100,6 +101,7 @@ ws.addEventListener("message", (e) => {
     hullShape = m.hull ?? hullShape;
     jetty = m.jetty ?? jetty;
     berth = m.berth ?? berth;
+    calm = m.calm ?? calm;
     stations = m.stations;
     leakCap = m.leakCap ?? 40;
     pierAt = m.pier ?? pierAt;
@@ -1197,7 +1199,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(jettyDistance(ship))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || ((ship.sail > 0.05 || ship.fore > 0.05) && jettyDistance(ship) > calm ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(jettyDistance(ship))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
       return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}` };

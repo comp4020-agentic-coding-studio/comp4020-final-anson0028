@@ -283,7 +283,7 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   s.fore = c.fore ? Math.min(1, (s.fore ?? 0) + P.SAIL_RISE * dt) : Math.max(0, (s.fore ?? 0) - P.SAIL_LOOSEN * dt);
   if (c.helmDir) {
     s.heading += c.helmDir * P.TURN_RATE * dt;
-  } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0 && nearestPierDistance(s.x, s.y) > HARBOUR_CALM) {
+  } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0 && (s.sail > 0.05 || s.fore > 0.05) && nearestPierDistance(s.x, s.y) > HARBOUR_CALM) {
     s.wander = (s.wander ?? 0) + dt;
     s.heading += P.HELM_DRIFT * Math.sin((s.wander * 2 * Math.PI) / 40 + s.id) * dt;
   }
@@ -331,8 +331,8 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
     events.push({ kind: "sank" });
     return events;
   }
-  const points = hullPoints(s.x, s.y, s.heading);
-  const shore = (i: Island) => Math.min(...points.map(([px, py]) => Math.hypot(px - i.cx, py - i.cy))) - i.r;
+  const [bowX, bowY] = hullPoints(s.x, s.y, s.heading)[HULL.parts.length - 1];
+  const shore = (i: Island) => Math.hypot(bowX - i.cx, bowY - i.cy) - i.r;
   const near = ISLANDS.find((i) => shore(i) <= P.LANDING_RANGE);
   if (near && s.landedOn !== near.id) {
     s.landedOn = near.id;

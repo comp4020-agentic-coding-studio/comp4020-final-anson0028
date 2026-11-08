@@ -93,7 +93,9 @@ Each of these becomes a test.
    itself, two people were as good as three; see `docs/tuning.md`.
    Changed 8 November: no wandering within `HARBOUR_CALM` tiles of the
    jetty, so the galleon leaves its berth straight instead of swinging
-   its stern into the pier.)
+   its stern into the pier; and from 9 November a ship with no sail up
+   does not wander either, so a hull left in the lane stays where it was
+   left until it is scuttled.)
 4. Chart. Only a body standing at the chart table is sent the map beyond the
    ship's own sight, and only that body's view switches to the chart.
    Everyone else sees the water around the ship and nothing more.
@@ -130,7 +132,7 @@ Each of these becomes a test.
     on the galleon that split the crew, so the place replaced the radius.
 11. Hulls are solid. A ship stops short of another ship and of the shore,
     the hull is checked at five points along the keel, a landing is the bow
-    touching the shore, and the crew are told when the hull is stopped or
+    (and only the bow) coming within `LANDING_RANGE` of the shore, and the crew are told when the hull is stopped or
     scraped. A reef under the beam, off the keel line, does nothing; the
     check is a line, not the whole footprint.
 12. Jobs, 23 October. Everyone aboard is given a job by the order they
