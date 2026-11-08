@@ -29,8 +29,8 @@ aboard heads for the same goal, and the funny things happen on the way
 
 **The sea gets harder the further out you go, and what you got through
 leaves a mark.** R.E.P.O. sends stronger monsters the deeper you get.
-Here the rocks get denser the further you sail and tear holes in the deck, so one person has
-to patch the hole while another pumps the water out. Every landing plants a
+Here the rocks get denser the further you sail and tear holes in the
+deck, so there is patching and pumping to do. Every landing plants a
 flag with the crew's names on the island; every wreck is a line on the
 harbour board, in order of time. Both are still there the next day
 ([decision 9](docs/decisions/0009-the-sea-gets-harder.md),
@@ -62,8 +62,7 @@ pod found the sea too hard, and the board shows it: three landings, all on
 the near island, and seven wrecks; the reefs were thinned that day (sweep
 5 in [docs/tuning.md](docs/tuning.md), decision 9). At crit 10 (19 October)
 a classmate arriving from the link said nothing was clear at the start;
-the first screen became three short paragraphs and everyone now gets a
-job on boarding (decision 10). That afternoon four of the six names on
+the first screen and the jobs came from that (decision 10). That afternoon four of the six names on
 the board reached the middle island together, and the one ship that sank
 had one person aboard. On 9 November four AI testers played for twenty
 minutes; thirteen faults were fixed that night
