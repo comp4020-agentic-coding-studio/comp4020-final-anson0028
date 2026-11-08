@@ -99,14 +99,26 @@ rather than solves.
 
 ## h) Restart the machine mid-session
 
-Not run against the live machine tonight: a restart with people
-aboard needs Anson's say-so, since others may be playing. What stands
-in for it: the deploy at 14:51 restarted the machine with nobody aboard
-and the ships, wrecks, landings and notes came back ("listening on 8080
-with 1 ships, 11 wrecks, 5 notes"); and `spec/ship.test.ts` "puts you
-back aboard after the server restarts under you" does the mid-session
-case against a server of its own on every CI run, red first on
-`2aebfee`.
+Expected: the pages say the connection dropped and reconnect on their
+own; everyone aboard comes back on the same ship at the same spot; the
+board, wrecks and landings are still there.
+
+Observed: with QA live 1 at the helm tile (-4.5, 0.5) and QA live 2 at
+the gangway (0.5, -2.5) of ship 26, `flyctl machine restart` was run at
+14:58:20 (Anson's say-so, nobody else aboard). `/health` was unreachable
+from +5.1 s to +5.7 s after the command; the page showed "The connection
+dropped. Reconnecting… you'll be put back aboard your ship."; both were
+back on ship 26 at the same deck spots 9.4 s after the command, and
+`/health` after showed the same 11 wrecks and 2 landings.
+
+    14:58:21Z Main child exited normally with code: 0
+    14:58:25.341Z all hands on deck: listening on 8080 with 1 ships, 11 wrecks, 5 notes
+    14:58:27.224Z QA live 1#51e4ce24 comes back aboard ship 26 after a dropped connection; 1 here
+    14:58:27.230Z QA live 2#f00eb7ab comes back aboard ship 26 after a dropped connection; 2 here
+
+The same case runs on every CI push against a server of its own
+(`spec/ship.test.ts`, "puts you back aboard after the server restarts
+under you", red first on `2aebfee`).
 
 ## What this did not test
 
