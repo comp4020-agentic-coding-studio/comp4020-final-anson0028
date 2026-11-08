@@ -475,17 +475,17 @@ let boardings = 0;
 const BOARD_SPOTS = [{ x: -0.5, y: -2.5 }, { x: 0.5, y: -2.5 }, { x: -1.5, y: -2.5 }, { x: 1.5, y: -2.5 }, { x: -0.5, y: -1.5 }, { x: 0.5, y: -1.5 }];
 const JOBS: Record<number, string[]> = {
   1: ["all"],
-  2: ["sail+helm", "pump+patch"],
-  3: ["helm", "sail", "pump+patch"],
-  4: ["helm", "sail", "pump+patch", "foresail"],
-  5: ["helm", "sail", "pump+patch", "foresail", "chart"],
+  2: ["sail", "helm"],
+  3: ["sail", "helm", "chart"],
+  4: ["sail", "helm", "chart", "pump+patch"],
+  5: ["sail", "helm", "chart", "pump+patch", "foresail"],
 };
 const DUTY_WORDS: Record<string, string> = { all: "everything", helm: "the helm", sail: "the mainsail", foresail: "the foresail", pump: "the pump", chart: "the chart table", patch: "patching holes" };
 const jobWords = (job: string) => job.split("+").map((d) => DUTY_WORDS[d] ?? d).join(" and ");
 
 function jobsOf(s: LiveShip): [string, string][] {
   const crew = aboard(s).sort((p, q) => p.boardedAt - q.boardedAt);
-  const table = JOBS[crew.length] ?? ["helm", "sail", "pump", "foresail", "chart"];
+  const table = JOBS[crew.length] ?? ["sail", "helm", "chart", "pump", "foresail"];
   return crew.map((c, i) => [c.id, table[i] ?? "patch"]);
 }
 

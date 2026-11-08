@@ -72,8 +72,8 @@ them broken, change README.md first and say why.
 - Before a UI change is done: board, walk to a station, raise the sail, turn
   the ship and turn the camera at 390 × 844 by touch (d-pad and drag), at
   1920 × 1080 with a mouse with a resize halfway, and with the keyboard only
-  (WASD, arrows, E, Q), and read the first-visit card and the board at both
-  sizes. E and Q must not submit anything.
+  (WASD, arrows, E, Q), and read the first-visit card, the guide line and
+  box, and the board at both sizes. E and Q must not submit anything.
 - Words in README.md match the code. Change both in the same commit.
 - Every page keeps a language, one h1, a header, a main and a named nav,
   a name on every control, live regions for what changes, and a visible

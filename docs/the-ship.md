@@ -133,14 +133,21 @@ Each of these becomes a test.
     scraped. A reef under the beam, off the keel line, does nothing; the
     check is a line, not the whole footprint.
 12. Jobs, 23 October. Everyone aboard is given a job by the order they
-    boarded: alone, everything; two, sail and helm then pump and patching;
-    three, helm, sail, pump and patching; four adds the foresail; five adds
-    the chart table; from six, the pump alone and the rest patch. The rest move up when one
+    boarded (order changed 9 November to match the first-visit guide):
+    alone, everything; then mainsail, helm, chart table, pump and
+    patching, foresail; from six, the pump alone and the rest patch. The
+    rest move up when one
     steps off. Jobs show over heads, in a crew line under the status (red
     when nobody is on one), and on the ship at the pier as the job the next
     body aboard will take. A body holding nothing whose job is unworked at
     sea for eight seconds is told so. Jobs are advice, never a lock.
-13. Two sails, 8 November. The mainsail gives six tenths of the speed and
+13. A first visit is led, 9 November: a red dashed line on the ground
+    from your feet to the gangway (or to where the next ship will be,
+    with the countdown), then aboard from your feet to the station your
+    job names, and a large box over the scene saying what to press. It
+    ends the first time you hold your station, and never shows again on
+    that browser.
+14. Two sails, 8 November. The mainsail gives six tenths of the speed and
     the foresail the rest; each rises only while held and loosens when
     left. One body on the mainsail moves the ship; it takes a second body
     at the bow, out of earshot of the helm, to get full speed.

@@ -30,6 +30,7 @@ const heardList = document.getElementById("heard");
 const noteForm = document.getElementById("note-form");
 const noteInput = document.getElementById("note-text");
 const noteButton = document.getElementById("note");
+const guideBox = document.getElementById("guide");
 
 let me = null;
 let deck = null;
@@ -480,6 +481,71 @@ function removeNote() {
   if (ownNoteNear !== null && ws.readyState === 1) ws.send(JSON.stringify({ t: "unnote", id: ownNoteNear }));
 }
 
+const GUIDE_KEY = "allhands-guide-1";
+let guideOn = (() => { try { return localStorage.getItem(GUIDE_KEY) !== "1"; } catch { return false; } })();
+let guideText = "";
+const GUIDE_STATION = { all: "sail", sail: "sail", helm: "helm", chart: "chart", pump: "pump", "pump+patch": "pump", foresail: "foresail" };
+function endGuide() {
+  guideOn = false;
+  try { localStorage.setItem(GUIDE_KEY, "1"); } catch {}
+  guideLine.visible = false;
+  guideBox.hidden = true;
+  guideText = "";
+}
+function updateGuide(cur) {
+  if (!guideOn || !cur?.self || !intro.hidden) {
+    guideLine.visible = false;
+    guideBox.hidden = true;
+    guideText = "";
+    return;
+  }
+  const self = cur.self;
+  const from = worldOf(self, cur.ships);
+  const fy = groundHeight(self);
+  let text = "", to = null, ty = TOP[PIER];
+  if (self.ship === null) {
+    const still = cur.ships.filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05);
+    const near = still.find((s) => alongside(self, s));
+    const waiting = still.find((s) => jettyDistance(s) <= boardRange);
+    to = waiting ? toWorld(waiting, 0, deck ? deck.minY - 0.6 : -3.6) : { x: berth.x, y: (jetty ? jetty.y1 + 1 : berth.y - 4) - 0.5 };
+    if (near) text = key("Press E to board.", "Tap Use to board.");
+    else if (waiting) text = key("Follow the red line to the ship, then press E to board.", "Follow the red line to the ship, then tap Use to board.");
+    else text = typeof nextShip === "number" ? `The ship has left. The next one comes in ${nextShip} s; wait at the end of the line.` : "The ship has left. Wait at the end of the line for the next one.";
+  } else {
+    const ship = cur.ships.find((s) => s.id === self.ship);
+    const st = ship ? GUIDE_STATION[ship.jobs[me.id]] : null;
+    if (!ship || !st) text = key("Walk to any free station and hold E. E by the gangway steps off.", "Walk to any free station and hold Use. Use by the gangway steps off.");
+    else {
+      const c = { x: stations[st].x + 0.5, y: stations[st].y + 0.5 };
+      const here = stationUnder(self) === st;
+      if (here && holding) return endGuide();
+      to = toWorld(ship, c.x, c.y);
+      ty = deckY(c.x, c.y);
+      text = here ? key("Hold E to work it.", "Hold Use to work it.") : key(`Your station is the ${stationLabel[st]}. Follow the red line and hold E there. E by the gangway steps off.`, `Your station is the ${stationLabel[st]}. Follow the red line and hold Use there. Use by the gangway steps off.`);
+    }
+  }
+  if (to) {
+    const dx = to.x - from.x, dz = to.y - from.y, dy = ty - fy;
+    const len = Math.hypot(dx, dz);
+    const n = Math.min(GUIDE_DASHES, Math.max(1, Math.floor(len / 0.75)));
+    const ang = -Math.atan2(dz, dx);
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n;
+      m4.makeRotationY(ang);
+      m4.setPosition(from.x + dx * t, fy + 0.08 + dy * t, from.y + dz * t);
+      guideLine.setMatrixAt(i, m4);
+    }
+    guideLine.count = n;
+    guideLine.instanceMatrix.needsUpdate = true;
+    guideLine.visible = true;
+  } else guideLine.visible = false;
+  if (text !== guideText) {
+    guideText = text;
+    guideBox.textContent = text;
+    guideBox.hidden = !text;
+  }
+}
+
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 const scene = new THREE.Scene();
@@ -495,6 +561,13 @@ const mat = (color, extra) => new THREE.MeshLambertMaterial({ color, ...extra })
 const sea = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), mat(0x28506e));
 sea.rotation.x = -Math.PI / 2;
 scene.add(sea);
+
+const GUIDE_DASHES = 80;
+const guideLine = new THREE.InstancedMesh(new THREE.BoxGeometry(0.45, 0.06, 0.2), new THREE.MeshBasicMaterial({ color: 0xd63a2f }), GUIDE_DASHES);
+guideLine.frustumCulled = false;
+guideLine.visible = false;
+guideLine.count = 0;
+scene.add(guideLine);
 
 const tileGeo = new THREE.BoxGeometry(1, 1, 1);
 const pools = {
@@ -917,7 +990,7 @@ function syncWrecks() {
   }
 }
 
-const JOB_TABLE = { 1: ["all"], 2: ["sail+helm", "pump+patch"], 3: ["helm", "sail", "pump+patch"], 4: ["helm", "sail", "pump+patch", "foresail"], 5: ["helm", "sail", "pump+patch", "foresail", "chart"] };
+const JOB_TABLE = { 1: ["all"], 2: ["sail", "helm"], 3: ["sail", "helm", "chart"], 4: ["sail", "helm", "chart", "pump+patch"], 5: ["sail", "helm", "chart", "pump+patch", "foresail"] };
 const DUTY = { all: "everything", helm: "helm", sail: "mainsail", foresail: "foresail", pump: "pump", chart: "chart table", patch: "patching" };
 const jobWords = (job) => job.split("+").map((d) => DUTY[d] ?? d).join(" + ");
 const jobShort = (job) => job.split("+").map((d) => (d === "chart" ? "chart" : DUTY[d] ?? d)).join("+");
@@ -1257,6 +1330,7 @@ function frame(t) {
     syncBirds(cur.players, cur.ships);
     if (!wreckMeshes.size && wrecks.length) syncWrecks();
     updateHud(cur.self, cur.ships);
+    updateGuide(cur);
     sendMove();
     if (cur.self) {
       target = worldOf(cur.self, cur.ships);

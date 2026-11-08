@@ -388,22 +388,21 @@ describe("jobs", { timeout: 60000 }, () => {
 
   it("nudge a body whose job is left unworked at sea, never for a dry pump, and say so in the log", async () => {
     const isl = await fresh();
-    const a = await Walker.join(isl.wsBase, uuid("aaaa0117"));
-    const b = await Walker.join(isl.wsBase, uuid("bbbb0117"));
+    const [a, b, c, d] = await Promise.all(["aaaa0117", "bbbb0117", "cccc0117", "dddd0117"].map((t) => Walker.join(isl.wsBase, uuid(t))));
     const ship = await a.board();
-    await b.board();
+    for (const w of [b, c, d]) expect(await w.board()).toBe(ship);
+    expect((await a.ship(ship)).jobs[d.id]).toBe("pump+patch");
     await a.man("sail");
     a.test({ op: "place", ship, x: 40, y: 24, heading: 0 });
     await settle(2500);
-    expect(b.inbox.filter((m) => m.t === "toast" && /your job is/i.test(m.text)).map((m) => m.text)).toEqual([]);
+    expect(d.inbox.filter((m) => m.t === "toast" && /your job is/i.test(m.text)).map((m) => m.text)).toEqual([]);
     a.test({ op: "place", ship, x: 40, y: 24, heading: 0, water: 30 });
-    const told = await b.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
+    const told = await d.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
     expect(a.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
-    expect(isl.stdout.join("\n")).toMatch(new RegExp(`${b.name}#${b.id} is nudged to the pump of ship ${ship}`));
-    a.close();
-    b.close();
+    expect(isl.stdout.join("\n")).toMatch(new RegExp(`${d.name}#${d.id} is nudged to the pump of ship ${ship}`));
+    for (const w of [a, b, c, d]) w.close();
   });
 });
 

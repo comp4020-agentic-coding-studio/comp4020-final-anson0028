@@ -36,6 +36,21 @@ Option 3. Jobs by order of boarding and crew size:
 | 4 | helm | sail | pump and patch | chart | |
 | 5+ | helm | sail | pump | chart | patch |
 
+Changed 9 November, with the galleon and its first-visit guide: the
+order is now the order a newcomer is led through the ship, mainsail,
+helm, chart table, pump and patching, foresail, and from the sixth,
+patching. A solo sailor's job is still everything, and the guide sends
+them to the mainsail first.
+
+| aboard | first | second | third | fourth | fifth | sixth and on |
+|---|---|---|---|---|---|---|
+| 1 | everything | | | | | |
+| 2 | mainsail | helm | | | | |
+| 3 | mainsail | helm | chart | | | |
+| 4 | mainsail | helm | chart | pump and patch | | |
+| 5 | mainsail | helm | chart | pump and patch | foresail | |
+| 6+ | mainsail | helm | chart | pump | foresail | patch |
+
 When someone steps off or is washed ashore, the rest move up. A body
 whose job is unworked for `JOB_NUDGE_S` while the ship is at sea is told
 so, once per `JOB_NUDGE_S`, and the log says who was nudged to what. The
