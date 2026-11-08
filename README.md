@@ -55,8 +55,7 @@ Each line is a test in `spec/` that runs against the app
 
 Measured, by bot crews of one to four ([how](docs/tuning.md)): every crew
 reaches the near and middle islands; to the far one, a bot alone sank in
-3 of 12 runs, crews of two to four in none of 36 (the October deck; the
-big ship's sweep is in the same file).
+3 of 12 runs, crews of two to four in none of 36.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: three landings, all on
@@ -74,9 +73,6 @@ minutes; thirteen faults were fixed that night
 
 - Accounts. A login slows the start; you type a name and go
   ([decision 4](docs/decisions/0004-names-are-typed.md)).
-- Puzzles that only exactly two people can solve, as in Big Walk. Nothing
-  here unlocks with a headcount, and the job you are given is a suggestion,
-  not a lock.
 - Voice chat. Between people who do not know each other it adds a risk
   that typed words do not.
 - Coins or any reward for a landing. It would move the point of the game
