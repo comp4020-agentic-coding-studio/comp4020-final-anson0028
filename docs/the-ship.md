@@ -254,7 +254,9 @@ one station (1), the block view (2), berths that refill (3), typed names
 (4), a board that ranks nothing (5), notes and no wide channel (6),
 everyone aboard has a job (7).
 
-1. Name: still Earshot, until a better one turns up.
+1. Name: All Hands on Deck, from 8 November. It was Earshot from 5 October, when
+   the one rule was hearing; once the rule became where you stand and what
+   you work, the sailors' call fitted better.
 2. Third person, when the block view lands.
 3. One berth at the pier, refilled ten seconds after its ship is clear
    (`LAUNCH_DELAY_S`), with at most twelve ships in the world (`MAX_SHIPS`)

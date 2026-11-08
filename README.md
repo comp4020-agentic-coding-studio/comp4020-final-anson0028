@@ -1,4 +1,4 @@
-# Earshot
+# All Hands on Deck
 
 On this ship you can only work the station you are standing at. The sail
 rises only while someone holds the mast, the helm turns only while someone
@@ -7,7 +7,7 @@ reaches only people within 8 tiles, a little more than a ship's length.
 One person can sail, badly, running between stations. More hands get
 further, and sink less.
 
-Earshot is a small online co-op game for a room of people. Whoever is here
+All Hands on Deck is a small online co-op game for a room of people. Whoever is here
 crews the ship at the pier, each told which station is theirs in the order
 they boarded,
 and how far they got is kept with their names. Further out the rocks

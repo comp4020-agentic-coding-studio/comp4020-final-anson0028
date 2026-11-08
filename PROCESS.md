@@ -6,7 +6,7 @@ checked, is [`docs/process-log.md`](docs/process-log.md).
 
 ## What I built
 
-Earshot is a harbour with one berth, seen over the shoulder of a block
+All Hands on Deck is a harbour with one berth, seen over the shoulder of a block
 bird with a name you can change. The ship at the pier has four stations,
 sail, helm, chart table and pump; a body works one at a time by standing
 on it, and every station stops when it is left. An unheld helm wanders,

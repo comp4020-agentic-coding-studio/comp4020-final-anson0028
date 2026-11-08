@@ -1,4 +1,4 @@
-# Earshot: rules for working in this repo
+# All Hands on Deck: rules for working in this repo
 
 The idea, from README.md: what you can do and what you know depends on
 where your body is. Every rule here protects that. If a change needs one of
