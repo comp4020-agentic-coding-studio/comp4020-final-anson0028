@@ -264,8 +264,15 @@ per cell, 150 game-seconds each, at five times real time:
 | 5 | middle | 100% | 0% | 0% | 31 | 31 |
 | 5 | far | 100% | 0% | 0% | 75 | 60 |
 
-Nobody sank. What the galleon's ladder measures is time, and the step is
-the second sail: five hands reach the far island in 75 s where one to
+Nobody sank. The bots steer a straight line down the lanes, which is a
+shortcut no person takes: a crew that swerves, overshoots a turn or
+heads for an island by eye crosses the scatter, holes the deck and
+meets the October ladder again, where a bot alone sank three times in
+twelve. The README keeps that October number for the far island because
+it describes the sea a person sails, not the one a straight-line bot
+does; a bot that wandered like a person would be the honest way to
+re-measure it, and is not built. What the galleon's ladder measures is
+time, and the step is the second sail: five hands reach the far island in 75 s where one to
 four take two minutes, and the solo boat ran out of time twice in twelve.
 The near and middle islands are the same trip from the berth now, 27 and
 31 tiles, so their rows match. Bots that steer in straight lines down the
