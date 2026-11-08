@@ -443,12 +443,13 @@ describe("a dropped connection", { timeout: 60000 }, () => {
 });
 
 describe("the galleon", { timeout: 60000 }, () => {
-  it("waits at the jetty: a visitor arrives ashore beside the berthed ship, one press from boarding, and the log says so", async () => {
+  it("waits at the jetty: a visitor arrives ashore at the root of the jetty, walks out to the gangway and boards, and the log says so", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0120"));
     const me = await a.me();
     expect(me.ship).toBeNull();
-    expect(me.x).toBeGreaterThan(16);
+    expect(me.x).toBeGreaterThan(8);
+    expect(me.x).toBeLessThan(13);
     expect(me.y).toBeGreaterThan(30);
     expect(me.y).toBeLessThan(33);
     expect(isl.stdout.join("\n")).toMatch(new RegExp(`${a.name}#${a.id} arrives on the jetty`));

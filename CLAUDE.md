@@ -115,10 +115,12 @@ them broken, change README.md first and say why.
   The spec's fixed positions were checked to be open water under the
   shipped map.
 - Deck coordinates are local to the ship: x in [-8, 10), y in [-3, 4).
-  Stations: helm (-6, 0) and chart (-4, 2) on the quarterdeck, sail (0, 1)
-  on the main deck, pump (3, -2) down in the bilge, foresail (7, 1) on the
-  forecastle (`LAYOUT` names the levels; the client draws them a step up
-  or down, the server moves on one plane). Speed is `MAIN_SHARE` of the
+  Stations: helm (-6, 0) and chart (-4, 2) at the stern, sail (0, 1)
+  amidships, pump (3, -2) beside it, foresail (7, 1) at the bow. The deck
+  is one flat plane (the raised ends and the bilge pit of 8 November were
+  flattened on 9 November; `LAYOUT` still names the places). A visitor
+  arrives at the root of the jetty and walks out to the gangway; stepping
+  off or washing up puts you on the jetty by the gangway. Speed is `MAIN_SHARE` of the
   mainsail plus the rest of the foresail. A visitor arrives on the jetty
   by the gangway (the pier is the lobby: the crew gathers there and boards);
   a known one is where they left. The gangway amidships on the port side

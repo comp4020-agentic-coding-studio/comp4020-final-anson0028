@@ -181,13 +181,21 @@ ws.addEventListener("message", (e) => {
     refused = true;
     if (m.why === "full") return say("The harbour is full right now.");
     if (m.why === "bad_token") return say("This browser's ticket isn't one the harbour issued.");
-    who.textContent = "You're already on the island in another tab.";
+    who.textContent = "Already here in another tab.";
+    const panel = document.createElement("section");
+    panel.className = "twice";
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Already here in another tab");
+    const text = document.createElement("p");
+    text.textContent = "You are already on the pier in another tab of this browser. Play there, or walk in here as a second person.";
     const again = document.createElement("button");
     again.type = "button";
     again.textContent = "Walk here as a second person";
     again.className = "again";
     again.addEventListener("click", () => { sessionStorage.setItem("sibling", crypto.randomUUID()); location.reload(); });
-    who.append(" ", again);
+    panel.append(text, again);
+    document.querySelector("main").append(panel);
+    again.focus();
   }
 });
 
@@ -644,12 +652,7 @@ function makeLabel(text, bg, fg, width = 2.4) {
 
 const tileCentre = (name) => ({ x: stations[name].x + 0.5, y: stations[name].y + 0.5 });
 
-function levelAt(x, y) {
-  if (!layout) return 0;
-  const tx = Math.floor(x), ty = Math.floor(y);
-  const b = layout.bilge;
-  if (tx >= b.x0 && tx < b.x1 && ty >= b.y0 && ty < b.y1) return -0.7;
-  if (tx < layout.quarterdeck.x1 || tx >= layout.forecastle.x0) return 0.5;
+function levelAt() {
   return 0;
 }
 const deckY = (x, y) => DECK_TOP + levelAt(x, y);
@@ -666,30 +669,11 @@ function makeShip() {
   const { minX, maxX, minY, maxY } = deck;
   const d = maxY - minY, cz = (minY + maxY) / 2;
   const PLANK = 0x8a6a3a, HULL = 0x6b4a2e, DARK = 0x5a3d26;
-  const b = layout.bilge;
-  const slabs = [[minX, b.x0, minY, maxY], [b.x0, b.x1, b.y1, maxY], [b.x1, maxX, minY, maxY]];
-  for (const [x0, x1, y0, y1] of slabs) {
-    box(g, x1 - x0, 0.76, y1 - y0, (x0 + x1) / 2, DECK_TOP - 0.42, (y0 + y1) / 2, HULL);
-    const px0 = x0 - (x0 === minX ? 0.05 : 0), px1 = x1 + (x1 === maxX ? 0.05 : 0);
-    box(g, px1 - px0, 0.08, y1 - y0 + 0.1, (px0 + px1) / 2, DECK_TOP - 0.04, (y0 + y1) / 2, PLANK);
-  }
-  box(g, b.x1 - b.x0, 0.06, b.y1 - b.y0, (b.x0 + b.x1) / 2, DECK_TOP - 0.73, (b.y0 + b.y1) / 2, 0x3b2a1a);
-  box(g, b.x1 - b.x0, 0.76, 0.08, (b.x0 + b.x1) / 2, DECK_TOP - 0.42, b.y0 - 0.04, HULL);
-  for (let i = 0; i < 4; i++) box(g, 0.6, 0.04, 0.16, b.x1 - 0.35, DECK_TOP - 0.62 + i * 0.18, b.y1 - 0.12, PLANK);
-  for (const [x0, x1] of [[minX, layout.quarterdeck.x1], [layout.forecastle.x0, maxX]]) {
-    box(g, x1 - x0, 0.42, d, (x0 + x1) / 2, DECK_TOP + 0.21, cz, HULL);
-    box(g, x1 - x0 + 0.1, 0.08, d + 0.1, (x0 + x1) / 2, DECK_TOP + 0.46, cz, PLANK);
-    const stepX = x0 === minX ? x1 + 0.2 : x0 - 0.2;
-    box(g, 0.4, 0.25, d - 0.4, stepX, DECK_TOP + 0.125, cz, DARK);
-  }
-  const railAt = (x0, x1, lvl) => {
-    for (const z of [minY - 0.03, maxY + 0.03]) box(g, x1 - x0, 0.35, 0.1, (x0 + x1) / 2, DECK_TOP + lvl + 0.175, z, DARK);
-  };
-  railAt(minX, layout.quarterdeck.x1, 0.5);
-  railAt(layout.quarterdeck.x1, layout.forecastle.x0, 0);
-  railAt(layout.forecastle.x0, maxX, 0.5);
-  box(g, 0.1, 0.35, d + 0.16, minX - 0.03, DECK_TOP + 0.675, cz, DARK);
-  box(g, 0.1, 0.35, d + 0.16, maxX + 0.03, DECK_TOP + 0.675, cz, DARK);
+  box(g, maxX - minX, 0.76, d, (minX + maxX) / 2, DECK_TOP - 0.42, cz, HULL);
+  box(g, maxX - minX + 0.1, 0.08, d + 0.1, (minX + maxX) / 2, DECK_TOP - 0.04, cz, PLANK);
+  for (const z of [minY - 0.03, maxY + 0.03]) box(g, maxX - minX + 0.16, 0.35, 0.1, (minX + maxX) / 2, DECK_TOP + 0.175, z, DARK);
+  box(g, 0.1, 0.35, d + 0.16, minX - 0.03, DECK_TOP + 0.175, cz, DARK);
+  box(g, 0.1, 0.35, d + 0.16, maxX + 0.03, DECK_TOP + 0.175, cz, DARK);
   box(g, 1.2, 0.5, d - 0.2, maxX + 0.65, DECK_TOP + 0.1, cz, HULL);
   const gw = layout.gangway;
   box(g, gw.x1 - gw.x0, 0.06, 1.4, (gw.x0 + gw.x1) / 2, DECK_TOP - 0.1, gw.y - 0.7, PLANK);
@@ -700,9 +684,9 @@ function makeShip() {
   const q = layout.quarters;
   for (let x = q.x0; x < q.x1; x++) for (let y = q.y0; y < q.y1; y++) {
     if (Object.values(stations).some((st) => st.x === x && st.y === y)) continue;
-    box(g, 0.8, 0.12, 0.5, x + 0.5, DECK_TOP + 0.5 + 0.3, y + 0.5, 0xd9c48a);
-    box(g, 0.06, 0.4, 0.06, x + 0.12, DECK_TOP + 0.5 + 0.2, y + 0.5, DARK);
-    box(g, 0.06, 0.4, 0.06, x + 0.88, DECK_TOP + 0.5 + 0.2, y + 0.5, DARK);
+    box(g, 0.8, 0.12, 0.5, x + 0.5, DECK_TOP + 0.3, y + 0.5, 0xd9c48a);
+    box(g, 0.06, 0.4, 0.06, x + 0.12, DECK_TOP + 0.2, y + 0.5, DARK);
+    box(g, 0.06, 0.4, 0.06, x + 0.88, DECK_TOP + 0.2, y + 0.5, DARK);
   }
   const pads = {};
   for (const name of Object.keys(stations)) {

@@ -9,7 +9,7 @@ const defaults = {
   REPAIR_RATE: 20,
   PUMP_RATE: 3,
   LAUNCH_DELAY_S: 10,
-  DERELICT_S: 300,
+  DERELICT_S: 60,
   JOB_NUDGE_S: 8,
   SIGHT: 8,
   BOARD_RANGE: 6,

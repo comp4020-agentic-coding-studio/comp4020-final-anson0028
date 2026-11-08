@@ -16,7 +16,7 @@ database once it stops. `spec/ship.test.ts` unless noted.
 7. Ships move independently and stop short of each other; the one berth is
    refilled ten seconds after the leaving ship's keel is clear of it, with
    a countdown over everyone waiting, and a ship left empty away from it
-   for five minutes is scuttled.
+   for a minute is scuttled.
 8. An island's first landing is written once, with the crew; later visits
    are counted.
 9. Only a body at the chart table is sent the map.
@@ -42,8 +42,8 @@ database once it stops. `spec/ship.test.ts` unless noted.
 17. A visitor arrives on the jetty beside the berthed ship, one press from
     boarding, and the log says so; the deck is at least 16 tiles long with
     five stations ([decision record 8](decisions/0008-the-galleon.md)).
-18. A word said at the helm reaches the pump down in the bilge, the length
-    of the deck away, and not the jetty beside the ship
+18. A word said at the helm reaches the pump nine tiles away and not the
+    jetty beside the ship
     ([decision record 9](decisions/0009-one-channel-per-place.md)).
 19. Two sails: a body on the mainsail alone moves the ship, and a second
     body on the foresail makes it faster.

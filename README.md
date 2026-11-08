@@ -3,7 +3,7 @@
 On this ship you can only work the station you are standing at. The
 mainsail rises only while someone holds the mast, the helm turns only
 while someone holds the wheel, the map shows only at the chart table,
-the pump runs only while someone is down in the bilge, and what you say
+the pump runs only while someone works it, and what you say
 is heard by your ship and not ashore. One person can sail, badly,
 running the deck. More hands get there faster.
 

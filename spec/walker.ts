@@ -21,6 +21,7 @@ export const ships = (snap: Msg): Ship[] =>
     holders: { sail: sh || null, helm: he || null, chart: ch || null, pump: pu || null, foresail: fs || null },
   }));
 
+export const GANGWAY = { x: 19.5, y: 32.5 };
 export const STATIONS = { helm: { x: -5.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -3.5, y: 2.5 }, pump: { x: 3.5, y: -1.5 }, foresail: { x: 7.5, y: 1.5 } } as const;
 export type Station = keyof typeof STATIONS;
 
@@ -110,6 +111,8 @@ export class Walker {
   }
 
   async board(): Promise<number> {
+    const me = await this.me();
+    if (me.ship === null && Math.hypot(me.x - GANGWAY.x, me.y - GANGWAY.y) > 1) await this.walkTo(GANGWAY.x, GANGWAY.y);
     this.inbox.length = 0;
     this.send({ t: "board" });
     const id = this.id;

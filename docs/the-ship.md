@@ -66,10 +66,10 @@ chart.
   increasing distances, clear lanes between them, and reef fields in the
   open water far from any of them.
 - One ship at the berth, a galleon since 8 November (decision record 8):
-  an 18 by 7 deck in three levels that carries the bodies standing on it.
-  Helm and chart table up on the quarterdeck at the stern, the mainsail on
-  the main deck, the foresail on the forecastle at the bow, the pump down
-  a ladder in the bilge. Helm to pump is 9 tiles, helm to foresail 13, so
+  an 18 by 7 deck that carries the bodies standing on it. Helm and chart
+  table at the stern, the mainsail amidships with the pump beside it, the
+  foresail at the bow (the deck was drawn in three levels for a day and
+  flattened on 9 November). Helm to pump is 9 tiles, helm to foresail 13, so
   the two ends of the ship are out of earshot of each other. Before that
   the deck was 7 by 4 with four stations a few steps apart.
 - A visitor arrives on the jetty by the gangway; the pier is the lobby
@@ -115,7 +115,8 @@ Each of these becomes a test.
 8. Absence. With nobody aboard, a ship stays where it is: the sail loosens,
    and if it is leaking the water keeps rising. The next visitor finds it as
    it was left. A ship that sinks empty leaves a wreck named "nobody
-   aboard". A ship left empty away from the berth for five minutes is
+   aboard". A ship left empty away from the berth for a minute (five until
+   9 November) is
    scuttled without a record (18 October: the harbour had filled with
    drifted hulls).
 9. The jetty. Ships are shared, not owned. There is one berth. Ten seconds

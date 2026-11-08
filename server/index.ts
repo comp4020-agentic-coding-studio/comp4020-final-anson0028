@@ -45,6 +45,10 @@ function logged(entry: LogEntry): void {
 const whoIs = (c: Client) => `${c.name}#${c.id}`;
 function spawnFor(id: string): { x: number; y: number } {
   const k = parseInt(id.slice(0, 4), 16);
+  return { x: 9.6 + (k % 4) * 0.6, y: 30.6 + ((k >> 4) % 4) * 0.6 };
+}
+function gangwaySpot(id: string): { x: number; y: number } {
+  const k = parseInt(id.slice(0, 4), 16);
   return { x: 17.6 + (k % 4) * 0.6, y: 31.3 + ((k >> 4) % 3) * 0.5 };
 }
 const atPier = (s: { x: number; y: number }) => nearestPierDistance(s.x, s.y) <= P.BOARD_RANGE;
@@ -555,7 +559,7 @@ function washUp(c: Client, how: string): void {
   const s = b.ship === null ? undefined : ships.get(b.ship);
   const far = !s || !atPier(s);
   logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? nearestPierDistance(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
-  const spot = spawnFor(c.id);
+  const spot = gangwaySpot(c.id);
   Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
   tellCrewLeft(c, s);
   if (far) send(c.ws, { t: "toast", text: "You swim back to the pier. The ship stays where it is." });
@@ -568,7 +572,7 @@ function sink(s: LiveShip): void {
   const wreck = recordWreck(s.x, s.y, today(), names, nearestPierDistance(s.x, s.y));
   logLine(`ship ${s.id} sinks ${wreck.distance.toFixed(0)} tiles out with ${crew.length ? crew.map(whoIs).join(", ") : "nobody"} aboard; wreck ${wreck.id}`);
   wrecks.push(wreck);
-  crew.forEach((c) => Object.assign(c.body, { ship: null, ...spawnFor(c.id), dx: 0, dy: 0, tx: null, ty: null, holding: false }));
+  crew.forEach((c) => Object.assign(c.body, { ship: null, ...gangwaySpot(c.id), dx: 0, dy: 0, tx: null, ty: null, holding: false }));
   ships.delete(s.id);
   removeShip(s.id);
   broadcast({ t: "wreck", wreck, ship: s.id });
@@ -598,7 +602,7 @@ function loop(): void {
   refillBerths(now);
   for (const c of clients.values()) {
     const b = c.body;
-    if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, ...spawnFor(c.id), holding: false, tx: null, ty: null });
+    if (b.ship !== null && !ships.has(b.ship)) Object.assign(b, { ship: null, ...gangwaySpot(c.id), holding: false, tx: null, ty: null });
     const s = b.ship === null ? undefined : ships.get(b.ship);
     const parked = b.holding && (stationUnder(b) !== null || (s !== undefined && leakUnder(s, b) !== null));
     if (!parked) stepBody(b, now, b.ship !== null ? onDeck : standable);

@@ -87,3 +87,10 @@ beside the ship, one press from the gangway, and the pier is the lobby;
 the countdown to the next ship shows there. Claim 17 and its test
 changed with it. The crew quarters stay on the forecastle as a place to
 stand.
+
+## Flattened: the three levels
+
+The raised quarterdeck and forecastle and the bilge pit lasted a day.
+Played, the steps and the hole read as clutter on a deck people are
+trying to cross quickly, so on 9 November the deck is one plane again;
+the stations keep their places and distances.

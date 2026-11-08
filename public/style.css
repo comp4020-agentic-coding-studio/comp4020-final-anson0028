@@ -55,7 +55,10 @@ nav a[aria-current="page"] { color: #fff; background: var(--ink); }
 
 @media (max-width: 40rem) { .top { flex-wrap: wrap; row-gap: 0.2rem; } .tag { order: 5; flex-basis: 100%; font-size: 0.8rem; } }
 
-.again { font: inherit; font-size: 0.85rem; padding: 0.2rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
+.twice { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9; width: min(28rem, calc(100vw - 2rem)); padding: 1.4rem 1.6rem; border-radius: 1rem; background: var(--card); color: var(--ink); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3); text-align: center; font-size: 1.15rem; line-height: 1.4; }
+.twice p { margin: 0 0 1rem; }
+.again { font: inherit; font-size: 1.1rem; font-weight: 600; padding: 0.7rem 1.2rem; border: 0; border-radius: 999px; background: #2f6f4e; color: #fff; cursor: pointer; }
+.again:focus-visible { outline: 3px solid #f0b94a; outline-offset: 2px; }
 
 main { position: relative; flex: 1; min-height: 0; }
 
