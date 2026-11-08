@@ -669,7 +669,7 @@ function makeShip() {
     box(g, 0.08, 0.08, width + 0.4, at.x, y0 + height - 0.2, at.y + 0.42, DARK);
     const geo = new THREE.PlaneGeometry(width, height - 1.2);
     geo.translate(0, -(height - 1.2) / 2, 0);
-    const cloth = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xf4f1ea, side: THREE.DoubleSide }));
+    const cloth = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xf4f1ea, side: THREE.DoubleSide, transparent: true, opacity: 0.55, depthWrite: false }));
     cloth.rotation.y = Math.PI / 2;
     cloth.position.set(at.x, y0 + height - 0.25, at.y + 0.42);
     g.add(cloth);

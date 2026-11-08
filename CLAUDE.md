@@ -106,8 +106,11 @@ them broken, change README.md first and say why.
   `LANDING_RANGE` of the shore, and the crew are told when the hull is
   stopped or scraped. Reefs start `REEF_FROM` tiles from the jetty,
   thicken by `REEF_SLOPE` to `REEF_MAX`, in clumps with lanes
-  (`REEF_CLUMP`). An unheld helm wanders (`HELM_DRIFT`). The spec's fixed
-  positions were checked to be open water under the shipped map.
+  (`REEF_CLUMP`). An unheld helm wanders (`HELM_DRIFT`) once the ship is
+  more than `HARBOUR_CALM` tiles from the jetty; inside that the water is
+  flat, so a galleon can leave its berth without swinging into the pier.
+  The spec's fixed positions were checked to be open water under the
+  shipped map.
 - Deck coordinates are local to the ship: x in [-8, 10), y in [-3, 4).
   Stations: helm (-6, 0) and chart (-4, 2) on the quarterdeck, sail (0, 1)
   on the main deck, pump (3, -2) down in the bilge, foresail (7, 1) on the

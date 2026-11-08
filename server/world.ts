@@ -266,6 +266,7 @@ export function worldToDeck(s: { x: number; y: number; heading: number }, wx: nu
 }
 
 export const MAIN_SHARE = 0.6;
+export const HARBOUR_CALM = 14;
 
 export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => true): ShipEvent[] {
   const events: ShipEvent[] = [];
@@ -274,7 +275,7 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   s.fore = c.fore ? Math.min(1, (s.fore ?? 0) + P.SAIL_RISE * dt) : Math.max(0, (s.fore ?? 0) - P.SAIL_LOOSEN * dt);
   if (c.helmDir) {
     s.heading += c.helmDir * P.TURN_RATE * dt;
-  } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0) {
+  } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0 && nearestPierDistance(s.x, s.y) > HARBOUR_CALM) {
     s.wander = (s.wander ?? 0) + dt;
     s.heading += P.HELM_DRIFT * Math.sin((s.wander * 2 * Math.PI) / 40 + s.id) * dt;
   }

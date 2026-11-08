@@ -88,7 +88,10 @@ Each of these becomes a test.
 3. Helm. Held with a direction, the ship turns. Unheld, a sailing ship
    wanders: a slow swing either way, so a course set and left drifts off
    over the next half minute. (Changed 12 October: with a heading that held
-   itself, two people were as good as three; see `docs/tuning.md`.)
+   itself, two people were as good as three; see `docs/tuning.md`.
+   Changed 8 November: no wandering within `HARBOUR_CALM` tiles of the
+   jetty, so the galleon leaves its berth straight instead of swinging
+   its stern into the pier.)
 4. Chart. Only a body standing at the chart table is sent the map beyond the
    ship's own sight, and only that body's view switches to the chart.
    Everyone else sees the water around the ship and nothing more.
