@@ -16,7 +16,8 @@ wanting another go. Raph Koster calls fun the pleasure of getting better
 at something (*A Theory of Fun*, 2004), and PEAK's Nick Kaman says the
 point of a co-op game is to hang out with your friends. Fun can only be
 judged, not tested, which is why the judged paragraph below carries the
-most weight. With other people aboard, fun comes down to three things.
+most weight. With other people aboard, fun comes down to the three
+things below.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
 a voice carries a few steps, so a group passes a clue down the line; in
