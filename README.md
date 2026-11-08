@@ -10,8 +10,13 @@ You can talk to your ship, leave a note on the jetty, and wave.
 
 ## What good means here
 
-A game has to be fun first, and with other people aboard, fun comes down
-to three things.
+**A game has to be fun first.** The brief says an app can do everything on
+its list and still not be worth using; for a game, worth using means
+wanting another go. Raph Koster calls fun the pleasure of getting better
+at something (*A Theory of Fun*, 2004), and PEAK's Nick Kaman says the
+point of a co-op game is to hang out with your friends. Fun can only be
+judged, not tested, which is why the judged paragraph below carries the
+most weight. With other people aboard, fun comes down to three things.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
 your voice carries only a few steps, so a big group has to pass a clue from
@@ -89,4 +94,5 @@ minutes; thirteen faults were fixed that night
 - [Big Walk](https://bigwalk.game/presskit/) (House House, 2026) and [its designers in Kotaku](https://kotaku.com/the-creators-of-big-walk-break-down-the-goty-contenders-development-puzzles-and-stunning-ending-2000725133).
 - PEAK (Aggro Crab and Landfall, 2025): [Nick Kaman in PC Gamer](https://pcgamer.com/games/adventure/peak-boss-doesnt-mind-us-calling-it-friendslop-why-not-make-a-game-where-the-point-is-to-hang-out-with-your-friends); [GamingOnLinux on stamina and ropes](https://www.gamingonlinux.com/2025/07/co-op-climbing-game-peak-is-a-truly-great-time-with-friends/).
 - R.E.P.O. (Semiwork, 2025): [PC Gamer on its difficulty](https://www.pcgamer.com/games/horror/repo-will-feature-moon-phases-as-part-of-the-new-update-ramping-up-the-difficulty-every-5-levels).
+- Raph Koster, *A Theory of Fun for Game Design*, Paraglyph Press, 2004.
 - [29 games and papers](docs/research.md); [the class survey](docs/cohort-survey.md).
