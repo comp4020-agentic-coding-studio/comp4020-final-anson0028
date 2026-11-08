@@ -24,7 +24,7 @@ const today = () => process.env.WALK_TODAY ?? canberraDay.format(new Date());
 
 type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number; boardedAt: number; idleSince: number | null; idleJob: string; nudgedAt: number };
 const EMOTES = new Set(["wave", "jump", "yes", "no"]);
-type LiveShip = Ship & { holders: Record<StationName, Client | null>; emptySince?: number };
+type LiveShip = Ship & { holders: Record<StationName, Client | null>; emptySince?: number; patchers?: string[] };
 
 const clients = new Map<WebSocket, Client>();
 const ships = new Map<number, LiveShip>();
@@ -45,7 +45,7 @@ function logged(entry: LogEntry): void {
 const whoIs = (c: Client) => `${c.name}#${c.id}`;
 function spawnFor(id: string): { x: number; y: number } {
   const k = parseInt(id.slice(0, 4), 16);
-  return { x: 9.6 + (k % 4) * 0.6, y: 30.6 + ((k >> 4) % 4) * 0.6 };
+  return { x: 9.6 + (k % 6) * 0.55, y: 30.6 + ((k >> 4) % 4) * 0.6 };
 }
 function gangwaySpot(id: string): { x: number; y: number } {
   const k = parseInt(id.slice(0, 4), 16);
@@ -628,7 +628,8 @@ function loop(): void {
   for (const s of [...ships.values()]) {
     if (s.state === "building") continue;
     const crew = aboard(s);
-    const patching = crew.filter((c) => c.body.holding && stationUnder(c.body) === null).map((c) => ({ x: c.body.x, y: c.body.y }));
+    const patching = crew.filter((c) => c.body.holding && stationUnder(c.body) === null && leakUnder(s, c.body)).map((c) => ({ x: c.body.x, y: c.body.y }));
+    s.patchers = crew.filter((c) => c.body.holding && stationUnder(c.body) === null && leakUnder(s, c.body)).map((c) => c.id);
     const control = { sail: !!s.holders.sail, fore: !!s.holders.foresail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump, patching };
     for (const ev of stepShip(s, control, dt, clearOf(s))) {
       if (ev.kind === "sank") {
@@ -662,7 +663,7 @@ function loop(): void {
     const since = emptySince.get(0);
     const next = since === undefined ? null : Math.max(0, Math.ceil((since + P.LAUNCH_DELAY_S * 1000 - now) / 1000));
     const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq, c.body.ship ?? ""]);
-    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)]), x.landedOn ? islandName(x.landedOn) : "", jobsOf(x), Math.round(x.fore * 100), x.holders.foresail?.id ?? ""]);
+    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)]), x.landedOn ? islandName(x.landedOn) : "", jobsOf(x), Math.round(x.fore * 100), x.holders.foresail?.id ?? "", x.patchers ?? []]);
     const snap = JSON.stringify({ t: "snap", at: now, p, s, next });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }

@@ -138,7 +138,7 @@ ws.addEventListener("message", (e) => {
     clockOffset = Date.now() - m.at;
     nextShip = typeof m.next === "number" ? m.next : null;
     m.players = m.p.map(([id, x, y, , ship]) => ({ id, x: x / 100, y: y / 100, ship: ship === "" ? null : ship, name: roster.get(id)?.name ?? "", hue: roster.get(id)?.hue ?? 0 }));
-    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed, jobs, fore, fs]) => ({ jobs: Object.fromEntries(jobs ?? []), id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, fore: (fore ?? 0) / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, holders: { sail: sh, helm: he, chart: ch, pump: pu, foresail: fs || "" } }));
+    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed, jobs, fore, fs, patchers]) => ({ jobs: Object.fromEntries(jobs ?? []), id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, fore: (fore ?? 0) / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, patchers: patchers ?? [], holders: { sail: sh, helm: he, chart: ch, pump: pu, foresail: fs || "" } }));
     snaps.push(m);
     if (snaps.length > 6) snaps.shift();
   } else if (m.t === "near") {
@@ -162,6 +162,7 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "wreck") {
     wrecks.push(m.wreck);
     const who = m.wreck.crew[0] === "nobody aboard" ? "nobody aboard" : `${m.wreck.crew.join(", ")} aboard`;
+    if (m.ship === aboardNow && aboardNow !== null) toastQueue.splice(0, toastQueue.length, ...toastQueue.filter((t) => !/^Your job/.test(t)));
     if (m.ship === aboardNow && aboardNow !== null) sticky = { ship: m.ship, text: `${shipNames.get(m.ship) ?? "Your ship"} sank ${Math.round(m.wreck.distance)} tiles out with ${who}. You washed up at the pier.`, until: Date.now() + 40000 };
     else say(`${shipNames.get(m.ship) ?? "A ship"} went down ${Math.round(m.wreck.distance)} tiles out with ${who}.`);
   } else if (m.t === "landing") {
@@ -216,6 +217,20 @@ function hideIntro() {
 nameForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const name = nameInput.value.trim();
+  const clean = name.normalize("NFKC").replace(/[^\p{L}\p{N} ]/gu, " ").trim();
+  let err = nameForm.querySelector(".form-error");
+  if (name && !clean) {
+    if (!err) {
+      err = document.createElement("p");
+      err.className = "form-error";
+      err.setAttribute("role", "alert");
+      nameForm.append(err);
+    }
+    err.textContent = "A name needs a letter or a digit.";
+    nameInput.focus();
+    return;
+  }
+  err?.remove();
   if (name && me && name !== me.name && ws.readyState === 1) ws.send(JSON.stringify({ t: "name", name }));
   hideIntro();
 });
@@ -382,8 +397,11 @@ function act(down) {
     if (down) ws.send(JSON.stringify({ t: "board" }));
     return;
   }
-  const self = current()?.self;
-  if (down && atPier && self && !stationUnder(self)) {
+  const cur = current();
+  const self = cur?.self;
+  const ship = selfShip(cur);
+  const onLeak = !!(self && ship && ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y)));
+  if (down && self && !stationUnder(self) && !onLeak) {
     ws.send(JSON.stringify({ t: "ashore" }));
     return;
   }
@@ -396,6 +414,7 @@ window.addEventListener("keydown", (e) => {
   if (e.target instanceof HTMLInputElement) return;
   if (moveKeyOf[e.key]) { e.preventDefault(); moveKeys.add(moveKeyOf[e.key]); sendMove(); }
   if (lookKeyOf[e.key]) { e.preventDefault(); look.add(lookKeyOf[e.key]); }
+  if (e.key === "Enter" && (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement)) return;
   if (e.key === "Enter") { e.preventDefault(); sayInput.focus(); }
   if ((e.key === "e" || e.key === "E") && !e.repeat) { e.preventDefault(); act(true); }
   if (e.key === "?") { e.preventDefault(); showIntro(); }
@@ -516,9 +535,14 @@ function updateGuide(cur) {
     const near = still.find((s) => alongside(self, s));
     const waiting = still.find((s) => jettyDistance(s) <= boardRange);
     to = { x: berth.x, y: (jetty ? jetty.y1 + 1 : berth.y - 4) - 0.5 };
+    const casting = cur.ships.find((s) => s.state !== "building" && (s.sail > 0.05 || s.fore > 0.05) && jettyDistance(s) <= boardRange);
+    const clearing = !casting && cur.ships.find((s) => s.state !== "building" && Math.hypot(s.x - berth.x, s.y - berth.y) > 2 && Math.hypot(s.x - berth.x, s.y - berth.y) <= 24);
     if (near) text = key("Press E to board.", "Tap Use to board.");
     else if (waiting) text = key("Follow the red line to the ship, then press E to board.", "Follow the red line to the ship, then tap Use to board.");
-    else text = typeof nextShip === "number" ? `The ship has left. The next one comes in ${nextShip} s; wait at the end of the line.` : "The ship has left. Wait at the end of the line for the next one.";
+    else if (casting) text = `${shipNames.get(casting.id) ?? "The ship"} is casting off; a moving ship can't be boarded. Wait at the end of the line for the next one.`;
+    else if (typeof nextShip === "number") text = `The next ship comes in ${nextShip} s. Wait at the end of the line.`;
+    else if (clearing) text = `${shipNames.get(clearing.id) ?? "The last ship"} is still clearing the berth. The next ship comes once it is clear.`;
+    else text = "The ship has left. Wait at the end of the line for the next one.";
   } else {
     const ship = cur.ships.find((s) => s.id === self.ship);
     const st = ship ? GUIDE_STATION[ship.jobs[me.id]] : null;
@@ -791,7 +815,7 @@ function syncShips(shipsNow) {
       g.userData.berthSign = null;
       if (signText) {
         const sign = makeLabel(signText, "rgba(47,111,78,0.92)", "#ffffff", Math.min(5, 1.4 + signText.length * 0.08));
-        sign.position.set(0.5, DECK_TOP + 6.2, 0.5);
+        sign.position.set(0.5, DECK_TOP + 2.4, deck.minY - 0.9);
         g.add(sign);
         g.userData.berthSign = sign;
       }
@@ -980,7 +1004,7 @@ const jobWords = (job) => job.split("+").map((d) => DUTY[d] ?? d).join(" + ");
 const jobShort = (job) => job.split("+").map((d) => (d === "chart" ? "chart" : DUTY[d] ?? d)).join("+");
 const nextJob = (n) => (JOB_TABLE[n + 1] ?? [])[n] ?? "patch";
 function jobIdle(ship, job) {
-  return job.split("+").some((d) => (d === "patch" ? ship.leaks.length > 0 : d === "pump" ? ship.water >= 5 && !ship.holders.pump : !ship.holders[d]));
+  return job.split("+").some((d) => (d === "patch" ? ship.leaks.length > 0 && !ship.patchers.length : d === "pump" ? ship.water >= 5 && !ship.holders.pump : !ship.holders[d]));
 }
 let islands = [];
 const flagMeshes = new Map();
@@ -1159,7 +1183,7 @@ function updateHud(self, shipsNow) {
   if (self.ship !== aboardNow) {
     yawOffset = ship ? 0 : lastViewYaw;
     if (ship && !noteForm.hidden) closeNote();
-    sayInput.placeholder = ship ? "Say something (Enter · your ship hears it)" : "Say something (Enter · the shore hears it)";
+    sayInput.placeholder = ship ? "Talk to your ship (Enter)" : "Talk to the shore (Enter)";
   }
   aboardNow = self.ship;
   syncNoteLabels(ship ? null : self);
@@ -1209,12 +1233,13 @@ function updateHud(self, shipsNow) {
   if (!ship) {
     const nearShip = shipsNow.filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05 && alongside(self, s)).sort((p, q) => Math.hypot(p.x - self.x, p.y - self.y) - Math.hypot(q.x - self.x, q.y - self.y))[0];
     const nearName = nearShip ? shipNames.get(nearShip.id) ?? "A ship" : "";
-    if (nearShip && nearShip.id !== lastAlongside) say(`${nearName} is alongside. ${key("Press E", "Tap Use")} to board.`);
+    const leaving = !nearShip && shipsNow.find((s) => s.state !== "building" && (s.sail > 0.05 || s.fore > 0.05) && alongside(self, s));
     lastAlongside = nearShip ? nearShip.id : null;
     if (sticky && Date.now() > sticky.until) sticky = null;
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
     else if (sticky) text = sticky.text;
     else if (nearShip) text = key(`${nearName} is alongside. Press E to board.`, `${nearName} is alongside. Tap Use to board.`);
+    else if (leaving) text = `${shipNames.get(leaving.id) ?? "The ship"} is under way; you can't board a moving ship. The next one comes once it is clear.`;
     else if (typeof nextShip === "number" && Math.hypot(self.x - berth.x, self.y - berth.y) <= 16) text = `Next ship in ${nextShip} s.`;
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
