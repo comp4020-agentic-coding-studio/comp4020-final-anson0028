@@ -85,9 +85,9 @@ Each of these becomes a test.
 1. One body, one station. You hold a station by standing on its tile and
    holding the action key. Stepping off releases it. Two bodies can't hold
    the same station.
-2. Sail. Held, the sail rises over about twelve seconds (four until 9
-   November). Unheld, it loosens over a longer time. Speed follows the
-   sail.
+2. Sail. Held, the sail fills over about four seconds. Unheld, it
+   loosens very slowly, a hundred seconds from full to slack since 9
+   November (twenty before). Speed follows the sail.
 3. Helm. Held with a direction, the ship turns. Unheld, a sailing ship
    wanders: a slow swing either way, so a course set and left drifts off
    over the next half minute. (Changed 12 October: with a heading that held

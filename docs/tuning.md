@@ -282,10 +282,13 @@ east of the berth touched the Middle Island, so that island moved from
 changes: the middle island is three tiles further than it says, and
 nothing else about the sea moved.
 
-`SAIL_RISE` went from 0.25 to 0.08 on 9 November, by hand and by feel,
-Anson's call after sailing the galleon: a sail that filled in four
-seconds made the mast a tap, not a job. At 0.08 it takes about twelve
-seconds of holding to fill, and still loosens at 0.05 a second when let
-go. The sweep 8 times above were measured at 0.25; a solo trip is now a
-few seconds longer per sail raised. Like `REPAIR_RATE`, this is a number
-set by a person, and the table says so.
+On 9 November, by hand and by feel after sailing the galleon, Anson set
+the sail's two speeds the other way round from what the bots had been
+tuned on: held, it fills in four seconds as before (`SAIL_RISE` 0.25);
+let go, it loosens at 0.01 a second (`SAIL_LOOSEN`, from 0.05), so a full
+sail takes a hundred seconds to fall slack and looks almost still. The
+cost is stated here: a body can raise the sail and leave the mast for
+most of a trip, so the mast is now a job you come back to rather than
+one you stand at, and the sweep 8 times above, measured at 0.05, are a
+little slower than the ship now sails. Like `REPAIR_RATE`, this is a
+number set by a person, and the table says so.
