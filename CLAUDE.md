@@ -61,8 +61,11 @@ them broken, change README.md first and say why.
 - After writing a check, break the rule it protects once and watch that test
   go red. If it stays green, the check is wrong, or the rule can't be
   reached.
-- Tuning numbers live in `server/params.ts` and nowhere else. They change by
-  simulation (`pnpm crews`, recorded in `docs/tuning.md`), not by feel. The
+- Tuning numbers live in `server/params.ts` and nowhere else; the shape of
+  the world (`HULL`, `SHIP_CLEARANCE`, `HARBOUR_CALM`, `MAIN_SHARE`, the
+  islands) lives in `server/world.ts`. Tuning numbers change by
+  simulation (`pnpm crews`, recorded in `docs/tuning.md`), not by feel,
+  and the two set by hand (`REPAIR_RATE`, the sail speeds) say so there. The
   spec pins its own fast numbers, so a tuning change never moves a test;
   if it does, the test was about a number, not a rule.
 - Snapshots carry public ids, positions, each body's input number and ship,
@@ -97,7 +100,7 @@ them broken, change README.md first and say why.
   relies on a jetty from x 8 to 30 along y 30 to 32 (`JETTY`, records
   measure distance from `PIER_CENTRE` (9.5, 31.5) at its root), one berth
   at (20, 36.5) heading east along the jetty, and the near island at
-  (34, 20). The berth, once the leaving ship's keel is clear of it, is
+  (44, 14), some 27 tiles from the berthed ship's bow. The berth, once the leaving ship's keel is clear of it, is
   refilled after `LAUNCH_DELAY_S` while the fleet is under `MAX_SHIPS`; a
   ship left empty away from it is scuttled after `DERELICT_S`. Nothing
   lies within 30 tiles of the pier.
@@ -116,16 +119,16 @@ them broken, change README.md first and say why.
   The spec's fixed positions were checked to be open water under the
   shipped map.
 - Deck coordinates are local to the ship: x in [-6, 8), y in [-3, 3).
-  Stations: helm (-5, 0) and chart (-3, 2) at the stern, sail (0, 1)
-  amidships, pump (2, -2) beside it, foresail (5, 1) at the bow. The deck
-  is one flat plane (the raised ends and the bilge pit of 8 November were
-  flattened on 9 November; `LAYOUT` still names the places). A visitor
-  arrives at the root of the jetty and walks out to the gangway; stepping
-  off or washing up puts you on the jetty by the gangway. Speed is `MAIN_SHARE` of the
-  mainsail plus the rest of the foresail. A visitor arrives on the jetty
-  by the gangway (the pier is the lobby: the crew gathers there and boards);
-  a known one is where they left. The gangway amidships on the port side
-  is where E boards and steps off.
+  Stations: helm (-5, 0) and chart (-3, 2) at the stern, `sail` (0, 1)
+  amidships (the mainsail, in every word a player sees), pump (2, -2)
+  beside it, foresail (5, 1) at the bow. The deck is one flat plane (the
+  raised ends and the bilge pit of 8 November were flattened on 9
+  November; `LAYOUT` still names the places). A new visitor arrives at
+  the root of the jetty and walks out to the gangway (the pier is the
+  lobby: the crew gathers there and boards); a known one is where they
+  left; stepping off or washing up puts you on the jetty by the gangway.
+  Speed is `MAIN_SHARE` of the mainsail plus the rest of the foresail. The
+  gangway amidships on the port side is where E boards and steps off.
 - A name is what the visitor typed, cleaned on the server to letters, digits
   and spaces, 16 at most; the bird name is the default. The board is
   `visits` and `wrecks` merged, newest first, 40 on hello. Notes travel in

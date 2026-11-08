@@ -59,8 +59,8 @@ reaches the near and middle islands; to the far one, a bot alone sank in
 deck; the galleon's own sweep is in the same file.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
-pod found the sea too hard, and the board shows it: four landings, all on
-the near island, and six wrecks. The reefs were thinned that night
+pod found the sea too hard, and the board shows it: three landings, all on
+the near island, and seven wrecks. The reefs were thinned that night
 (decision 9). At crit 10 (19 October) a classmate arriving from the link
 said nothing was clear at the start; the first screen became three
 sentences and everyone now gets a job on boarding (decision 10). That

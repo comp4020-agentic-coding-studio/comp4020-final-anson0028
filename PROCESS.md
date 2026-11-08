@@ -10,7 +10,7 @@ deadline. The long one, day by day with every commit, is
 All Hands on Deck is a big ship at a jetty, seen over the shoulder of a
 block bird you can name. You arrive beside the ship and board when you
 choose. Five stations, helm and chart table at the stern, mainsail
-amidships, foresail at the bow, pump in the bilge; each works only while a
+amidships, foresail at the bow, pump beside the mainsail; each works only while a
 body stands on it. Everyone aboard is given a job by the order they
 boarded and a line to walk to it; nothing stops them taking another. A
 word reaches your whole ship and nobody ashore. Rocks hole the deck where
@@ -87,8 +87,8 @@ the first screen and three more played it
 The two crit sessions were the real tests, and the harbour board kept the
 record
 ([`docs/testing/harbour-board-2026-11-09.md`](docs/testing/harbour-board-2026-11-09.md)).
-At crit 9 the group found the sea too hard: four landings that afternoon,
-all on the near island, six wrecks. The reefs were thinned that night. At
+At crit 9 the group found the sea too hard: three landings that afternoon,
+all on the near island, seven wrecks. The reefs were thinned that night. At
 crit 10 a classmate arriving from the link said nothing was clear at the
 start, and the tutor asked that everyone aboard should see what they are
 for; the card became three short paragraphs and everyone now gets a job

@@ -37,6 +37,6 @@ since); Near Island on 12 October by quiet lorikeet (8 visits since).
 12 October was crit 9 and 19 October was crit 10, both Monday afternoons
 with the pod playing from the URL. The 18 October entries are my own, the
 evening the reefs were thinned for the third time. What the two crit days
-show is in `PROCESS.md`: on the 12th, four landings all on the near island
-and six wrecks; on the 19th, four people on the middle island together and
+show is in `PROCESS.md`: on the 12th, three landings all on the near island
+and seven wrecks; on the 19th, four people on the middle island together and
 one sinking, with one person aboard.
