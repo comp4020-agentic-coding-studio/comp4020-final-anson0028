@@ -2,12 +2,12 @@
 
 All Hands on Deck is a sailing game for whoever is online. You start on a
 pier with one ship tied up at it, and whoever turns up is its crew. The ship
-has stations, sail, helm, chart table and pump, and each works only while
-somebody stands at it; step away and it stops. The crew's one goal is to
+has five stations, mainsail, foresail, helm, chart table and pump, and each
+works only while somebody stands at it; step away and it stops. The crew's one goal is to
 find the islands out there and reach them together, past rocks that tear
 holes in the deck. A landing goes on the harbour board with your names.
-You can talk to the people near you, leave a
-note on the ground for whoever comes next, and jump to show you are pleased.
+You can talk to everyone on your ship, leave a note on the jetty for
+whoever comes next, and jump to show you are pleased.
 
 ## What good means here
 
@@ -36,7 +36,7 @@ they are the reason players come back
 **A stranger has to be able to start.** My first two assignments came back
 with the same note, "I can't tell what this is": the agent that wrote them
 had the context and assumed every reader did. So the first screen says what
-the game is in three sentences, the game walks you onto the ship, and it
+the game is in three short paragraphs, the game walks you onto the ship, and it
 gives you a station to start at, so there is something to do
 ([decision 10](docs/decisions/0010-a-stranger-has-to-be-able-to-start.md)).
 
@@ -55,7 +55,8 @@ Each line is a test in `spec/` that runs against the app
 
 Measured, by bot crews of one to four ([how](docs/tuning.md)): every crew
 reaches the near and middle islands; to the far one, a bot alone sank in
-3 of 12 runs, crews of two to four in none of 36.
+3 of 12 runs, crews of two to four in none of 36. That was the October
+deck; the galleon's own sweep is in the same file.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: four landings, all on
@@ -64,7 +65,9 @@ the near island, and six wrecks. The reefs were thinned that night
 said nothing was clear at the start; the first screen became three
 sentences and everyone now gets a job on boarding (decision 10). That
 afternoon four classmates reached the middle island together, and the one
-ship that sank had one person aboard.
+ship that sank had one person aboard. On 9 November four AI testers played
+the galleon for twenty minutes; thirteen faults were fixed that night
+([the report](docs/testing/playtest-2026-11-09.md)).
 
 ## What I didn't build
 
