@@ -6,14 +6,12 @@ has five stations, mainsail, foresail, helm, chart table and pump, and each
 works only while somebody stands at it; step away and it stops. The crew's one goal is to
 find the islands out there and reach them together, past rocks that tear
 holes in the deck. A landing goes on the harbour board with your names.
-You can talk to everyone on your ship, leave a note on the jetty for
-whoever comes next, and jump to show you are pleased.
+You can talk to your ship, leave a note on the jetty, and wave.
 
 ## What good means here
 
-**What you can do, and what you know, depends on where your body is.** A
-game has to be fun first, and with other people aboard that rule makes fun
-come down to three things.
+**What you can do, and what you know, depends on where your body is.**
+With other people aboard, that rule comes down to three things.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
 your voice carries only a few steps, so a big group has to pass a clue from
@@ -29,16 +27,13 @@ leaves a mark.** R.E.P.O. sends stronger monsters the deeper you get.
 Here the rocks get denser the further you sail and tear holes in the deck, so one person has
 to patch the hole while another pumps the water out. Every landing plants a
 flag with the crew's names on the island; every wreck is a line on the
-harbour board, in order of time. Both are still there the next day, and
-they are the reason players come back
+harbour board, in order of time. Both are still there the next day
 ([decision 9](docs/decisions/0009-the-sea-gets-harder.md),
 [decision 5](docs/decisions/0005-the-harbour-board-ranks-nothing.md)).
 
-**A stranger has to be able to start.** My first two assignments came back
-with the same note, "I can't tell what this is": the agent that wrote them
-had the context and assumed every reader did. So the first screen says what
-the game is in three short paragraphs, the game walks you onto the ship, and it
-gives you a station to start at, so there is something to do
+**A stranger has to be able to start.** The first screen says what the
+game is in three short paragraphs, a red line walks you to the ship, and
+you are given a station to start at, so there is something to do
 ([decision 10](docs/decisions/0010-a-stranger-has-to-be-able-to-start.md)).
 
 ## Enforced, and judged
@@ -65,27 +60,26 @@ reaches the near and middle islands; to the far one, a bot alone sank in
 deck; the big ship's own sweep is in the same file.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
-pod found the sea too hard, and the board shows it: four names, three
-landings, all on the near island, and seven wrecks. The reefs were thinned that day
-(sweep 5 in [docs/tuning.md](docs/tuning.md), decision 9). At crit 10 (19 October) a classmate arriving from the link
-said nothing was clear at the start; the first screen became three
-short paragraphs and everyone now gets a job on boarding (decision 10).
-That afternoon six names are on the board; four of them reached the
-middle island together, and the one
-ship that sank had one person aboard. On 9 November four AI testers played
-the galleon for twenty minutes; thirteen faults were fixed that night
+pod found the sea too hard, and the board shows it: three landings, all on
+the near island, and seven wrecks; the reefs were thinned that day (sweep
+5 in [docs/tuning.md](docs/tuning.md), decision 9). At crit 10 (19 October)
+a classmate arriving from the link said nothing was clear at the start;
+the first screen became three short paragraphs and everyone now gets a
+job on boarding (decision 10). That afternoon four of the six names on
+the board reached the middle island together, and the one ship that sank
+had one person aboard. On 9 November four AI testers played for twenty
+minutes; thirteen faults were fixed that night
 ([the report](docs/testing/playtest-2026-11-09.md)).
 
 ## What I didn't build
 
-- Accounts. The thing I weigh most in a game is how fast it opens, and a
-  login would slow the play down. You type a name and go
+- Accounts. A login slows the start; you type a name and go
   ([decision 4](docs/decisions/0004-names-are-typed.md)).
 - Puzzles that only exactly two people can solve, as in Big Walk. Nothing
   here unlocks with a headcount, and the job you are given is a suggestion,
   not a lock.
-- Voice chat. For people who do not know each other well it adds a social
-  risk that typed words do not.
+- Voice chat. Between people who do not know each other it adds a risk
+  that typed words do not.
 - Coins or any reward for a landing. It would move the point of the game
   from a good time with friends to earning coins
   ([decision 11](docs/decisions/0011-no-reward-for-landing.md)).
