@@ -65,7 +65,8 @@ them broken, change README.md first and say why.
   if it does, the test was about a number, not a rule.
 - Snapshots carry public ids, positions, each body's input number and ship,
   and each ship's position, heading, sail, water, hull, open holes, state,
-  holders and jobs. Names and colours travel once, on join.
+  holders, jobs, foresail and its holder. Names and colours travel once,
+  on join.
 - Before a UI change is done: board, walk to a station, raise the sail, turn
   the ship and turn the camera at 390 × 844 by touch (d-pad and drag), at
   1920 × 1080 with a mouse with a resize halfway, and with the keyboard only
@@ -91,20 +92,31 @@ them broken, change README.md first and say why.
   Check memory with `/health` after anything that adds per-player or
   per-ship state.
 - The sea is generated from a fixed seed in `server/world.ts`; the spec
-  relies on the pier at (9.5, 31.5), one berth at (13.5, 32) facing open
-  water, and the near island at (34, 20). The berth, once its ship is
-  clear, is refilled after `LAUNCH_DELAY_S` while the fleet is under
-  `MAX_SHIPS`; a ship left empty away from it is scuttled after
-  `DERELICT_S`. Nothing lies within 30 tiles of the pier.
-- A ship is three points, centre, bow 3.5 ahead and stern 2.5 behind. Land
-  and reefs are checked at all three, ships keep 5 tiles between centres
-  (`SHIP_CLEARANCE`), and the crew are told when the hull is stopped or
-  scraped. Reefs start `REEF_FROM` tiles from the pier, thicken by
-  `REEF_SLOPE` to `REEF_MAX`, in clumps with lanes (`REEF_CLUMP`). An
-  unheld helm wanders (`HELM_DRIFT`). The spec's fixed positions were
-  checked to be open water under the shipped map.
-- Deck coordinates are local to the ship: x in [-3, 4), y in [-2, 2).
-  Stations: helm (-3, 0), sail (0, 1), chart (3, 0), pump (0, -2).
+  relies on a jetty from x 8 to 30 along y 30 to 32 (`JETTY`, records
+  measure distance from `PIER_CENTRE` (9.5, 31.5) at its root), one berth
+  at (20, 36.5) heading east along the jetty, and the near island at
+  (34, 20). The berth, once the leaving ship's keel is clear of it, is
+  refilled after `LAUNCH_DELAY_S` while the fleet is under `MAX_SHIPS`; a
+  ship left empty away from it is scuttled after `DERELICT_S`. Nothing
+  lies within 30 tiles of the pier.
+- A ship is a galleon (decision record 8): five keel points from stern
+  8.5 behind the centre to bow 10.5 ahead (`HULL`). Land and reefs are
+  checked at all five, ships keep `SHIP_CLEARANCE` between keels (the
+  distance between the two segments), a landing is any keel point within
+  `LANDING_RANGE` of the shore, and the crew are told when the hull is
+  stopped or scraped. Reefs start `REEF_FROM` tiles from the jetty,
+  thicken by `REEF_SLOPE` to `REEF_MAX`, in clumps with lanes
+  (`REEF_CLUMP`). An unheld helm wanders (`HELM_DRIFT`). The spec's fixed
+  positions were checked to be open water under the shipped map.
+- Deck coordinates are local to the ship: x in [-8, 10), y in [-3, 4).
+  Stations: helm (-6, 0) and chart (-4, 2) on the quarterdeck, sail (0, 1)
+  on the main deck, pump (3, -2) down in the bilge, foresail (7, 1) on the
+  forecastle (`LAYOUT` names the levels; the client draws them a step up
+  or down, the server moves on one plane). Speed is `MAIN_SHARE` of the
+  mainsail plus the rest of the foresail. Helm to pump is 9.2 tiles, so a
+  word at the wheel does not reach the bilge. A new visitor wakes in the
+  crew quarters of the ship at the berth; a known one is where they left.
+  The gangway amidships on the port side is where E boards and steps off.
 - A name is what the visitor typed, cleaned on the server to letters, digits
   and spaces, 16 at most; the bird name is the default. The board is
   `visits` and `wrecks` merged, newest first, 40 on hello. Notes travel in

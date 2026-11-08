@@ -62,14 +62,19 @@ chart.
 
 ## The world
 
-- A sea of tiles: a harbour with a pier, islands at increasing distances,
-  clear lanes between them, and reef fields in the open water far from any
-  of them.
-- Several ships moored at the pier (three to start). Any crew can take any
-  free one. Each ship is a small deck (about 7 by 4 tiles) that carries the
-  bodies standing on it, with stations at least three tiles apart: sail,
-  helm, chart table, pump.
-- You walk on the deck, and onto the pier when the ship is docked.
+- A sea of tiles: a harbour with a jetty along the shore, islands at
+  increasing distances, clear lanes between them, and reef fields in the
+  open water far from any of them.
+- One ship at the berth, a galleon since 8 November (decision record 8):
+  an 18 by 7 deck in three levels that carries the bodies standing on it.
+  Helm and chart table up on the quarterdeck at the stern, the mainsail on
+  the main deck, the foresail on the forecastle at the bow, the pump down
+  a ladder in the bilge. Helm to pump is 9 tiles, helm to foresail 13, so
+  the two ends of the ship are out of earshot of each other. Before that
+  the deck was 7 by 4 with four stations a few steps apart.
+- A new visitor wakes in the crew quarters on the forecastle. You walk on
+  the deck, and across the gangway onto the jetty when the ship is
+  alongside it.
 
 ## Rules
 
@@ -108,24 +113,30 @@ Each of these becomes a test.
    aboard". A ship left empty away from the berth for five minutes is
    scuttled without a record (18 October: the harbour had filled with
    drifted hulls).
-9. The pier. Ships are shared, not owned. There is one berth. Ten seconds
-   after its ship is clear of it a new one is launched, and everyone not
-   aboard sees the countdown over their head; ships at sea stay where they
-   were left, up to a cap on the fleet. Boarding is E beside the ship,
-   within five tiles or so.
+9. The jetty. Ships are shared, not owned. There is one berth. Ten seconds
+   after the leaving ship's keel is clear of it a new one is launched, and
+   everyone not aboard sees the countdown over their head; ships at sea
+   stay where they were left, up to a cap on the fleet. Boarding is E on
+   the jetty within six tiles of the hull.
 10. Talking is unchanged: a bubble reaches 8 tiles. Aboard, that is the whole
     ship. Ship to ship, and ship to shore, it isn't.
 11. Hulls are solid. A ship stops short of another ship and of the shore,
-    the hull is checked at bow, centre and stern, and the crew are told when
-    it is stopped or scraped.
+    the hull is checked at five points along the keel, a landing is the bow
+    touching the shore, and the crew are told when the hull is stopped or
+    scraped. A reef under the beam, off the keel line, does nothing; the
+    check is a line, not the whole footprint.
 12. Jobs, 23 October. Everyone aboard is given a job by the order they
     boarded: alone, everything; two, sail and helm then pump and patching;
-    three, helm, sail, pump and patching; four adds the chart table; from
-    five, the pump alone and the rest patch. The rest move up when one
+    three, helm, sail, pump and patching; four adds the foresail; five adds
+    the chart table; from six, the pump alone and the rest patch. The rest move up when one
     steps off. Jobs show over heads, in a crew line under the status (red
     when nobody is on one), and on the ship at the pier as the job the next
     body aboard will take. A body holding nothing whose job is unworked at
     sea for eight seconds is told so. Jobs are advice, never a lock.
+13. Two sails, 8 November. The mainsail gives six tenths of the speed and
+    the foresail the rest; each rises only while held and loosens when
+    left. One body on the mainsail moves the ship; it takes a second body
+    at the bow, out of earshot of the helm, to get full speed.
 
 ## What each extra body adds
 

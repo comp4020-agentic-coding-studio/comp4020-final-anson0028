@@ -14,9 +14,9 @@ database once it stops. `spec/ship.test.ts` unless noted.
    nothing can change or delete.
 6. A ship nobody is aboard keeps running down.
 7. Ships move independently and stop short of each other; the one berth is
-   refilled ten seconds after its ship is clear of it, with a countdown over
-   everyone waiting, and a ship left empty away from it for five minutes is
-   scuttled.
+   refilled ten seconds after the leaving ship's keel is clear of it, with
+   a countdown over everyone waiting, and a ship left empty away from it
+   for five minutes is scuttled.
 8. An island's first landing is written once, with the crew; later visits
    are counted.
 9. Only a body at the chart table is sent the map.
@@ -30,13 +30,20 @@ database once it stops. `spec/ship.test.ts` unless noted.
     writer.
 14. A word reaches everyone within earshot and nobody else, whatever the
     client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
-15. The pier is the only way on or off a ship: E boards one alongside and
+15. The jetty is the only way on or off a ship: E boards one alongside and
     steps off one there; nothing leaves a ship at sea but a sinking.
 16. Everyone aboard has a job, given by the order they boarded and sent to
     every client in the snapshot (the page shows it over each head and in
     the crew list); a job left unworked at sea is named to its owner, and
     nothing stops anyone working any station
     ([decision record 7](decisions/0007-everyone-aboard-has-a-job.md)).
+17. A new visitor wakes aboard the ship at the berth, in the crew quarters,
+    and the log says so; the deck is at least 16 tiles long with five
+    stations ([decision record 8](decisions/0008-the-galleon.md)).
+18. A word said at the helm reaches the chart table beside it and not the
+    pump down in the bilge, 9 tiles away.
+19. Two sails: a body on the mainsail alone moves the ship, and a second
+    body on the foresail makes it faster.
 
 The red runs that showed each test failing first are in
 [`red-runs.md`](red-runs.md).
