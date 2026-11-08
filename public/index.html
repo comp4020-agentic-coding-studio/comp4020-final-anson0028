@@ -21,7 +21,7 @@
     <main>
       <h1 class="sr-only">Earshot</h1>
       <p id="loading" class="loading" role="status">Loading the harbour…</p>
-      <canvas id="view" role="application" aria-label="The harbour and the sea, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to board at the pier, step off there, or use what you stand on." tabindex="0"></canvas>
+      <canvas id="view" role="application" aria-label="The deck of a galleon at the pier, seen over your bird's shoulder. WASD to walk, arrow keys to look, E to work the station you stand on; at the pier, E to board or to step off." tabindex="0"></canvas>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
       <div id="status" class="status" aria-live="polite" hidden></div>
       <div id="hint" class="hint" aria-live="polite" hidden></div>
@@ -40,9 +40,9 @@
       <section id="intro" class="intro" aria-label="Welcome" hidden>
         <div class="intro-card">
           <h2>Earshot</h2>
-          <p>A small online co-op game. You and whoever else is here right now crew the one ship at the pier, and the more of you aboard, the further it gets.</p>
-          <p>You can only work the station you stand at. Walk up to the ship and press E to board; you are told which station is yours. Stand at it and hold E: sail, helm, chart table or pump. Every station stops the moment it is left.</p>
-          <p>The harbour board lists how far each crew got, with their names.</p>
+          <p>A small online co-op game. You are a block bird, and you wake in the crew quarters of a galleon at the pier, with whoever else is online. The more of you aboard, the safer the trip.</p>
+          <p>You can only work the station you stand at, and you only hear people within a ship's length. The helm and chart table are up on the quarterdeck, the mainsail on the main deck, the foresail at the bow, and the pump is down a ladder in the bilge, out of earshot of the deck. You are told which station is yours. Stand at it and hold E; every station stops the moment it is left. Rocks hole the deck; stand on the hole to patch it.</p>
+          <p>The harbour board lists how far each crew got, with their names. Press E by the gangway to step onto the pier, and again to come back aboard.</p>
           <p class="keys">WASD or tap to walk · arrows or drag to look · E boards and works a station · N leaves a note · H waves · Y and B nod and shake</p>
           <form id="name-form" class="name-form" autocomplete="off">
             <label for="name">What should the crew call you?</label>

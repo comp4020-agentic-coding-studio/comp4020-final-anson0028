@@ -33,6 +33,10 @@ const noteButton = document.getElementById("note");
 
 let me = null;
 let deck = null;
+let layout = null;
+let hullShape = { bow: 10.5, stern: 8.5, keel: 0.5 };
+let jetty = null;
+let berth = { x: 20, y: 36.5 };
 let stations = null;
 let leakCap = 40;
 let patchStart = null;
@@ -92,6 +96,10 @@ ws.addEventListener("message", (e) => {
   if (m.t === "hello") {
     me = m.you;
     deck = m.deck;
+    layout = m.layout ?? layout;
+    hullShape = m.hull ?? hullShape;
+    jetty = m.jetty ?? jetty;
+    berth = m.berth ?? berth;
     stations = m.stations;
     leakCap = m.leakCap ?? 40;
     pierAt = m.pier ?? pierAt;
@@ -112,7 +120,7 @@ ws.addEventListener("message", (e) => {
     nameInput.value = me.name;
     drawBoard();
     if (!seenIntro()) showIntro();
-    else say(`Welcome ashore. ${m.ships.length} ship${m.ships.length === 1 ? "" : "s"} at the pier, ${wrecks.length} wreck${wrecks.length === 1 ? "" : "s"} out there.`);
+    else say(`Welcome back. ${wrecks.length} wreck${wrecks.length === 1 ? "" : "s"} out there, ${landings.length} island${landings.length === 1 ? "" : "s"} reached.`);
   } else if (m.t === "join") {
     roster.set(m.id, m);
   } else if (m.t === "rename") {
@@ -133,7 +141,7 @@ ws.addEventListener("message", (e) => {
     clockOffset = Date.now() - m.at;
     nextShip = typeof m.next === "number" ? m.next : null;
     m.players = m.p.map(([id, x, y, , ship]) => ({ id, x: x / 100, y: y / 100, ship: ship === "" ? null : ship, name: roster.get(id)?.name ?? "", hue: roster.get(id)?.hue ?? 0 }));
-    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed, jobs]) => ({ jobs: Object.fromEntries(jobs ?? []), id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, holders: { sail: sh, helm: he, chart: ch, pump: pu } }));
+    m.ships = m.s.map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, landed, jobs, fore, fs]) => ({ jobs: Object.fromEntries(jobs ?? []), id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, fore: (fore ?? 0) / 100, water, state, hull: hull ?? 0, leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })), landed: landed || null, holders: { sail: sh, helm: he, chart: ch, pump: pu, foresail: fs || "" } }));
     snaps.push(m);
     if (snaps.length > 6) snaps.shift();
   } else if (m.t === "near") {
@@ -571,73 +579,115 @@ function makeLabel(text, bg, fg, width = 2.4) {
 
 const tileCentre = (name) => ({ x: stations[name].x + 0.5, y: stations[name].y + 0.5 });
 
+function levelAt(x, y) {
+  if (!layout) return 0;
+  const tx = Math.floor(x), ty = Math.floor(y);
+  const b = layout.bilge;
+  if (tx >= b.x0 && tx < b.x1 && ty >= b.y0 && ty < b.y1) return -0.7;
+  if (tx < layout.quarterdeck.x1 || tx >= layout.forecastle.x0) return 0.5;
+  return 0;
+}
+const deckY = (x, y) => DECK_TOP + levelAt(x, y);
+
+function box(g, w, h, d, x, y, z, color, extra) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color, extra));
+  m.position.set(x, y, z);
+  g.add(m);
+  return m;
+}
+
 function makeShip() {
   const g = new THREE.Group();
-  const w = deck.maxX - deck.minX, d = deck.maxY - deck.minY;
-  const cx = (deck.minX + deck.maxX) / 2, cz = (deck.minY + deck.maxY) / 2;
-  const hull = new THREE.Mesh(new THREE.BoxGeometry(w, 0.76, d), mat(0x6b4a2e));
-  hull.position.set(cx, DECK_TOP - 0.42, cz);
-  g.add(hull);
-  const top = new THREE.Mesh(new THREE.BoxGeometry(w + 0.2, 0.08, d + 0.2), mat(0x8a6a3a));
-  top.position.set(cx, DECK_TOP - 0.04, cz);
-  g.add(top);
-  for (const [sx, sz, lx, lz] of [[w + 0.16, 0.1, cx, deck.minY - 0.03], [w + 0.16, 0.1, cx, deck.maxY + 0.03], [0.1, d + 0.16, deck.minX - 0.03, cz], [0.1, d + 0.16, deck.maxX + 0.03, cz]]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(sx, 0.35, sz), mat(0x5a3d26));
-    rail.position.set(lx, DECK_TOP + 0.175, lz);
-    g.add(rail);
+  const { minX, maxX, minY, maxY } = deck;
+  const d = maxY - minY, cz = (minY + maxY) / 2;
+  const PLANK = 0x8a6a3a, HULL = 0x6b4a2e, DARK = 0x5a3d26;
+  const b = layout.bilge;
+  const slabs = [[minX, b.x0, minY, maxY], [b.x0, b.x1, b.y1, maxY], [b.x1, maxX, minY, maxY]];
+  for (const [x0, x1, y0, y1] of slabs) {
+    box(g, x1 - x0, 0.76, y1 - y0, (x0 + x1) / 2, DECK_TOP - 0.42, (y0 + y1) / 2, HULL);
+    box(g, x1 - x0 + (x0 === minX || x1 === maxX ? 0.1 : 0), 0.08, y1 - y0 + 0.1, (x0 + x1) / 2, DECK_TOP - 0.04, (y0 + y1) / 2, PLANK);
   }
-  const water = new THREE.Mesh(new THREE.BoxGeometry(w - 0.2, 1, d - 0.2), mat(0x2e6ea8, { transparent: true, opacity: 0.6 }));
-  water.position.set(cx, DECK_TOP, cz);
+  box(g, b.x1 - b.x0, 0.06, b.y1 - b.y0, (b.x0 + b.x1) / 2, DECK_TOP - 0.73, (b.y0 + b.y1) / 2, 0x3b2a1a);
+  box(g, b.x1 - b.x0, 0.76, 0.08, (b.x0 + b.x1) / 2, DECK_TOP - 0.42, b.y0 - 0.04, HULL);
+  for (let i = 0; i < 4; i++) box(g, 0.6, 0.04, 0.16, b.x1 - 0.35, DECK_TOP - 0.62 + i * 0.18, b.y1 - 0.12, PLANK);
+  for (const [x0, x1] of [[minX, layout.quarterdeck.x1], [layout.forecastle.x0, maxX]]) {
+    box(g, x1 - x0, 0.5, d, (x0 + x1) / 2, DECK_TOP + 0.25, cz, HULL);
+    box(g, x1 - x0 + 0.1, 0.08, d + 0.1, (x0 + x1) / 2, DECK_TOP + 0.46, cz, PLANK);
+    const stepX = x0 === minX ? x1 + 0.2 : x0 - 0.2;
+    box(g, 0.4, 0.25, d - 0.4, stepX, DECK_TOP + 0.125, cz, DARK);
+  }
+  const railAt = (x0, x1, lvl) => {
+    for (const z of [minY - 0.03, maxY + 0.03]) box(g, x1 - x0, 0.35, 0.1, (x0 + x1) / 2, DECK_TOP + lvl + 0.175, z, DARK);
+  };
+  railAt(minX, layout.quarterdeck.x1, 0.5);
+  railAt(layout.quarterdeck.x1, layout.forecastle.x0, 0);
+  railAt(layout.forecastle.x0, maxX, 0.5);
+  box(g, 0.1, 0.35, d + 0.16, minX - 0.03, DECK_TOP + 0.675, cz, DARK);
+  box(g, 0.1, 0.35, d + 0.16, maxX + 0.03, DECK_TOP + 0.675, cz, DARK);
+  box(g, 1.2, 0.5, d, maxX + 0.6, DECK_TOP + 0.1, cz, HULL);
+  const gw = layout.gangway;
+  box(g, gw.x1 - gw.x0, 0.06, 1.4, (gw.x0 + gw.x1) / 2, DECK_TOP - 0.1, gw.y - 0.7, PLANK);
+  const water = new THREE.Mesh(new THREE.BoxGeometry(maxX - minX - 0.2, 1, d - 0.2), mat(0x2e6ea8, { transparent: true, opacity: 0.6 }));
+  water.position.set((minX + maxX) / 2, DECK_TOP, cz);
   water.visible = false;
   g.add(water);
+  const q = layout.quarters;
+  for (let x = q.x0; x < q.x1; x++) for (let y = q.y0; y < q.y1; y++) {
+    if (Object.values(stations).some((st) => st.x === x && st.y === y)) continue;
+    box(g, 0.8, 0.12, 0.5, x + 0.5, DECK_TOP + 0.5 + 0.3, y + 0.5, 0xd9c48a);
+    box(g, 0.06, 0.4, 0.06, x + 0.12, DECK_TOP + 0.5 + 0.2, y + 0.5, DARK);
+    box(g, 0.06, 0.4, 0.06, x + 0.88, DECK_TOP + 0.5 + 0.2, y + 0.5, DARK);
+  }
   const pads = {};
   for (const name of Object.keys(stations)) {
     const c = tileCentre(name);
     const padMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.92), mat(0xd9c48a));
     padMesh.rotation.x = -Math.PI / 2;
-    padMesh.position.set(c.x, DECK_TOP + 0.01, c.y);
+    padMesh.position.set(c.x, deckY(c.x, c.y) + 0.01, c.y);
     g.add(padMesh);
     pads[name] = padMesh;
     padMesh.userData.spot = c;
     const sign = makeLabel(stationLabel[name], "rgba(21,23,28,0.55)", "#ffffff", 1.5);
-    sign.position.set(c.x, DECK_TOP + 1.05, c.y);
+    sign.position.set(c.x, deckY(c.x, c.y) + 1.05, c.y);
     sign.userData.spot = c;
     g.add(sign);
   }
   const helm = tileCentre("helm");
-  const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.1), mat(0x5a3d26));
-  post.position.set(helm.x + 0.42, DECK_TOP + 0.5, helm.y);
-  g.add(post);
+  const hy = deckY(helm.x, helm.y);
+  box(g, 0.1, 1.0, 0.1, helm.x + 0.42, hy + 0.5, helm.y, DARK);
   const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.05, 8, 18), mat(0x3b2a1a));
   wheel.rotation.y = Math.PI / 2;
-  wheel.position.set(helm.x + 0.42, DECK_TOP + 1.2, helm.y);
+  wheel.position.set(helm.x + 0.42, hy + 1.2, helm.y);
   g.add(wheel);
-  const sailAt = tileCentre("sail");
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.4, 8), mat(0x5a3d26));
-  mast.position.set(sailAt.x, DECK_TOP + 1.7, sailAt.y + 0.42);
-  g.add(mast);
-  const sailGeo = new THREE.PlaneGeometry(1.6, 2.4);
-  sailGeo.translate(0, -1.2, 0);
-  const sail = new THREE.Mesh(sailGeo, new THREE.MeshBasicMaterial({ color: 0xf4f1ea, side: THREE.DoubleSide }));
-  sail.rotation.y = Math.PI / 2;
-  sail.position.set(sailAt.x, DECK_TOP + 3.3, sailAt.y + 0.42);
-  g.add(sail);
+  const rig = (name, height, width) => {
+    const at = tileCentre(name);
+    const y0 = deckY(at.x, at.y);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, height, 8), mat(DARK));
+    mast.position.set(at.x, y0 + height / 2, at.y + 0.42);
+    g.add(mast);
+    box(g, 0.08, 0.08, width + 0.4, at.x, y0 + height - 0.2, at.y + 0.42, DARK);
+    const geo = new THREE.PlaneGeometry(width, height - 1.2);
+    geo.translate(0, -(height - 1.2) / 2, 0);
+    const cloth = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xf4f1ea, side: THREE.DoubleSide }));
+    cloth.rotation.y = Math.PI / 2;
+    cloth.position.set(at.x, y0 + height - 0.25, at.y + 0.42);
+    g.add(cloth);
+    return cloth;
+  };
+  const sail = rig("sail", 5.2, 3.4);
+  const fore = rig("foresail", 4.2, 2.6);
   const chartAt = tileCentre("chart");
-  const table = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.5, 0.8), mat(0x5c4a2a));
-  table.position.set(chartAt.x + 0.28, DECK_TOP + 0.25, chartAt.y);
-  g.add(table);
+  const cy = deckY(chartAt.x, chartAt.y);
+  box(g, 0.36, 0.5, 0.8, chartAt.x + 0.28, cy + 0.25, chartAt.y, 0x5c4a2a);
   const paper = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.7), mat(0xe9dcbf));
   paper.rotation.x = -Math.PI / 2;
-  paper.position.set(chartAt.x + 0.28, DECK_TOP + 0.51, chartAt.y);
+  paper.position.set(chartAt.x + 0.28, cy + 0.51, chartAt.y);
   g.add(paper);
   const pumpAt = tileCentre("pump");
-  const pump = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.3), mat(0x4a4a4a));
-  pump.position.set(pumpAt.x, DECK_TOP + 0.25, pumpAt.y - 0.3);
-  g.add(pump);
-  const handle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), mat(0x8a6a3a));
-  handle.position.set(pumpAt.x, DECK_TOP + 0.75, pumpAt.y - 0.3);
-  g.add(handle);
-  g.userData = { water, pads, sail, leaks: new Map() };
+  const py = deckY(pumpAt.x, pumpAt.y);
+  box(g, 0.5, 0.5, 0.3, pumpAt.x, py + 0.25, pumpAt.y - 0.3, 0x4a4a4a);
+  box(g, 0.08, 0.5, 0.08, pumpAt.x, py + 0.75, pumpAt.y - 0.3, PLANK);
+  g.userData = { water, pads, sail, fore, leaks: new Map() };
   return g;
 }
 
@@ -647,9 +697,9 @@ function leakPatch(g, l) {
   if (!patch) {
     patch = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.92), mat(0x7a1a1a));
     patch.rotation.x = -Math.PI / 2;
-    patch.position.set(l.x + 0.5, DECK_TOP + 0.012, l.y + 0.5);
+    patch.position.set(l.x + 0.5, deckY(l.x + 0.5, l.y + 0.5) + 0.012, l.y + 0.5);
     const sign = makeLabel("hole", "rgba(122,26,26,0.8)", "#ffffff", 1.2);
-    sign.position.set(l.x + 0.5, DECK_TOP + 0.8, l.y + 0.5);
+    sign.position.set(l.x + 0.5, deckY(l.x + 0.5, l.y + 0.5) + 0.8, l.y + 0.5);
     patch.userData.sign = sign;
     patch.userData.spot = sign.userData.spot = { x: l.x + 0.5, y: l.y + 0.5 };
     g.add(patch, sign);
@@ -683,7 +733,7 @@ function syncShips(shipsNow) {
       scene.add(g);
     }
     g.position.set(s.x, 0, s.y);
-    const atBerth = s.sail <= 0.05 && Math.hypot(s.x - pierAt.x, s.y - pierAt.y) <= 6;
+    const atBerth = s.sail <= 0.05 && s.fore <= 0.05 && Math.hypot(s.x - berth.x, s.y - berth.y) <= 2;
     const n = Object.keys(s.jobs).length;
     const signText = atBerth ? `${shipNames.get(s.id) ?? "Ship"} · ${n} aboard · next aboard: ${jobWords(nextJob(n))}` : "";
     if (g.userData.signText !== signText) {
@@ -691,7 +741,7 @@ function syncShips(shipsNow) {
       g.userData.berthSign = null;
       if (signText) {
         const sign = makeLabel(signText, "rgba(47,111,78,0.92)", "#ffffff", Math.min(5, 1.4 + signText.length * 0.08));
-        sign.position.set(0.5, DECK_TOP + 2.6, 0);
+        sign.position.set(0.5, DECK_TOP + 6.2, 0.5);
         g.add(sign);
         g.userData.berthSign = sign;
       }
@@ -699,6 +749,7 @@ function syncShips(shipsNow) {
     }
     g.rotation.y = -s.heading;
     g.userData.sail.scale.y = Math.max(0.03, s.sail);
+    g.userData.fore.scale.y = Math.max(0.03, s.fore);
     const h = 0.45 * (s.water / 100);
     g.userData.water.visible = s.water > 1;
     g.userData.water.scale.y = Math.max(0.01, h);
@@ -781,7 +832,7 @@ function animateEmote(g, now) {
 }
 
 function groundHeight(p) {
-  if (p.ship !== null) return DECK_TOP;
+  if (p.ship !== null) return deckY(p.x, p.y);
   const kind = ground.get(`${Math.floor(p.x)},${Math.floor(p.y)}`);
   return TOP[kind] ?? TOP[PIER];
 }
@@ -832,7 +883,7 @@ function syncBirds(players, shipsNow) {
       g.userData.bubble = null;
       g.userData.bubbleText = "";
     }
-    const waitText = p.ship === null && typeof nextShip === "number" && Math.hypot(w.x - pierAt.x, w.y - pierAt.y) <= 12 ? `next ship in ${nextShip} s` : "";
+    const waitText = p.ship === null && typeof nextShip === "number" && Math.hypot(w.x - berth.x, w.y - berth.y) <= 16 ? `next ship in ${nextShip} s` : "";
     if (g.userData.waitText !== waitText) {
       if (g.userData.wait) g.remove(g.userData.wait);
       g.userData.wait = null;
@@ -873,8 +924,8 @@ function syncWrecks() {
   }
 }
 
-const JOB_TABLE = { 1: ["all"], 2: ["sail+helm", "pump+patch"], 3: ["helm", "sail", "pump+patch"], 4: ["helm", "sail", "pump+patch", "chart"] };
-const DUTY = { all: "everything", helm: "helm", sail: "sail", pump: "pump", chart: "chart table", patch: "patching" };
+const JOB_TABLE = { 1: ["all"], 2: ["sail+helm", "pump+patch"], 3: ["helm", "sail", "pump+patch"], 4: ["helm", "sail", "pump+patch", "foresail"], 5: ["helm", "sail", "pump+patch", "foresail", "chart"] };
+const DUTY = { all: "everything", helm: "helm", sail: "mainsail", foresail: "foresail", pump: "pump", chart: "chart table", patch: "patching" };
 const jobWords = (job) => job.split("+").map((d) => DUTY[d] ?? d).join(" + ");
 const jobShort = (job) => job.split("+").map((d) => (d === "chart" ? "chart" : DUTY[d] ?? d)).join("+");
 const nextJob = (n) => (JOB_TABLE[n + 1] ?? [])[n] ?? "patch";
@@ -1027,7 +1078,21 @@ function resize() {
 window.addEventListener("resize", resize);
 resize();
 
-const stationLabel = { helm: "helm", sail: "sail", chart: "chart table", pump: "pump" };
+const stationLabel = { helm: "helm", sail: "mainsail", chart: "chart table", pump: "pump", foresail: "foresail" };
+function jettyDistance(p) {
+  if (!jetty) return Math.hypot(p.x - pierAt.x, p.y - pierAt.y);
+  const cx = Math.min(jetty.x1 + 1, Math.max(jetty.x0, p.x)), cy = Math.min(jetty.y1 + 1, Math.max(jetty.y0, p.y));
+  return Math.hypot(p.x - cx, p.y - cy);
+}
+function alongside(p, s) {
+  const c = Math.cos(s.heading), n = Math.sin(s.heading);
+  const kx = -hullShape.keel * n, ky = hullShape.keel * c;
+  const a = { x: s.x - hullShape.stern * c + kx, y: s.y - hullShape.stern * n + ky };
+  const b = { x: s.x + hullShape.bow * c + kx, y: s.y + hullShape.bow * n + ky };
+  const vx = b.x - a.x, vy = b.y - a.y;
+  const t = clamp(((p.x - a.x) * vx + (p.y - a.y) * vy) / (vx * vx + vy * vy || 1), 0, 1);
+  return Math.hypot(p.x - (a.x + t * vx), p.y - (a.y + t * vy)) <= boardRange;
+}
 function stationUnder(p) {
   if (!stations || p.ship === null) return null;
   const tx = Math.floor(p.x), ty = Math.floor(p.y);
@@ -1047,7 +1112,7 @@ function updateHud(self, shipsNow) {
   syncNoteLabels(ship ? null : self);
   noteButton.classList.toggle("gone", !!ship);
   noteButton.textContent = ownNoteNear !== null ? key("Remove note (X)", "Remove note") : key("Note (N)", "Note");
-  atPier = !!ship && Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y) <= boardRange;
+  atPier = !!ship && jettyDistance(ship) <= boardRange;
   leaveButton.classList.toggle("gone", !(atPier && !stationUnder(self)));
   if (ship) {
     status.hidden = false;
@@ -1055,7 +1120,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Sail ${Math.round(ship.sail * 100)}%${at("sail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
       return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}` };
@@ -1089,7 +1154,7 @@ function updateHud(self, shipsNow) {
   const st = stationUnder(self);
   let text = "";
   if (!ship) {
-    const nearShip = shipsNow.filter((s) => s.state !== "building" && s.sail <= 0.05 && Math.hypot(s.x - self.x, s.y - self.y) <= boardRange).sort((p, q) => Math.hypot(p.x - self.x, p.y - self.y) - Math.hypot(q.x - self.x, q.y - self.y))[0];
+    const nearShip = shipsNow.filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05 && alongside(self, s)).sort((p, q) => Math.hypot(p.x - self.x, p.y - self.y) - Math.hypot(q.x - self.x, q.y - self.y))[0];
     const nearName = nearShip ? shipNames.get(nearShip.id) ?? "A ship" : "";
     if (nearShip && nearShip.id !== lastAlongside) say(`${nearName} is alongside. ${key("Press E", "Tap Use")} to board.`);
     lastAlongside = nearShip ? nearShip.id : null;
@@ -1097,11 +1162,12 @@ function updateHud(self, shipsNow) {
     if (ownNoteNear !== null) text = key("Your note is here. X takes it up.", "Your note is here. Remove note takes it up.");
     else if (sticky) text = sticky.text;
     else if (nearShip) text = key(`${nearName} is alongside. Press E to board.`, `${nearName} is alongside. Tap Use to board.`);
-    else if (typeof nextShip === "number" && Math.hypot(self.x - pierAt.x, self.y - pierAt.y) <= 12) text = `Next ship in ${nextShip} s.`;
+    else if (typeof nextShip === "number" && Math.hypot(self.x - berth.x, self.y - berth.y) <= 16) text = `Next ship in ${nextShip} s.`;
     else text = key("WASD to walk, arrows or drag to look. N leaves a note.", "The pad walks, a drag looks round. Note leaves a note.");
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
-  else if (st === "sail") text = holding ? "Raising the sail. Let go and it loosens." : key("Hold E to raise the sail.", "Hold Use to raise the sail.");
-  else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
+  else if (st === "sail") text = holding ? "Raising the mainsail. Let go and it loosens." : key("Hold E to raise the mainsail.", "Hold Use to raise the mainsail.");
+  else if (st === "foresail") text = holding ? "Raising the foresail. Let go and it loosens." : key("Hold E to raise the foresail.", "Hold Use to raise the foresail.");
+  else if (st === "pump") text = holding ? "Pumping, down in the bilge. Nobody on deck can hear you from here." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
   else if (ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y))) {
     const leak = ship.leaks.find((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y));
@@ -1203,7 +1269,7 @@ function frame(t) {
   }
   const yaw = viewYaw(cur);
   lastViewYaw = yaw;
-  const dist = 7, cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const dist = 8, cp = Math.cos(pitch), sp = Math.sin(pitch);
   camera.position.set(target.x - dist * cp * Math.cos(yaw), ty + 0.9 + dist * sp, target.y - dist * cp * Math.sin(yaw));
   camera.lookAt(target.x, ty + 0.9, target.y);
   sea.position.set(target.x, 0, target.y);
