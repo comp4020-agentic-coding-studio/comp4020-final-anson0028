@@ -54,8 +54,9 @@ it was, and all missed the same thing: nobody could tell they had reached an isl
 sinking vanished into a fresh ship. Islands now
 fly a flag with the crew's names, and a sinking stays on screen. A
 reviewer asked that a second person aboard see what they are for, so
-everyone gets a job. The galleon is a day old; only I and one
-agent have sailed it ([what changed](PROCESS.md)).
+everyone gets a job. The galleon is a day old; I, one agent and
+[four scripted testers](docs/testing/playtest-2026-11-09.md) have sailed
+it ([what changed](PROCESS.md)).
 
 ## What I didn't build
 
