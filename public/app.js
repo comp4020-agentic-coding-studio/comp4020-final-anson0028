@@ -203,6 +203,7 @@ ws.addEventListener("message", (e) => {
 });
 
 function seenIntro() {
+  if (sibling) return sessionStorage.getItem("sibling-intro") === "1";
   try { return localStorage.getItem("allhands-intro-1") === "1"; } catch { return false; }
 }
 function showIntro() {
@@ -212,7 +213,7 @@ function showIntro() {
   nameInput.select();
 }
 function hideIntro() {
-  try { localStorage.setItem("allhands-intro-1", "1"); } catch {}
+  try { (sibling ? sessionStorage : localStorage).setItem(sibling ? "sibling-intro" : "allhands-intro-1", "1"); } catch {}
   intro.hidden = true;
   canvas.focus();
 }
@@ -511,12 +512,12 @@ function removeNote() {
 }
 
 const GUIDE_KEY = "allhands-guide-1";
-let guideOn = (() => { try { return localStorage.getItem(GUIDE_KEY) !== "1"; } catch { return false; } })();
+let guideOn = (() => { try { return sibling ? sessionStorage.getItem("sibling-guide") !== "1" : localStorage.getItem(GUIDE_KEY) !== "1"; } catch { return false; } })();
 let guideText = "";
 const GUIDE_STATION = { all: "sail", sail: "sail", helm: "helm", chart: "chart", pump: "pump", "pump+patch": "pump", foresail: "foresail" };
 function endGuide() {
   guideOn = false;
-  try { localStorage.setItem(GUIDE_KEY, "1"); } catch {}
+  try { (sibling ? sessionStorage : localStorage).setItem(sibling ? "sibling-guide" : GUIDE_KEY, "1"); } catch {}
   guideLine.visible = false;
   guideBox.hidden = true;
   guideText = "";
