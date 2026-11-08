@@ -10,8 +10,9 @@ deadline. The long one, day by day with every commit, is
 A big ship at a jetty with five stations that run only while a body
 stands at them, a job for everyone aboard by order of boarding, a word
 that reaches your whole ship and nobody ashore, rocks that hole the deck,
-and a board that keeps every landing and wreck with names; the server
-decides all of it
+and a board that keeps every landing and wreck with names. One rule under
+all of it: what you can do and what you know depends on where your body
+is. The server decides all of it
 ([decision 13](docs/decisions/0013-the-server-decides-who-may-do-what.md)).
 `README.md`
 says what good means here. This file is how it got that way.

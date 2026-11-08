@@ -1,8 +1,10 @@
 # All Hands on Deck: rules for working in this repo
 
-The idea, from README.md: what you can do and what you know depends on
-where your body is. Every rule here protects that. If a change needs one of
-them broken, change README.md first and say why.
+The idea, from README.md: a game has to be fun first. The rule that
+makes this one fun with other people aboard is that what you can do and
+what you know depends on where your body is. Every rule here protects
+that rule. If a change needs one of them broken, change README.md first
+and say why.
 
 ## Never
 
