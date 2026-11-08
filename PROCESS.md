@@ -7,7 +7,7 @@ deadline. The long one, day by day with every commit, is
 
 ## What I built
 
-All Hands on Deck is a galleon at a jetty, seen over the shoulder of a
+All Hands on Deck is a big ship at a jetty, seen over the shoulder of a
 block bird you can name. You arrive beside the ship and board when you
 choose. Five stations, helm and chart table at the stern, mainsail
 amidships, foresail at the bow, pump in the bilge; each works only while a
@@ -74,7 +74,7 @@ The reefs were thinned three times in a week, measured each time
 ([`45fc95a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/45fc95a),
 [decision 9](docs/decisions/0009-the-sea-gets-harder.md)); those sweeps
 measured a deck that no longer exists, and sweep eight in
-`docs/tuning.md` measures the galleon.
+`docs/tuning.md` measures the big ship.
 
 ## Human checks
 
@@ -101,9 +101,9 @@ crit 10 whiteboard, two joining, a late joiner, a restart with two aboard,
 were run against the live app with the Fly log lines
 ([the report](docs/testing/multi-user-test-report.md)).
 
-## The galleon, the last two days
+## The big ship, the last two days
 
-I asked for the ship I had wanted, a galleon with places on it that you
+I asked for the ship I had wanted, a big ship with places on it that you
 wake aboard; the agent wrote a four-stage plan and I took stage one on a
 branch. Four tests went red on the old deck, then the server, the client
 and decision record 8
@@ -168,7 +168,7 @@ The whole project ran as two conversations. The main one changed code,
 and I talked to it about the code. A second one, forked from it, kept the
 words: when the main one landed a piece of work it sent the fork a
 message, and the fork brought that week's `PROCESS.md` and the long log up
-to date. On the last two days they ran side by side, the galleon on its
+to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other. Checks by hand: a
 phone on the home network, my own sinking read from the live log, the two
 crit sessions, Playwright at both viewports before every UI change. Every
@@ -183,7 +183,7 @@ spoken aloud and written down with me
 ## Thin spots
 
 The commits of 10 and 11 October were made in batches at the end of each
-evening. The numbers were tuned by bots, and bots never patch. The galleon
+evening. The numbers were tuned by bots, and bots never patch. The big ship
 is a day old: its ladder is one sweep, and the far-island number in the
 README is from the old deck. Only classmates have sailed it; nobody from
 outside the course has.
