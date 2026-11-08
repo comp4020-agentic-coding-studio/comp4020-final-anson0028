@@ -24,7 +24,7 @@ export const HULL = { bow: 10.5, stern: 8.5, keel: 0.5, parts: [-8.5, -4, 0, 5, 
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };
 export const ISLANDS: Island[] = [
-  { id: "near", name: "Near Island", cx: 34, cy: 20, r: 3 },
+  { id: "near", name: "Near Island", cx: 44, cy: 14, r: 3 },
   { id: "mid", name: "Middle Island", cx: 58, cy: 44, r: 4 },
   { id: "far", name: "Far Island", cx: 86, cy: 16, r: 4 },
 ];

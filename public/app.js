@@ -605,13 +605,14 @@ function makeShip() {
   const slabs = [[minX, b.x0, minY, maxY], [b.x0, b.x1, b.y1, maxY], [b.x1, maxX, minY, maxY]];
   for (const [x0, x1, y0, y1] of slabs) {
     box(g, x1 - x0, 0.76, y1 - y0, (x0 + x1) / 2, DECK_TOP - 0.42, (y0 + y1) / 2, HULL);
-    box(g, x1 - x0 + (x0 === minX || x1 === maxX ? 0.1 : 0), 0.08, y1 - y0 + 0.1, (x0 + x1) / 2, DECK_TOP - 0.04, (y0 + y1) / 2, PLANK);
+    const px0 = x0 - (x0 === minX ? 0.05 : 0), px1 = x1 + (x1 === maxX ? 0.05 : 0);
+    box(g, px1 - px0, 0.08, y1 - y0 + 0.1, (px0 + px1) / 2, DECK_TOP - 0.04, (y0 + y1) / 2, PLANK);
   }
   box(g, b.x1 - b.x0, 0.06, b.y1 - b.y0, (b.x0 + b.x1) / 2, DECK_TOP - 0.73, (b.y0 + b.y1) / 2, 0x3b2a1a);
   box(g, b.x1 - b.x0, 0.76, 0.08, (b.x0 + b.x1) / 2, DECK_TOP - 0.42, b.y0 - 0.04, HULL);
   for (let i = 0; i < 4; i++) box(g, 0.6, 0.04, 0.16, b.x1 - 0.35, DECK_TOP - 0.62 + i * 0.18, b.y1 - 0.12, PLANK);
   for (const [x0, x1] of [[minX, layout.quarterdeck.x1], [layout.forecastle.x0, maxX]]) {
-    box(g, x1 - x0, 0.5, d, (x0 + x1) / 2, DECK_TOP + 0.25, cz, HULL);
+    box(g, x1 - x0, 0.42, d, (x0 + x1) / 2, DECK_TOP + 0.21, cz, HULL);
     box(g, x1 - x0 + 0.1, 0.08, d + 0.1, (x0 + x1) / 2, DECK_TOP + 0.46, cz, PLANK);
     const stepX = x0 === minX ? x1 + 0.2 : x0 - 0.2;
     box(g, 0.4, 0.25, d - 0.4, stepX, DECK_TOP + 0.125, cz, DARK);
@@ -624,7 +625,7 @@ function makeShip() {
   railAt(layout.forecastle.x0, maxX, 0.5);
   box(g, 0.1, 0.35, d + 0.16, minX - 0.03, DECK_TOP + 0.675, cz, DARK);
   box(g, 0.1, 0.35, d + 0.16, maxX + 0.03, DECK_TOP + 0.675, cz, DARK);
-  box(g, 1.2, 0.5, d, maxX + 0.6, DECK_TOP + 0.1, cz, HULL);
+  box(g, 1.2, 0.5, d - 0.2, maxX + 0.65, DECK_TOP + 0.1, cz, HULL);
   const gw = layout.gangway;
   box(g, gw.x1 - gw.x0, 0.06, 1.4, (gw.x0 + gw.x1) / 2, DECK_TOP - 0.1, gw.y - 0.7, PLANK);
   const water = new THREE.Mesh(new THREE.BoxGeometry(maxX - minX - 0.2, 1, d - 0.2), mat(0x2e6ea8, { transparent: true, opacity: 0.6 }));
@@ -1031,7 +1032,10 @@ function tapTo(cx, cy) {
     if (ship) {
       target = toDeck(ship, hit.x, hit.z);
       const g = shipMeshes.get(ship.id);
-      const spot = g ? ray.intersectObjects(g.children, false).find((h) => h.object.visible && h.object.userData.spot)?.object.userData.spot : null;
+      const hits = g ? ray.intersectObjects(g.children, false).filter((h) => h.object.visible) : [];
+      const spot = hits.find((h) => h.object.userData.spot)?.object.userData.spot;
+      const solid = hits.find((h) => h.object.isMesh && !h.object.userData.spot);
+      if (solid) target = toDeck(ship, solid.point.x, solid.point.z);
       if (spot) target = { x: spot.x, y: spot.y };
       else {
         const spots = [...Object.values(stations).map((s) => ({ x: s.x + 0.5, y: s.y + 0.5 })), ...ship.leaks.map((l) => ({ x: l.x + 0.5, y: l.y + 0.5 }))];
@@ -1120,7 +1124,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - pierAt.x, ship.y - pierAt.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || (ship.sail > 0.05 ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(jettyDistance(ship))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
       return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}` };

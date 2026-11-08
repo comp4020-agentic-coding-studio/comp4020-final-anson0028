@@ -4,7 +4,7 @@ import { Walker, bodies, ships, uuid, type Msg } from "../spec/walker.ts";
 import { ISLANDS, PIER_CENTRE, REEF, SEA, W, H } from "../server/world.ts";
 
 type Target = "near" | "mid" | "far";
-type Station = "sail" | "helm" | "pump" | "chart";
+type Station = "sail" | "helm" | "pump" | "chart" | "foresail";
 type Result = "landed" | "wrecked" | "timeout";
 type Outcome = { crew: number; target: Target; result: Result; t: number; far: number; water: number; hull: number };
 
@@ -16,7 +16,7 @@ const CREWS = (process.env.CREWS ?? "1,2,3,4").split(",").map(Number);
 const TARGETS = (process.env.TARGETS ?? "near,mid,far").split(",") as Target[];
 const PARAMS = process.env.SHIP_PARAMS ?? "{}";
 const OUT = process.env.OUT ?? "";
-const STATIONS = { helm: { x: -2.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: 3.5, y: 0.5 }, pump: { x: 0.5, y: -1.5 } };
+const STATIONS = { helm: { x: -5.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -3.5, y: 2.5 }, pump: { x: 3.5, y: -1.5 }, foresail: { x: 7.5, y: 1.5 } };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const norm = (d: number) => { while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
 
@@ -138,19 +138,14 @@ async function sail(isl: Island, bots: Bot[], crew: number, target: Target): Pro
   for (let n = 0; n < crew; n++) bots.push(await Bot.join(isl, n));
   const first = bots[0];
   const shipId = await first.w.board();
-  await sleep(200);
-  const berth = first.ship(shipId)!;
-  for (const b of bots.slice(1)) {
-    await b.w.walkTo(9.9, berth.y);
-    await b.w.board();
-  }
+  for (const b of bots.slice(1)) await b.w.board();
   await sleep(200);
   const t0 = Date.now();
   const gameTime = () => ((Date.now() - t0) / 1000) * SPEED;
   let far = 0;
-  let route: { x: number; y: number }[] = [{ x: island.cx, y: island.cy }];
+  let route: { x: number; y: number }[] = [{ x: PIER_CENTRE.x + 26, y: 36.5 }, { x: island.cx, y: island.cy }];
   let routed = false;
-  const roles: Record<number, Station[]> = { 1: ["sail"], 2: ["sail", "helm"], 3: ["sail", "helm", "pump"], 4: ["sail", "helm", "pump", "chart"] };
+  const roles: Record<number, Station[]> = { 1: ["sail"], 2: ["sail", "helm"], 3: ["sail", "helm", "pump"], 4: ["sail", "helm", "pump", "chart"], 5: ["sail", "helm", "pump", "chart", "foresail"] };
   const soloState = { task: "sail" as Station };
   const duoState = { task: "helm" as Station };
   while (!first.snap) await sleep(20);
@@ -183,8 +178,9 @@ async function sail(isl: Island, bots: Bot[], crew: number, target: Target): Pro
       if (soloState.task === "helm") steer(bot);
       else { bot.input(0); bot.work(soloState.task); }
     } else {
-      const [sailor, helm, pumper, nav] = bots;
+      const [sailor, helm, pumper, nav, fore] = bots;
       sailor.work("sail");
+      if (fore) fore.work("foresail");
       if (crew === 2) {
         if (s.water >= 30) duoState.task = "pump";
         else if (duoState.task === "pump" && s.water > 10) duoState.task = "pump";
@@ -199,7 +195,7 @@ async function sail(isl: Island, bots: Bot[], crew: number, target: Target): Pro
         if (nav) {
           nav.work("chart");
           if (nav.chart && !routed) {
-            const clearOfBerths = Math.hypot(s.x - PIER_CENTRE.x, s.y - PIER_CENTRE.y) < 10 ? { x: s.x + 7, y: s.y } : s;
+            const clearOfBerths = s.x < PIER_CENTRE.x + 26 ? { x: PIER_CENTRE.x + 26, y: 36.5 } : s;
             route = [...(clearOfBerths === s ? [] : [clearOfBerths]), ...waypoints(nav.chart, clearOfBerths, { x: island.cx, y: island.cy })];
             routed = true;
           }

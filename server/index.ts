@@ -11,8 +11,8 @@ import {
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, ISLANDS, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
-  alongside, deckToWorld, distanceFromPier, leakUnder, nearTiles, nearestPierDistance, onDeck, setTile, shipsApart, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
+  type Body, DECK, H, HULL, ISLANDS, JETTY, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  alongside, deckToWorld, leakUnder, nearTiles, nearestPierDistance, onDeck, setTile, shipsApart, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
 } from "./world.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -299,7 +299,7 @@ function join_(ws: WebSocket, token: string): void {
   else logLine(`${whoIs(c)} arrives on the jetty at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], jetty: JETTY, hull: HULL, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => {
@@ -567,7 +567,7 @@ function washUp(c: Client, how: string): void {
   const b = c.body;
   const s = b.ship === null ? undefined : ships.get(b.ship);
   const far = !s || !atPier(s);
-  logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
+  logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? nearestPierDistance(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
   const spot = spawnFor(c.id);
   Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
   tellCrewLeft(c, s);
@@ -578,7 +578,7 @@ function washUp(c: Client, how: string): void {
 function sink(s: LiveShip): void {
   const crew = aboard(s);
   const names = crew.length ? crew.map((c) => c.name) : ["nobody aboard"];
-  const wreck = recordWreck(s.x, s.y, today(), names, distanceFromPier(s.x, s.y));
+  const wreck = recordWreck(s.x, s.y, today(), names, nearestPierDistance(s.x, s.y));
   logLine(`ship ${s.id} sinks ${wreck.distance.toFixed(0)} tiles out with ${crew.length ? crew.map(whoIs).join(", ") : "nobody"} aboard; wreck ${wreck.id}`);
   wrecks.push(wreck);
   crew.forEach((c) => Object.assign(c.body, { ship: null, ...spawnFor(c.id), dx: 0, dy: 0, tx: null, ty: null, holding: false }));
@@ -600,7 +600,7 @@ function land(s: LiveShip, island: { id: string; name: string }): void {
   else landings.push(landing);
   broadcast({ t: "landing", landing, first, ship: s.id, name: island.name });
   logLine(`ship ${s.id} lands on ${island.name} with ${crew.map(whoIs).join(", ")} aboard${first ? ", the first landing there" : ` (visit ${landing.visits})`}`);
-  logged(visitEntry(recordVisit(island.id, today(), names, distanceFromPier(s.x, s.y))));
+  logged(visitEntry(recordVisit(island.id, today(), names, nearestPierDistance(s.x, s.y))));
 }
 
 function loop(): void {

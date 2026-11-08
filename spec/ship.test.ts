@@ -107,12 +107,12 @@ describe("leaks", { timeout: 60000 }, () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0113"));
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, reef: true, sail: 0 });
+    a.test({ op: "place", ship, x: 56, y: 24, heading: 0, reef: true, sail: 0 });
     await settle(1000);
     const still = await a.ship(ship);
     expect(still.leaks).toEqual([]);
     expect(still.hull).toBe(0);
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0.6 });
+    a.test({ op: "place", ship, x: 56, y: 24, heading: 0, sail: 0.6 });
     const hurt = await a.until((s) => s.leaks.length > 0, ship, 6000);
     expect(hurt.leaks[0].amount).toBeGreaterThan(0);
     expect(hurt.hull).toBeGreaterThan(0);
@@ -140,7 +140,7 @@ describe("water", { timeout: 60000 }, () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0104"));
     const shipId = await a.board();
-    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, reef: true, sail: 0.6 });
+    a.test({ op: "place", ship: shipId, x: 56, y: 24, heading: 0, reef: true, sail: 0.6 });
     const wet = await a.until((s) => s.water >= 5, shipId, 6000);
     expect(wet.water).toBeGreaterThan(0);
     await a.man("pump");
@@ -154,7 +154,7 @@ describe("water", { timeout: 60000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0105"));
     const shipId = await a.board();
     await a.ashore();
-    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, hull: 50 });
+    a.test({ op: "place", ship: shipId, x: 56, y: 24, heading: 0, hull: 50 });
     await settle(200);
     const w1 = (await a.ship(shipId)).water;
     await settle(1500);
@@ -172,7 +172,7 @@ describe("sinking", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0106"));
     const shipId = await a.board();
     expect(await b.board()).toBe(shipId);
-    a.test({ op: "place", ship: shipId, x: 40, y: 10, heading: 0, hull: 100, water: 95 });
+    a.test({ op: "place", ship: shipId, x: 56, y: 24, heading: 0, hull: 100, water: 95 });
     const sunk = await a.next((m) => m.t === "wreck", 8000);
     expect(sunk.wreck.crew.sort()).toEqual([a.name, b.name].sort());
     expect(sunk.wreck.distance).toBeGreaterThan(20);
@@ -307,7 +307,7 @@ describe("landing", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0109"));
     const shipId = await a.board();
     expect(await b.board()).toBe(shipId);
-    a.test({ op: "place", ship: shipId, x: 55, y: 20, heading: Math.PI });
+    a.test({ op: "place", ship: shipId, x: 64, y: 14, heading: Math.PI });
     await a.man("sail");
     const landing = await a.next((m) => m.t === "landing", 10000);
     expect(landing.landing.island).toBe("near");
@@ -324,7 +324,7 @@ describe("landing", { timeout: 60000 }, () => {
     expect(c.hello.landings).toHaveLength(1);
     expect(c.hello.landings[0].size).toBe(2);
     const second = await c.board();
-    c.test({ op: "place", ship: second, x: 55, y: 20, heading: Math.PI });
+    c.test({ op: "place", ship: second, x: 64, y: 14, heading: Math.PI });
     await c.man("sail");
     const again = await c.next((m) => m.t === "landing", 10000);
     expect(again.first).toBe(false);
@@ -346,7 +346,7 @@ describe("the pier", { timeout: 60000 }, () => {
     a.send({ t: "ashore" });
     await a.next(ashore, 2000);
     expect(await a.board()).toBe(ship);
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 56, y: 24, heading: 0, sail: 0 });
     await settle(300);
     a.inbox.length = 0;
     a.send({ t: "ashore" });
@@ -484,7 +484,7 @@ describe("the galleon", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0122"));
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 56, y: 24, heading: 0, sail: 0 });
     await a.man("sail");
     await a.until((s) => s.sail >= 0.95, ship);
     const s1 = await a.ship(ship);

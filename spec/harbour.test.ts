@@ -61,7 +61,7 @@ describe("names", { timeout: 30000 }, () => {
     a.send({ t: "name", name: "Anson" });
     await a.next((m) => m.t === "rename", 2000);
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
+    a.test({ op: "place", ship, x: 64, y: 14, heading: Math.PI });
     await a.man("sail");
     const landing = await a.next((m) => m.t === "landing", 10000);
     expect(landing.landing.crew).toEqual(["Anson"]);
@@ -77,7 +77,7 @@ describe("the harbour board", { timeout: 30000 }, () => {
     expect(a.hello.log).toEqual([]);
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
-    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
+    a.test({ op: "place", ship, x: 64, y: 14, heading: Math.PI });
     await a.man("sail");
     const first = await b.next((m) => m.t === "log", 10000);
     expect(first.entry.kind).toBe("landing");
@@ -85,13 +85,13 @@ describe("the harbour board", { timeout: 30000 }, () => {
     expect(first.entry.crew.sort()).toEqual([a.name, b.name].sort());
     expect(first.entry.size).toBe(2);
     expect(first.entry.day).toBe("2026-10-12");
-    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
+    a.test({ op: "place", ship, x: 64, y: 14, heading: Math.PI });
     const second = await b.next((m) => m.t === "log" && m !== first, 10000);
     expect(second.entry.kind).toBe("landing");
-    a.test({ op: "place", ship, x: 40, y: 10, heading: 0, hull: 100, water: 95 });
+    a.test({ op: "place", ship, x: 56, y: 24, heading: 0, hull: 100, water: 95 });
     const sunk = await b.next((m) => m.t === "log" && m.entry.kind === "wreck", 10000);
     expect(sunk.entry.crew.sort()).toEqual([a.name, b.name].sort());
-    expect(sunk.entry.distance).toBeGreaterThan(30);
+    expect(sunk.entry.distance).toBeGreaterThan(20);
     a.close();
     b.close();
 
