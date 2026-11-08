@@ -11,8 +11,9 @@ whoever comes next, and jump to show you are pleased.
 
 ## What good means here
 
-A game has to be fun first, and with other people aboard, fun comes down
-to three things.
+**What you can do, and what you know, depends on where your body is.** A
+game has to be fun first, and with other people aboard that rule makes fun
+come down to three things.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
 your voice carries only a few steps, so a big group has to pass a clue from

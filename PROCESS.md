@@ -19,13 +19,13 @@ says what good means here. This file is how it got that way.
 ## Ideation: from three requirements to a ship
 
 The brief fixed many users, real time and persistence; I wanted a co-op
-game. The first version copied Big Walk's shape: a walk on an island with a
-gate that two people could open once
+game. The first version copied Big Walk's shape, a gate two people could open
+once
 ([`8611c0b`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/8611c0b),
 shipped for crit 8 at
 [`46eedd6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/46eedd6)).
-The crit group opened it and stood around. Two agents then read 29 games
-and papers and the class's 114 project READMEs
+The crit group opened it and stood around. Two agents read 29 games and
+papers and the class's 114 project READMEs
 ([`6c20b7a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6c20b7a),
 [`docs/cohort-survey.md`](docs/cohort-survey.md)); both said: make a
 second person useful with a rule, and keep a record with names on it.
@@ -61,8 +61,8 @@ check was wrong and was rewritten before the rule was trusted.
 
 The numbers were tuned by simulated crews of one to four bots, measuring
 how far each crew size gets. The first sweep said the problem was rules,
-not numbers: a helm that held itself made the third body idle, and reefs
-spread evenly gave a navigator nothing to find
+not numbers, and two rules changed: an unheld helm wanders, and reefs
+come in clumps with lanes
 ([`0f828aa`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0f828aa)).
 The simulator had faults of its own, a navigator that steered straight
 ([`b845fd9`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/b845fd9))
@@ -97,34 +97,31 @@ app with its log lines
 
 ## The big ship, the last two days
 
-I asked for the ship I had wanted, a big ship with places on it that you
-wake aboard; the agent wrote a four-stage plan and I took stage one on a
-branch. Four tests went red on the old deck, then the server, the client
-and decision record 8
+I asked for the ship I had wanted, a big one with places on it; the agent
+wrote a four-stage plan and I took stage one on a branch. Four tests went
+red, then the server, the client and decision record 8
 ([`62332a2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/62332a2),
 [`67da561`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/67da561),
 [`768913d`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/768913d),
 [`4a83b39`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/4a83b39)).
-Playing it changed three rules that night. Waking aboard went, because
-the jetty is where a crew forms
+Playing it changed three rules that night. Waking aboard went; the jetty
+is where a crew forms
 ([`80d000f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/80d000f)
 red,
 [`2340fc6`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2340fc6)).
-The 8-tile rule went, because on a long deck it made the pump deaf to the
-helm and a crew that cannot talk to itself is not a crew; a word now
-reaches your whole ship and nobody ashore
+The 8-tile rule went; on a long deck it made the pump deaf to the helm,
+and a crew that cannot talk to itself is not a crew
 ([`5e6829c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/5e6829c)
 red,
 [`bf36817`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/bf36817),
-[decision 12](docs/decisions/0012-one-channel-per-place.md)). A first
-visit is now led by a red line from your feet to the gangway and your
-station
+[decision 12](docs/decisions/0012-one-channel-per-place.md)). A red line
+now leads a first visit to the gangway and to your station
 ([`a6a488e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a6a488e)).
-Four AI testers played it for twenty minutes on 9 November; thirteen
-faults were fixed that night, six are listed open
+Four AI testers played it for twenty minutes; thirteen faults were fixed
+that night, six are listed open
 ([the report](docs/testing/playtest-2026-11-09.md),
 [`f7613d1`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f7613d1)),
-the deck was cut to 14 by 6 so two can work it
+the deck was cut to 14 by 6
 ([`88e03fe`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/88e03fe)),
 and the branch merged on the morning of the deadline
 ([`a7d3e63`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a7d3e63)).
@@ -148,22 +145,18 @@ Coins for a landing I wanted and did not build
 
 The harness, every file and command the agent must obey or that catches
 it, is listed in [`docs/harness.md`](docs/harness.md). Agents, on Claude
-Code with Opus and then Fable, got narrow briefs and no history: readers,
-reviewers playing a marker, a tutor and a cold player, cold readers of
-the first screen and the README, cold players, a code reviewer,
-play-testers, and markers of this file. A finder skill offered the Superpowers set; I used it once,
-for the code review that found two crashes, which went into the spec
-first
+Code with Opus and then Fable, got narrow briefs and no history: readers, reviewers
+playing a marker, a tutor and a cold player, cold readers and cold
+players, a code reviewer, play-testers, markers of this file. A finder skill offered the Superpowers set; I used it once, for the code
+review that found two crashes, which went into the spec first
 ([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2)),
-and otherwise left it off because it is heavy and my tokens are rationed.
-The skill I used most is Humanizer: the biggest fault of a project
-maintained by an agent is documents people find hard to read, all short
-sentences and "not this but that", so every page of words went through it
-before it shipped (it is in the harness table).
+and otherwise left it off as too heavy for my token budget. The skill I
+used most is Humanizer, because documents written by an agent are hard
+for people to read; every page of words went through it before it
+shipped.
 
-The whole project ran as two conversations. The main one changed code,
-and I talked to it about the code. A second one, forked from it, kept the
-words: when the main one landed a piece of work it sent the fork a
+The project ran as two conversations. The main one changed code. A
+second one, forked from it, kept the words: when the main one landed a piece of work it sent the fork a
 message, and the fork brought that week's `PROCESS.md` and the long log up
 to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other, and met at the merge
@@ -185,10 +178,11 @@ spoken aloud and written down with me
 
 The commits of 10 and 11 October were made in batches at the end of each
 evening, and on 8 and 9 November several commits bundled spec, code and
-docs in one, against the one pair per claim rule; the red evidence for
-those is in `docs/red-runs.md`. The agent wrote nearly all the code and
-drafted every document, this one included; every commit carries its name.
-I decided what to build, what to cut, and what to take back. The numbers were tuned by bots, and bots never patch. The big ship
+docs in one; the red evidence is in `docs/red-runs.md`. The agent wrote
+nearly all the code and drafted every document, this one included; every
+commit carries its name. I decided what to build, what to cut, and what
+to take back. The numbers were tuned by bots, and bots never patch. The
+big ship
 is a day old: its ladder is one sweep, and the far-island number in the
 README is from the old deck. Only classmates have sailed it; nobody from
 outside the course has.
