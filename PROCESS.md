@@ -96,7 +96,10 @@ for; the card became three short paragraphs and everyone now gets a job
 [`808811a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/808811a),
 [decision 10](docs/decisions/0010-a-stranger-has-to-be-able-to-start.md)).
 That afternoon four classmates reached the middle island together; the
-one ship that sank had one person aboard.
+one ship that sank had one person aboard. The eight scenarios from the
+crit 10 whiteboard, two joining, a late joiner, a restart with two aboard,
+were run against the live app with the Fly log lines
+([the report](docs/testing/multi-user-test-report.md)).
 
 ## The galleon, the last two days
 
