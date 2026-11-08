@@ -507,7 +507,7 @@ function updateGuide(cur) {
     const still = cur.ships.filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05);
     const near = still.find((s) => alongside(self, s));
     const waiting = still.find((s) => jettyDistance(s) <= boardRange);
-    to = waiting ? toWorld(waiting, 0, deck ? deck.minY - 0.6 : -3.6) : { x: berth.x, y: (jetty ? jetty.y1 + 1 : berth.y - 4) - 0.5 };
+    to = { x: berth.x, y: (jetty ? jetty.y1 + 1 : berth.y - 4) - 0.5 };
     if (near) text = key("Press E to board.", "Tap Use to board.");
     else if (waiting) text = key("Follow the red line to the ship, then press E to board.", "Follow the red line to the ship, then tap Use to board.");
     else text = typeof nextShip === "number" ? `The ship has left. The next one comes in ${nextShip} s; wait at the end of the line.` : "The ship has left. Wait at the end of the line for the next one.";
