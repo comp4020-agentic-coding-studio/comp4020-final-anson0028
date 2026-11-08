@@ -48,8 +48,6 @@ Each line is a test in `spec/` that runs against the app
 
 - one body holds one station, and one station is held by one body
   (claim 1, `ship.test.ts`)
-- a reef holes a moving hull where it struck; a body on the hole patches
-  it (claim 4, `ship.test.ts`)
 - a wreck names its crew, and no wreck or landing can be changed or
   deleted (claims 5 and 12, `ship.test.ts`, `harbour.test.ts`)
 - only the body at the chart table is sent the map (claim 9,
