@@ -133,6 +133,12 @@ them broken, change README.md first and say why.
   fades them over 14 days and never hides them. Gestures are four kinds
   (`EMOTES`), one per 400 ms per body, animated on the client, never
   stored.
+- A second connection with the same cookie is not refused on sight: the
+  old socket is pinged, and only if it answers within 700 ms is the new
+  one refused as a second tab; a socket that stays silent (a page that
+  navigated to About and back, a proxy that closed late) is dropped and
+  the new one takes its place, back aboard if it was aboard. The log says
+  which happened.
 - The server logs one line per act to stdout, `<iso time> <name>#<id> <did
   what>`, including refusals (a second tab, a held station, a note that
   isn't yours) and the ship events (launched, aground, scrape, landing,

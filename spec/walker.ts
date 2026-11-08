@@ -30,13 +30,13 @@ export class Walker {
   inbox: Msg[] = [];
   hello!: Msg;
 
-  constructor(wsBase: string, token: string) {
-    this.ws = new WebSocket(`${wsBase}/ws?token=${token}`);
+  constructor(wsBase: string, token: string, opts: { autoPong?: boolean } = {}) {
+    this.ws = new WebSocket(`${wsBase}/ws?token=${token}`, opts);
     this.ws.on("message", (d) => this.inbox.push(JSON.parse(d.toString())));
   }
 
-  static async join(wsBase: string, token: string): Promise<Walker> {
-    const w = new Walker(wsBase, token);
+  static async join(wsBase: string, token: string, opts: { autoPong?: boolean } = {}): Promise<Walker> {
+    const w = new Walker(wsBase, token, opts);
     w.hello = await w.next((m) => m.t === "hello" || m.t === "refused");
     return w;
   }

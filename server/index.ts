@@ -272,11 +272,47 @@ function join_(ws: WebSocket, token: string): void {
     send(ws, { t: "refused", why: "bad_token" });
     return ws.close();
   }
-  if ([...clients.values()].some((c) => c.token === token)) {
-    logLine(`#${publicId(token)} tries to join from a second tab and is refused`);
-    send(ws, { t: "refused", why: "already_here" });
-    return ws.close();
+  const dup = [...clients.values()].find((c) => c.token === token);
+  if (dup) {
+    let alive = false;
+    const onPong = () => { alive = true; };
+    dup.ws.once("pong", onPong);
+    try {
+      dup.ws.ping();
+    } catch {
+      alive = false;
+    }
+    setTimeout(() => {
+      dup.ws.off("pong", onPong);
+      if (!clients.has(dup.ws)) return admit(ws, token);
+      if (alive) {
+        logLine(`#${publicId(token)} tries to join from a second tab and is refused`);
+        send(ws, { t: "refused", why: "already_here" });
+        return ws.close();
+      }
+      logLine(`#${publicId(token)}'s old connection does not answer and is replaced by the new one`);
+      dropClient(dup, "is replaced");
+      dup.ws.terminate();
+      admit(ws, token);
+    }, 700);
+    return;
   }
+  admit(ws, token);
+}
+
+function dropClient(c: Client, how: string): void {
+  clients.delete(c.ws);
+  const w = worldPos(c);
+  savePlayer(c.token, w.x, w.y);
+  if (c.body.ship !== null) {
+    awayFrom.set(c.token, { ship: c.body.ship, x: c.body.x, y: c.body.y, boardedAt: c.boardedAt, at: Date.now() });
+    rememberAboard(c.token, c.body.ship, c.body.x, c.body.y, c.boardedAt);
+  }
+  for (const o of clients.values()) send(o.ws, { t: "leave", id: c.id });
+  logLine(`${whoIs(c)} ${how}${c.body.ship === null ? "" : ` from ship ${c.body.ship}`}; ${clients.size} here`);
+}
+
+function admit(ws: WebSocket, token: string): void {
   if (clients.size >= MAX_PLAYERS) {
     logLine(`#${publicId(token)} is refused: the harbour is full`);
     send(ws, { t: "refused", why: "full" });
@@ -312,15 +348,8 @@ function join_(ws: WebSocket, token: string): void {
   });
   ws.on("error", (err) => logLine(`${whoIs(c)}'s connection failed: ${err.message}`));
   ws.on("close", () => {
-    clients.delete(ws);
-    const w = worldPos(c);
-    savePlayer(c.token, w.x, w.y);
-    if (c.body.ship !== null) {
-      awayFrom.set(c.token, { ship: c.body.ship, x: c.body.x, y: c.body.y, boardedAt: c.boardedAt, at: Date.now() });
-      rememberAboard(c.token, c.body.ship, c.body.x, c.body.y, c.boardedAt);
-    }
-    for (const o of clients.values()) send(o.ws, { t: "leave", id });
-    logLine(`${whoIs(c)} leaves${c.body.ship === null ? "" : ` from ship ${c.body.ship}`}; ${clients.size} here`);
+    if (clients.get(ws) !== c) return;
+    dropClient(c, "leaves");
   });
 }
 

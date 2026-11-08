@@ -56,12 +56,24 @@ describe("two people on the pier", { timeout: 30000 }, () => {
     expect(forged.hello.why).toBe("bad_token");
   });
 
-  it("refuses a second body for the same person", async () => {
+  it("refuses a second body for the same person while the first still answers", async () => {
     const a = await join(uuid("aaaa0003"));
     const twin = await join(uuid("aaaa0003"));
     expect(twin.hello.t).toBe("refused");
     expect(twin.hello.why).toBe("already_here");
     a.close();
+  });
+
+  it("lets the same person back in when the old connection has gone quiet, as after a page change", async () => {
+    const token = uuid("aaaa0004");
+    const stale = await W.join(wsBase, token, { autoPong: false });
+    await stale.ashore();
+    const back = await W.join(wsBase, token);
+    expect(back.hello.t).toBe("hello");
+    expect(back.id).toBe(stale.id);
+    await new Promise((r) => setTimeout(r, 300));
+    expect(stale.ws.readyState).not.toBe(1);
+    back.close();
   });
 
   it("never sends anyone another person's cookie, or any part of it", async () => {

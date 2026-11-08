@@ -64,7 +64,9 @@ the near island, and six wrecks. The reefs were thinned that night
 said nothing was clear at the start; the first screen became three
 sentences and everyone now gets a job on boarding (decision 10). That
 afternoon four classmates reached the middle island together, and the one
-ship that sank had one person aboard.
+ship that sank had one person aboard. On 9 November four scripted testers
+played a fresh server for twenty minutes; what they found and what changed
+is in [the play-test record](docs/testing/playtest-2026-11-09.md).
 
 ## What I didn't build
 

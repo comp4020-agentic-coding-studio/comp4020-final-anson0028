@@ -76,8 +76,13 @@ const sibling = sessionStorage.getItem("sibling");
 const wsBase = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 const ws = new WebSocket(sibling ? `${wsBase}?token=${sibling}` : wsBase);
 let refused = false;
+let leaving = false;
+window.addEventListener("pagehide", () => {
+  leaving = true;
+  try { ws.close(); } catch {}
+});
 ws.addEventListener("close", () => {
-  if (refused) return;
+  if (refused || leaving) return;
   const note = document.createElement("p");
   note.className = "loading";
   note.setAttribute("role", "status");

@@ -29,6 +29,7 @@ named commit with only the new spec files copied in.
 | the huge-frame test with `maxPayload` removed | the working tree | failed: no close 1009 within 30 s |
 | "puts you back aboard your ship at sea if you come back within two minutes" | `2aebfee` | failed: the rejoining body was on the pier, not aboard |
 | "… after the server restarts under you" with the shutdown write removed | the working tree | failed: the body came back ashore |
+| "lets the same person back in when the old connection has gone quiet" (`spec/walk.test.ts`) | the working tree before the ping probe | failed: the second connection was refused with `already_here` |
 | the galleon: a visitor wakes aboard; a word from the helm misses the pump; two sails; the fifth takes the chart (`62332a2`) | `f03b072` (the 7 by 4 deck) | 4 of 4 failed: the new body was on the pier, the walk to the chart table hit the deck's edge, no `fore` in the snapshot, the fourth job was the chart |
 
 The same specs pass against the commits that followed each of them.
