@@ -7,7 +7,7 @@ reaches only people within 8 tiles, a little more than a ship's length.
 One person can sail, badly, running between stations. More hands get
 further, and sink less.
 
-All Hands on Deck is a small online co-op game for a room of people. Whoever is here
+All Hands on Deck is an online co-op game for a room of people. Whoever is here
 crews the ship at the pier, each told which station is theirs in the order
 they boarded,
 and how far they got is kept with their names. Further out the rocks
@@ -26,7 +26,7 @@ version had the same fault: alone I could only walk. So one person can
 always sail here.
 Erickson and Kellogg (2000) found a limit works when everyone can see it;
 the chart rule is the same for everyone, and each bird's station is
-written above it for the whole crew to see. Several other student projects unlock features once enough
+written above it for the whole crew to see. Other student projects unlock features once enough
 players are present ([114 class projects surveyed](docs/cohort-survey.md)); here
 nothing unlocks, and a ship simply gets further the more hands it has
 ([the decision, written up](docs/decisions/0001-one-body-one-station.md)).
@@ -46,12 +46,12 @@ islands. To the far island, a lone bot sank in 3 of 12 runs; with a
 second bot aboard, none of 36 runs across two to four crew sank. Bots
 never patch holes; people can.
 
-Judged, by watching it played from the link alone. Three AI agents told
-to play with no instructions knew within a minute it was a co-op sailing
+Judged, by watching it played from the link alone. Three AI agents given
+no instructions knew within a minute it was a co-op sailing
 game, and all three missed the same thing: nobody could tell they had
 reached an island, and a sinking vanished into a fresh ship. Islands now
-fly a flag with the crew's names, and a sinking stays on screen. My tutor
-asked that a second or third person aboard should see what they are for,
+fly a flag with the crew's names, and a sinking stays on screen. A reviewer
+asked that the second and third aboard should see what they are for,
 so everyone now gets a job ([what changed](PROCESS.md)).
 
 ## What I didn't build
