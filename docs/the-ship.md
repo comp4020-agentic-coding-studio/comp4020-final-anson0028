@@ -152,7 +152,11 @@ Each of these becomes a test.
     with the countdown), then aboard from your feet to the station your
     job names, and a large box over the scene saying what to press. It
     ends the first time you hold your station, and never shows again on
-    that browser.
+    that browser. Two lines stay on for everyone, always: when the deck
+    has a hole, each body not working a station gets a red line to the
+    nearest hole and a box saying to hold E on it; when the holes are
+    patched but water is left and nobody is at the pump, the line goes to
+    the pump.
 14. Two sails, 8 November. The mainsail gives six tenths of the speed and
     the foresail the rest; each rises only while held and loosens when
     left. One body on the mainsail moves the ship; it takes a second body

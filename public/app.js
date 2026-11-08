@@ -523,17 +523,40 @@ function endGuide() {
   guideText = "";
 }
 function updateGuide(cur) {
-  if (!guideOn || !cur?.self || !intro.hidden) {
+  const hide = () => {
     guideLine.visible = false;
     guideBox.hidden = true;
     guideText = "";
-    return;
-  }
+  };
+  if (!cur?.self || !intro.hidden) return hide();
   const self = cur.self;
   const from = worldOf(self, cur.ships);
   const fy = groundHeight(self);
   let text = "", to = null, ty = TOP[PIER];
-  if (self.ship === null) {
+  const ship = self.ship === null ? null : cur.ships.find((s) => s.id === self.ship);
+  const st = stationUnder(self);
+  const busy = !!(st && holding);
+  const onLeak = ship ? ship.leaks.find((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y)) : null;
+  if (ship && ship.leaks.length && !busy) {
+    if (onLeak) {
+      if (holding) return hide();
+      text = key("Hold E to patch this hole.", "Hold Use to patch this hole.");
+    } else {
+      const nearest = ship.leaks.map((l) => ({ l, d: Math.hypot(l.x + 0.5 - self.x, l.y + 0.5 - self.y) })).sort((a, b) => a.d - b.d)[0].l;
+      to = toWorld(ship, nearest.x + 0.5, nearest.y + 0.5);
+      ty = deckY(nearest.x + 0.5, nearest.y + 0.5);
+      text = key(`A hole in the deck! Follow the red line and hold E on it to patch it.`, `A hole in the deck! Follow the red line and hold Use on it to patch it.`);
+    }
+  } else if (ship && !ship.leaks.length && ship.water >= 5 && !ship.holders.pump && !busy) {
+    const c = tileCentre("pump");
+    if (st === "pump") text = key("Hold E to pump the water out.", "Hold Use to pump the water out.");
+    else {
+      to = toWorld(ship, c.x, c.y);
+      ty = deckY(c.x, c.y);
+      text = key(`Water ${Math.round(ship.water)}% in the hull and nobody at the pump. Follow the red line and hold E there.`, `Water ${Math.round(ship.water)}% in the hull and nobody at the pump. Follow the red line and hold Use there.`);
+    }
+  } else if (!guideOn) return hide();
+  else if (!ship) {
     const still = cur.ships.filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05);
     const near = still.find((s) => alongside(self, s));
     const waiting = still.find((s) => jettyDistance(s) <= boardRange);
@@ -547,16 +570,15 @@ function updateGuide(cur) {
     else if (clearing) text = `${shipNames.get(clearing.id) ?? "The last ship"} is still clearing the berth. The next ship comes once it is clear.`;
     else text = "The ship has left. Wait at the end of the line for the next one.";
   } else {
-    const ship = cur.ships.find((s) => s.id === self.ship);
-    const st = ship ? GUIDE_STATION[ship.jobs[me.id]] : null;
-    if (!ship || !st) text = key("Walk to any free station and hold E. E by the gangway steps off.", "Walk to any free station and hold Use. Use by the gangway steps off.");
+    const job = GUIDE_STATION[ship.jobs[me.id]];
+    if (!job) text = key("Walk to any free station and hold E. E by the gangway steps off.", "Walk to any free station and hold Use. Use by the gangway steps off.");
     else {
-      const c = { x: stations[st].x + 0.5, y: stations[st].y + 0.5 };
-      const here = stationUnder(self) === st;
+      const c = tileCentre(job);
+      const here = st === job;
       if (here && holding) return endGuide();
       to = toWorld(ship, c.x, c.y);
       ty = deckY(c.x, c.y);
-      text = here ? key("Hold E to work it.", "Hold Use to work it.") : key(`Your station is the ${stationLabel[st]}. Follow the red line and hold E there. E by the gangway steps off.`, `Your station is the ${stationLabel[st]}. Follow the red line and hold Use there. Use by the gangway steps off.`);
+      text = here ? key("Hold E to work it.", "Hold Use to work it.") : key(`Your station is the ${stationLabel[job]}. Follow the red line and hold E there. E by the gangway steps off.`, `Your station is the ${stationLabel[job]}. Follow the red line and hold Use there. Use by the gangway steps off.`);
     }
   }
   if (to) {
