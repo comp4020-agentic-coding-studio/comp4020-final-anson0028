@@ -16,5 +16,7 @@ is a file or a command in this repo.
 | `pnpm check:evidence` | Fails if `PROCESS.md` still has the template comment, cites a commit that does not exist, or a crit reflection is missing. |
 | `.githooks/pre-commit` | Blocks a commit that contains anything shaped like an API key. |
 | `flyctl logs` | One line per act on the live server, `<time> <name>#<id> <did what>`, including refusals. Read at crit 10 and whenever the live app misbehaves. |
-| Playwright at 1920 by 1080, 390 by 844 and keyboard only | Run before any UI change is done, per `CLAUDE.md`. |
+| Playwright at 1920 by 1080, 390 by 844 and keyboard only | Run before any UI change is done, per `CLAUDE.md`. Not a dependency of this repo: the scripts load it from the assignment 2 repo's `node_modules` and live in the agent's scratch directory, so they are not committed. |
+| Humanizer (a user-level skill) | Every page of words, README, PROCESS, the records, goes through it before it ships, against the habits of agent prose: staged contrasts, one-line closers, dashes. |
+| Two conversations | One session changes code; a fork of it keeps the words and is messaged when a piece of work lands. On the last two days they ran side by side and met at the merge. |
 | Agents with no history | Cold readers, cold players, a marker, a tutor, a code reviewer, markers of `PROCESS.md`, each with a narrow brief and no access to the conversation. |
