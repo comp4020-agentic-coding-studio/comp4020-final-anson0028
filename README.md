@@ -11,7 +11,8 @@ You can talk to your ship, leave a note on the jetty, and wave.
 ## What good means here
 
 **What you can do, and what you know, depends on where your body is.**
-With other people aboard, that rule comes down to three things.
+That rule is how the ship works. Whether it makes a good game comes
+down to three things.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
 your voice carries only a few steps, so a big group has to pass a clue from
