@@ -180,7 +180,11 @@ spoken aloud and written down with me
 ## Thin spots
 
 The commits of 10 and 11 October were made in batches at the end of each
-evening. The numbers were tuned by bots, and bots never patch. The big ship
+evening, and on 8 and 9 November several commits bundled spec, code and
+docs in one, against the one pair per claim rule; the red evidence for
+those is in `docs/red-runs.md`. The agent wrote nearly all the code and
+drafted every document, this one included; every commit carries its name.
+I decided what to build, what to cut, and what to take back. The numbers were tuned by bots, and bots never patch. The big ship
 is a day old: its ladder is one sweep, and the far-island number in the
 README is from the old deck. Only classmates have sailed it; nobody from
 outside the course has.
