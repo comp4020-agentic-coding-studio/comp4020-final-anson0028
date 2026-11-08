@@ -1,5 +1,5 @@
 const defaults = {
-  SAIL_RISE: 0.25,
+  SAIL_RISE: 0.08,
   SAIL_LOOSEN: 0.05,
   MAX_SPEED: 0.8,
   TURN_RATE: 0.8,

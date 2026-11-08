@@ -281,3 +281,11 @@ east of the berth touched the Middle Island, so that island moved from
 (58, 44) to (58, 47). The sweep 8 table above was measured before both
 changes: the middle island is three tiles further than it says, and
 nothing else about the sea moved.
+
+`SAIL_RISE` went from 0.25 to 0.08 on 9 November, by hand and by feel,
+Anson's call after sailing the galleon: a sail that filled in four
+seconds made the mast a tap, not a job. At 0.08 it takes about twelve
+seconds of holding to fill, and still loosens at 0.05 a second when let
+go. The sweep 8 times above were measured at 0.25; a solo trip is now a
+few seconds longer per sail raised. Like `REPAIR_RATE`, this is a number
+set by a person, and the table says so.
