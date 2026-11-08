@@ -38,8 +38,7 @@ The design note and the first decision record came before any code
 One Node 24 process steps the ships twenty times a second from who holds
 which station; one WebSocket per visitor carries intent up and a small
 snapshot down; `node:sqlite` holds the records; three.js draws it. The
-alternatives were the Astro site from assignment 2 with a socket server
-beside it, or React with Socket.io. Against them: one page, one process,
+alternatives were Astro plus a socket server, or React with Socket.io. Against them: one page, one process,
 and a server that simulates the ship should own the state, not share it
 with a framework; every extra layer is one more place a reef could be
 computed on the wrong side. The costs: an experimental SQLite module, two
@@ -53,16 +52,14 @@ separate commits. The eleven ship tests failed 11 of 11 against the gate
 server, "no `board` message, no ships in snapshots", and passed on the ship
 ([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4),
 [`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)).
-Every claim since went the same way, the spec red before the server
-(`docs/red-runs.md`). Every test was seen red before its code, and five were broken again on
+Every test since was seen red before its code, and five were broken again on
 purpose after it, a rate set to 0 or a rule switched off
 ([twenty-three runs](docs/red-runs.md)). Where a check stayed green, the
 check was wrong and was rewritten before the rule was trusted.
 
 ## Measured, not promised
 
-The numbers were tuned by simulated crews of one to four bots, measuring
-how far each crew size gets. The first sweep said the problem was rules,
+The numbers were tuned by simulated crews of one to four bots. The first sweep said the problem was rules,
 not numbers, and two rules changed: an unheld helm wanders, and reefs
 come in clumps with lanes
 ([`0f828aa`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0f828aa)).
@@ -123,10 +120,8 @@ Four AI testers played it for twenty minutes; thirteen faults were fixed
 that night, six are listed open
 ([the report](docs/testing/playtest-2026-11-09.md),
 [`f7613d1`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f7613d1)),
-the deck was cut to 14 by 6
-([`88e03fe`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/88e03fe)),
-and the two branches met on the morning of the deadline
-([`a7d3e63`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a7d3e63)).
+and the deck was cut to 14 by 6
+([`88e03fe`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/88e03fe)).
 
 ## What was thrown away
 
@@ -147,15 +142,13 @@ Coins for a landing I wanted and did not build
 
 The harness, every file and command the agent must obey or that catches
 it, is listed in [`docs/harness.md`](docs/harness.md). Agents, on Claude
-Code with Opus and then Fable, got narrow briefs and no history: readers, reviewers
-playing a marker, a tutor and a cold player, cold readers and cold
-players, a code reviewer, play-testers, markers of this file. A finder skill offered the Superpowers set; I used it once, for the code
-review that found two crashes, which went into the spec first
+Code with Opus and then Fable, got narrow briefs and no history: readers,
+cold readers and cold players, reviewers playing a marker or a tutor,
+a code reviewer, play-testers, markers of this file. The Superpowers set
+was used once, for the code review that found two crashes, red first
 ([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2)),
-and otherwise left it off as too heavy for my token budget. The skill I
-used most is Humanizer, because documents written by an agent are hard
-for people to read; every page of words went through it before it
-shipped.
+and otherwise left off as too heavy. Humanizer read every page of words
+before it shipped, because an agent's prose is hard for people to read.
 
 The project ran as two conversations. The main one changed code. A
 second one, forked from it, kept the words: when the main one landed a piece of work it sent the fork a
@@ -163,10 +156,8 @@ message, and the fork brought that week's `PROCESS.md` and the long log up
 to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other, and met at the merge
 ([`f0c3f61`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f0c3f61)).
-Checks by hand: a phone on the home network, my own sinking read from the
-live log, the two crit sessions, and Playwright at both viewports before UI
-changes, borrowed from the assignment 2 repo rather than installed
-here. Every call was mine. The agent was wrong in ways only the checks
+Playwright ran at both viewports before UI changes, borrowed from the
+assignment 2 repo rather than installed here. Every call was mine. The agent was wrong in ways only the checks
 caught: the first nudge test matched the boarding toast, not the nudge,
 and was tightened in the server commit
 ([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406));
