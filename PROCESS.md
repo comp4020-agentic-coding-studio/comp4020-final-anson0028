@@ -53,8 +53,9 @@ server, "no `board` message, no ships in snapshots", and passed on the ship
 ([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4),
 [`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)).
 Every claim since went the same way, the spec red before the server
-(`docs/red-runs.md`). Each check was then broken once to see it fail,
-[twenty runs so far](docs/red-runs.md). Where a check stayed green, the
+(`docs/red-runs.md`). Every test was seen red before its code, and five were broken again on
+purpose after it, a rate set to 0 or a rule switched off
+([twenty-three runs](docs/red-runs.md)). Where a check stayed green, the
 check was wrong and was rewritten before the rule was trusted.
 
 ## Measured, not promised
@@ -123,7 +124,7 @@ that night, six are listed open
 [`f7613d1`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f7613d1)),
 the deck was cut to 14 by 6
 ([`88e03fe`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/88e03fe)),
-and the branch merged on the morning of the deadline
+and the two branches met on the morning of the deadline
 ([`a7d3e63`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a7d3e63)).
 
 ## What was thrown away
@@ -162,8 +163,8 @@ to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other, and met at the merge
 ([`f0c3f61`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f0c3f61)).
 Checks by hand: a phone on the home network, my own sinking read from the
-live log, the two crit sessions, and Playwright at both viewports before
-every UI change, borrowed from the assignment 2 repo rather than installed
+live log, the two crit sessions, and Playwright at both viewports before UI
+changes, borrowed from the assignment 2 repo rather than installed
 here. Every call was mine. The agent was wrong in ways only the checks
 caught: the first nudge test matched the boarding toast, not the nudge,
 and was tightened in the server commit

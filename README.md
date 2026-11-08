@@ -55,7 +55,7 @@ Each line is a test in `spec/` that runs against the app
 - only the body at the chart table is sent the map (claim 9,
   `ship.test.ts`)
 - a move shows to everyone within a second, and a word reaches your ship
-  and not the shore (claims 10 and 18, `walk.test.ts`, `harbour.test.ts`)
+  and not the shore (claims 10 and 14, `walk.test.ts`, `harbour.test.ts`)
 - everyone aboard has a job by order of boarding (claim 16,
   `ship.test.ts`)
 
@@ -67,7 +67,7 @@ deck; the big ship's own sweep is in the same file.
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: four names, three
 landings, all on the near island, and seven wrecks. The reefs were thinned that day
-(decision 9). At crit 10 (19 October) a classmate arriving from the link
+(sweep 5 in [docs/tuning.md](docs/tuning.md), decision 9). At crit 10 (19 October) a classmate arriving from the link
 said nothing was clear at the start; the first screen became three
 short paragraphs and everyone now gets a job on boarding (decision 10).
 That afternoon six names are on the board; four of them reached the
@@ -82,8 +82,8 @@ the galleon for twenty minutes; thirteen faults were fixed that night
   login would slow the play down. You type a name and go
   ([decision 4](docs/decisions/0004-names-are-typed.md)).
 - Puzzles that only exactly two people can solve, as in Big Walk. Nothing
-  here counts players, and the job you are given is a suggestion, not a
-  lock.
+  here unlocks with a headcount, and the job you are given is a suggestion,
+  not a lock.
 - Voice chat. For people who do not know each other well it adds a social
   risk that typed words do not.
 - Coins or any reward for a landing. It would move the point of the game
