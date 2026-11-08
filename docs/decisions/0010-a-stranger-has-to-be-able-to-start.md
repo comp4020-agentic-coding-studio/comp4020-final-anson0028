@@ -39,8 +39,8 @@ see what they are for.
    thing the game is for, and a room of forty arriving at once cannot each
    be walked through it.
 3. **Three things on the page, and a world that says what happened.** A
-   first-screen card that says what the game is in three sentences and
-   asks for a name; a station given to you when you board, by order of
+   first-screen card that says what the game is in three short paragraphs
+   and asks for a name; a station given to you when you board, by order of
    boarding, so there is something to do; and a hint line that says what
    the tile under your feet does. Then the world itself reports: a landing
    plants a flag with the crew's names, a sinking stays on screen until
@@ -48,8 +48,8 @@ see what they are for.
 
 ## Decision
 
-Option 3, over eight commits from 14 to 26 October. The card went from a
-paragraph to three sentences and one line of keys
+Option 3, over eight commits from 14 to 26 October. The card went from one
+paragraph to three short ones and a line of keys
 ([`cd5674f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/cd5674f)),
 the header line says what the game is before anything else
 ([`37440ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37440ce)),
@@ -76,7 +76,12 @@ do" and "what do others do".
 - Every word on the first screen is a word the marker reads before the
   README's argument reaches them; the card and the README are kept saying
   the same thing, in the same commit.
-- Not yet: a first boarding that shows the way, a mark on the deck at the
-  station that is yours, and a pointer to it from wherever you stand. The
-  label over your head and the toast say which station; nothing yet shows
-  where. That is the next change to this record.
+- Done on 9 November, after the galleon: a red dashed line from your feet
+  to the gangway and then to the station your job names, with a box saying
+  what to press
+  ([`a6a488e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a6a488e)),
+  and a line to the nearest hole, or to the pump, when nobody is working
+  it
+  ([`3c0d92b`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/3c0d92b)).
+  Four AI testers that day passed arrival, card, guide and boarding 10 of
+  12 (`docs/testing/playtest-2026-11-09.md`).

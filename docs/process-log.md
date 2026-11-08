@@ -344,20 +344,88 @@ the map. The islands travel with `near` now, only within sight
 read by four agents and the strongest seven compared against this one; the
 finding that stuck was that their first sentence is the rule itself.
 
+## 19 October to 9 November: the crit, the jobs, a review, the words
+
+**Crit 10, 19 October.** The pod used the deployed app from the URL while I
+read `flyctl logs`. The board kept the afternoon: a crew of four (early
+magpie, meow, quiet lorikeet, amber lorikeet) landed on the middle island,
+three of them landed there again, two people reached the near island alone,
+and the one ship that sank that day had one person aboard, 36 tiles out.
+A classmate arriving cold said nothing was clear at the start. The tutor's
+note afterwards: make the cooperation visible; everyone aboard should have
+something to do; a video link in the README is fine.
+
+**Jobs, 23 October.** Decision record 7 first
+([`6d66973`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6d66973)),
+then the spec red
+([`ed7c243`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/ed7c243)),
+the server
+([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406)),
+the client with jobs over heads and a crew line
+([`808811a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/808811a)),
+and the docs, where `CLAUDE.md` gained "never turn a job into a lock"
+([`a812049`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a812049)).
+Jobs are given by order of boarding and are advice; a crew short of its
+helmsman still steers. The first nudge test matched the boarding toast
+instead of the nudge and was tightened before it counted.
+
+**Words, 25 and 26 October.** The README was cut to under 600 with the rule
+in the first sentence and the checks split into tested, measured and
+judged
+([`68771c0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/68771c0),
+[`693d43c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/693d43c)),
+the card became three short paragraphs and one line of keys
+([`cd5674f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/cd5674f)),
+an accessibility spec went in and was broken twice to see it fail
+([`2339122`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2339122)),
+and a loading line covers a slow connection
+([`71099a9`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/71099a9)).
+Five cold reads of card and README went from 3 of 5 to 4 of 5 and stayed
+there.
+
+**A review, 30 October.** A code review with no context reproduced two
+ways one visitor could take the server down: a request for `/vendor/`
+exited with EISDIR, and a WebSocket frame containing `null` threw. Both
+went in as tests first
+([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2),
+[`f95c6d7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f95c6d7)).
+The same day: a dry pump is not an unworked job
+([`07ea84a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/07ea84a),
+[`2aebfee`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2aebfee)),
+and a dropped connection or a redeploy puts you back aboard within two
+minutes, written to the database on shutdown so a restart keeps it
+([`33ac98e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/33ac98e),
+[`00ed7ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/00ed7ce));
+with the shutdown write removed, the restart test went red.
+
+**The last weekend, 8 and 9 November.** The name changed from Earshot to
+All Hands on Deck, because the rule had stopped being about hearing
+([`9e759af`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9e759af)).
+I dictated what good means in my own words; the README was rewritten from
+that, as three claims each with its decision record, and three records
+were written to carry the detail: the sea gets harder with distance, a
+stranger has to be able to start, and no reward for a landing
+([`17eaafb`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/17eaafb),
+[`bda0f6e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/bda0f6e),
+[`6e3543a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/6e3543a),
+[`93906af`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/93906af)).
+The galleon, built on a branch over the same two days and merged on the
+morning of the 9th, has its own section below.
+
 ## 8 November: the galleon
 
 The last evening before the deadline, after reading the cohort's 126
-final sites and the marking page again, Anson asked for a different
+final sites and the marking page again, I asked for a different
 ship: you should arrive already aboard, the ship should be the size of a
 Sea of Thieves galleon, and it should have places on it, a crew's
-quarters, a mess, a gambling table, a sail deck. I wrote the spec and the
+quarters, a mess, a gambling table, a sail deck. The agent wrote the spec and the
 plan before touching code: four stages, the first (the big deck, two
 sails, a bilge, waking aboard, a jetty) kept every existing claim, the
 second and third (the mess with the board on its table, dice only the
 players at the table are sent) needed new rules, words and tests, and a
 dice table with no stakes is scenery while one with stakes is a score.
-Anson chose a branch, `galleon`, and the first stage, with the merge to
-wait for his say-so.
+I chose a branch, `galleon`, and the first stage, with the merge to
+wait for my say-so.
 
 Red first ([`62332a2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/62332a2)):
 a visitor wakes aboard, a word from the helm reaches the chart table and
@@ -378,11 +446,11 @@ which is the better rule anyway. Then the client
 and decision record 8 with the docs
 ([`4a83b39`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/4a83b39)).
 
-Anson played it on the local server and reported the bow and stern
+I played it on the local server and saw the bow and stern
 flickering while the ship moved. That was coplanar faces: the raised
 quarterdeck block and the planks on it both topped out at the same
 height, and the three hull slabs' planks overlapped by five hundredths of
-a tile at the seams. I played it myself after the fix and found three
+a tile at the seams. The agent played it after the fix and found three
 more: a tap on the raised deck walked to the wrong tile because the
 click was cast against one flat plane; the status read "12 tiles out"
 while moored, because distance was measured from the root of the jetty;
@@ -403,15 +471,18 @@ exists. Sweep eight re-measures crews of one to five on the galleon and
 is recorded in `docs/tuning.md`; whatever it says, the README says the
 same.
 
-Waking aboard did not survive the night. Anson played it and wanted the
+Waking aboard did not survive the night. I played it and wanted the
 pier back as the place a crew forms before it goes, so the arrival test
 was rewritten red, the wake code went, and decision record 8 records the
 reversal at its end.
 
-A second session ran beside this one for part of the evening, renaming
-the project to All Hands on Deck. It began in the same working tree, we
-noticed, talked, and it moved its edits to a worktree on `main`; the
-rename meets the galleon at the merge.
+A second agent session ran beside this one for part of the evening,
+renaming the project to All Hands on Deck and rewriting the README from
+my dictation. It began in the same working tree; the two sessions
+noticed, messaged each other, and the second moved its edits to a
+worktree on `main`. The rename met the galleon at the merge on the
+morning of 9 November
+([`a7d3e63`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a7d3e63)).
 
 ## How the work was directed
 
