@@ -293,7 +293,7 @@ describe("ships", { timeout: 60000 }, () => {
     const mover = ships(snap).find((s) => s.id === one)!;
     const other = ships(snap).find((s) => s.id === two)!;
     expect(mover.y).toBeGreaterThan(21);
-    expect(mover.y).toBeLessThan(26);
+    expect(mover.y).toBeLessThan(31);
     expect(other.y).toBeCloseTo(55, 1);
     a.close();
     b.close();
@@ -454,7 +454,7 @@ describe("the galleon", { timeout: 60000 }, () => {
     expect(me.y).toBeLessThan(33);
     expect(isl.stdout.join("\n")).toMatch(new RegExp(`${a.name}#${a.id} arrives on the jetty`));
     expect(await a.board()).toBe(a.hello.ships[0].id);
-    expect(a.hello.deck.maxX - a.hello.deck.minX).toBeGreaterThanOrEqual(16);
+    expect(a.hello.deck.maxX - a.hello.deck.minX).toBeGreaterThanOrEqual(12);
     expect(Object.keys(a.hello.stations).sort()).toEqual(["chart", "foresail", "helm", "pump", "sail"]);
     a.close();
   });

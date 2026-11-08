@@ -20,7 +20,7 @@ export const SPAWN = { x: 9.5, y: 31.5 };
 export const JETTY = { x0: 8, x1: 30, y0: 30, y1: 32 };
 export const SLOTS = [{ x: 20, y: 36.5, heading: 0 }];
 export const SHIP_CLEARANCE = 8;
-export const HULL = { bow: 10.5, stern: 8.5, keel: 0.5, parts: [-8.5, -4, 0, 5, 10.5], beam: 3, shoulders: [-6, 7] };
+export const HULL = { bow: 8.5, stern: 6.5, keel: 0, parts: [-6.5, -3, 0, 4, 8.5], beam: 2.5, shoulders: [-4, 5] };
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };
 export const ISLANDS: Island[] = [
@@ -29,14 +29,14 @@ export const ISLANDS: Island[] = [
   { id: "far", name: "Far Island", cx: 86, cy: 16, r: 4 },
 ];
 
-export const DECK = { minX: -8, maxX: 10, minY: -3, maxY: 4 };
-export const LAYOUT = { quarterdeck: { x0: -8, x1: -3 }, forecastle: { x0: 6, x1: 10 }, bilge: { x0: 2, x1: 5, y0: -3, y1: -1 }, gangway: { x0: -2, x1: 2, y: -3 }, quarters: { x0: 6, x1: 9, y0: -3, y1: -1 } };
+export const DECK = { minX: -6, maxX: 8, minY: -3, maxY: 3 };
+export const LAYOUT = { quarterdeck: { x0: -6, x1: -2 }, forecastle: { x0: 4, x1: 8 }, bilge: { x0: 1, x1: 4, y0: -3, y1: -1 }, gangway: { x0: -2, x1: 2, y: -3 }, quarters: { x0: 5, x1: 7, y0: -3, y1: -1 } };
 export const STATIONS = {
-  helm: { x: -6, y: 0 },
+  helm: { x: -5, y: 0 },
   sail: { x: 0, y: 1 },
-  chart: { x: -4, y: 2 },
-  pump: { x: 3, y: -2 },
-  foresail: { x: 7, y: 1 },
+  chart: { x: -3, y: 2 },
+  pump: { x: 2, y: -2 },
+  foresail: { x: 5, y: 1 },
 } as const;
 export type StationName = keyof typeof STATIONS;
 export const STATION_NAMES = Object.keys(STATIONS) as StationName[];
@@ -183,11 +183,11 @@ export function stationUnder(b: Body): StationName | null {
 export type ShipState = "moored" | "sailing" | "building";
 export type Leak = { x: number; y: number; amount: number };
 export const LEAK_SPOTS: [number, number][][] = [
-  [[-7, -1], [-7, 2]],
-  [[-4, -1], [-4, 0]],
+  [[-5, -1], [-5, 2]],
+  [[-3, -1], [-3, 0]],
   [[0, -1], [0, 0]],
-  [[5, 0], [5, -1]],
-  [[8, 0], [8, 1]],
+  [[4, 0], [4, -1]],
+  [[6, 0], [6, 1]],
 ];
 export type Ship = { id: number; x: number; y: number; heading: number; sail: number; fore: number; water: number; hull: number; leaks: Leak[]; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
 export type Control = { sail: boolean; fore: boolean; helmDir: number; helmHeld: boolean; pump: boolean; patching: { x: number; y: number }[] };

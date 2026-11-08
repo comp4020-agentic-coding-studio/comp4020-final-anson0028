@@ -40,9 +40,9 @@ database once it stops. `spec/ship.test.ts` unless noted.
     nothing stops anyone working any station
     ([decision record 7](decisions/0007-everyone-aboard-has-a-job.md)).
 17. A visitor arrives on the jetty beside the berthed ship, one press from
-    boarding, and the log says so; the deck is at least 16 tiles long with
+    boarding, and the log says so; the deck is at least 12 tiles long with
     five stations ([decision record 8](decisions/0008-the-galleon.md)).
-18. A word said at the helm reaches the pump nine tiles away and not the
+18. A word said at the helm reaches the pump seven tiles away and not the
     jetty beside the ship
     ([decision record 9](decisions/0009-one-channel-per-place.md)).
 19. Two sails: a body on the mainsail alone moves the ship, and a second

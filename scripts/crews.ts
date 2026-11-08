@@ -16,7 +16,7 @@ const CREWS = (process.env.CREWS ?? "1,2,3,4").split(",").map(Number);
 const TARGETS = (process.env.TARGETS ?? "near,mid,far").split(",") as Target[];
 const PARAMS = process.env.SHIP_PARAMS ?? "{}";
 const OUT = process.env.OUT ?? "";
-const STATIONS = { helm: { x: -5.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -3.5, y: 2.5 }, pump: { x: 3.5, y: -1.5 }, foresail: { x: 7.5, y: 1.5 } };
+const STATIONS = { helm: { x: -4.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -2.5, y: 2.5 }, pump: { x: 2.5, y: -1.5 }, foresail: { x: 5.5, y: 1.5 } };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const norm = (d: number) => { while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
 

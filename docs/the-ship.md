@@ -66,10 +66,12 @@ chart.
   increasing distances, clear lanes between them, and reef fields in the
   open water far from any of them.
 - One ship at the berth, a galleon since 8 November (decision record 8):
-  an 18 by 7 deck that carries the bodies standing on it. Helm and chart
-  table at the stern, the mainsail amidships with the pump beside it, the
-  foresail at the bow (the deck was drawn in three levels for a day and
-  flattened on 9 November). Helm to pump is 9 tiles, helm to foresail 13, so
+  a 14 by 6 deck that carries the bodies standing on it (18 by 7 for its
+  first day; Anson found the sea looked outsized beside it and had it cut
+  by a fifth on 9 November). Helm and chart table at the stern, the
+  mainsail amidships with the pump beside it, the foresail at the bow
+  (the deck was drawn in three levels for a day and flattened on 9
+  November). Helm to pump is 7 tiles, helm to foresail 10, so
   the two ends of the ship are out of earshot of each other. Before that
   the deck was 7 by 4 with four stations a few steps apart.
 - A visitor arrives on the jetty by the gangway; the pier is the lobby

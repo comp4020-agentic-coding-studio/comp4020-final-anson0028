@@ -22,7 +22,7 @@ export const ships = (snap: Msg): Ship[] =>
   }));
 
 export const GANGWAY = { x: 19.5, y: 32.5 };
-export const STATIONS = { helm: { x: -5.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -3.5, y: 2.5 }, pump: { x: 3.5, y: -1.5 }, foresail: { x: 7.5, y: 1.5 } } as const;
+export const STATIONS = { helm: { x: -4.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -2.5, y: 2.5 }, pump: { x: 2.5, y: -1.5 }, foresail: { x: 5.5, y: 1.5 } } as const;
 export type Station = keyof typeof STATIONS;
 
 export class Walker {

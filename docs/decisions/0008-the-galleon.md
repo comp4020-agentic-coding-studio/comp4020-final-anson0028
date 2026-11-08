@@ -88,6 +88,14 @@ the countdown to the next ship shows there. Claim 17 and its test
 changed with it. The crew quarters stay on the forecastle as a place to
 stand.
 
+## Cut by a fifth
+
+Played on 9 November the sea looked outsized beside an 18-tile hull, so
+the deck is 14 by 6 (x in [-6, 8), y in [-3, 3)): helm (-5, 0), chart
+(-3, 2), mainsail (0, 1), pump (2, -2), foresail (5, 1); keel from 6.5
+behind to 8.5 ahead, beam points 2.5 out. The jetty, the berth and the
+islands did not move.
+
 ## Flattened: the three levels
 
 The raised quarterdeck and forecastle and the bilge pit lasted a day.

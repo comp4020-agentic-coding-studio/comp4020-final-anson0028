@@ -102,9 +102,10 @@ them broken, change README.md first and say why.
   ship left empty away from it is scuttled after `DERELICT_S`. Nothing
   lies within 30 tiles of the pier.
 - A ship is a galleon (decision record 8): five keel points from stern
-  8.5 behind the centre to bow 10.5 ahead, and four beam points three
-  tiles out at the shoulders (`HULL`). Land and the jetty are checked at
-  all nine, reefs at the five keel points, ships keep `SHIP_CLEARANCE` between keels (the
+  6.5 behind the centre to bow 8.5 ahead, and four beam points two and a
+  half tiles out at the shoulders (`HULL`; 18 by 7 for a day, 14 by 6
+  since 9 November). Land and the jetty are checked at all nine, reefs at
+  the five keel points, ships keep `SHIP_CLEARANCE` between keels (the
   distance between the two segments), a landing is any keel point within
   `LANDING_RANGE` of the shore, and the crew are told when the hull is
   stopped or scraped. Reefs start `REEF_FROM` tiles from the jetty,
@@ -114,9 +115,9 @@ them broken, change README.md first and say why.
   flat, so a galleon can leave its berth without swinging into the pier.
   The spec's fixed positions were checked to be open water under the
   shipped map.
-- Deck coordinates are local to the ship: x in [-8, 10), y in [-3, 4).
-  Stations: helm (-6, 0) and chart (-4, 2) at the stern, sail (0, 1)
-  amidships, pump (3, -2) beside it, foresail (7, 1) at the bow. The deck
+- Deck coordinates are local to the ship: x in [-6, 8), y in [-3, 3).
+  Stations: helm (-5, 0) and chart (-3, 2) at the stern, sail (0, 1)
+  amidships, pump (2, -2) beside it, foresail (5, 1) at the bow. The deck
   is one flat plane (the raised ends and the bilge pit of 8 November were
   flattened on 9 November; `LAYOUT` still names the places). A visitor
   arrives at the root of the jetty and walks out to the gangway; stepping
