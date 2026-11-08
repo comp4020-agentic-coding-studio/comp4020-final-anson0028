@@ -73,6 +73,9 @@ table).
 - A change to any of these numbers is a sweep first (`pnpm crews`), then a
   line in `docs/tuning.md`, then the commit. The spec pins its own fast
   numbers so a tuning change never moves a test.
+- The deck changed on 8 November (decision record 8) and `MAX_SPEED` went
+  from 1.2 to 0.8 for the longer hull; the reef numbers above did not
+  move. Sweep eight in `docs/tuning.md` measures the galleon.
 - What the sea does is what persists: every landing is a flag with the
   crew's names and every wreck a line on the board, in order of time
   (decision record 5). The difficulty is what makes those lines worth
