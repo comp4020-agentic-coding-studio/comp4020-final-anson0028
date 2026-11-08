@@ -285,8 +285,9 @@ nothing else about the sea moved.
 On 9 November, by hand and by feel after sailing the galleon, Anson set
 the sail's two speeds the other way round from what the bots had been
 tuned on: held, it fills in four seconds as before (`SAIL_RISE` 0.25);
-let go, it loosens at 0.01 a second (`SAIL_LOOSEN`, from 0.05), so a full
-sail takes a hundred seconds to fall slack and looks almost still. The
+let go, it loosens at 0.02 a second (`SAIL_LOOSEN`, from 0.05; 0.01 for
+an hour), so a full sail takes fifty seconds to fall slack and looks
+almost still. The
 cost is stated here: a body can raise the sail and leave the mast for
 most of a trip, so the mast is now a job you come back to rather than
 one you stand at, and the sweep 8 times above, measured at 0.05, are a
