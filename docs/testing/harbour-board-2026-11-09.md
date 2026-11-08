@@ -31,8 +31,11 @@ here can be changed or deleted (decision record 5; `wrecks_kept` and
 | 2026-10-23 | landing | Near Island | 1 | gentle currawong | 20 |
 | 2026-10-23 | wreck | | 1 | gentle currawong | 52 |
 
-First landings: Middle Island on 11 October by dusty currawong (4 visits
-since); Near Island on 12 October by quiet lorikeet (8 visits since).
+First landings, from the `landings` table rather than the board: Middle
+Island on 11 October by dusty currawong, who sank later that day (the
+first row above), 4 visits since; Near Island on 12 October by quiet
+lorikeet, 8 visits since. The board (`visits`) began on 11 October, after
+that first landing, so the landing itself has no row.
 
 12 October was crit 9 and 19 October was crit 10, both Monday afternoons
 with the pod playing from the URL. The 18 October entries are my own, the

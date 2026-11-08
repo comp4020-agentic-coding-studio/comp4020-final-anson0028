@@ -46,25 +46,31 @@ Each line is a test in `spec/` that runs against the app
 ([all nineteen](docs/claims.md)):
 
 - one body holds one station, and one station is held by one body
-  (`ship.test.ts`)
+  (claim 1, `ship.test.ts`)
 - a reef holes a moving hull where it struck; a body on the hole patches
-  it (`ship.test.ts`)
+  it (claim 4, `ship.test.ts`)
 - a wreck names its crew, and no wreck or landing can be changed or
-  deleted (`ship.test.ts`)
-- only the body at the chart table is sent the map (`ship.test.ts`)
+  deleted (claims 5 and 12, `ship.test.ts`, `harbour.test.ts`)
+- only the body at the chart table is sent the map (claim 9,
+  `ship.test.ts`)
+- a move shows to everyone within a second, and a word reaches your ship
+  and not the shore (claims 10 and 18, `walk.test.ts`, `harbour.test.ts`)
+- everyone aboard has a job by order of boarding (claim 16,
+  `ship.test.ts`)
 
 Measured, by bot crews of one to four ([how](docs/tuning.md)): every crew
 reaches the near and middle islands; to the far one, a bot alone sank in
 3 of 12 runs, crews of two to four in none of 36. That was the October
-deck; the galleon's own sweep is in the same file.
+deck; the big ship's own sweep is in the same file.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
-pod found the sea too hard, and the board shows it: three landings, all on
-the near island, and seven wrecks. The reefs were thinned that night
+pod found the sea too hard, and the board shows it: four names, three
+landings, all on the near island, and seven wrecks. The reefs were thinned that night
 (decision 9). At crit 10 (19 October) a classmate arriving from the link
 said nothing was clear at the start; the first screen became three
-sentences and everyone now gets a job on boarding (decision 10). That
-afternoon four classmates reached the middle island together, and the one
+short paragraphs and everyone now gets a job on boarding (decision 10).
+That afternoon six names are on the board; four of them reached the
+middle island together, and the one
 ship that sank had one person aboard. On 9 November four AI testers played
 the galleon for twenty minutes; thirteen faults were fixed that night
 ([the report](docs/testing/playtest-2026-11-09.md)).

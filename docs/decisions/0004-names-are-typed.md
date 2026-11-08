@@ -41,5 +41,7 @@ new name, and the old records keep the old one.
   help; not built.
 - Nothing stops a rude name beyond its length. Same accepted risk as the
   bubbles.
+- The README gives the player's reason for no account: a game should open
+  fast, and a login slows the start. Both reasons hold.
 - Records are strings of names, so renaming does not rewrite history. That
   is a feature: the plaque says what you were called when you landed.

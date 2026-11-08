@@ -7,16 +7,11 @@ deadline. The long one, day by day with every commit, is
 
 ## What I built
 
-All Hands on Deck is a big ship at a jetty, seen over the shoulder of a
-block bird you can name. You arrive beside the ship and board when you
-choose. Five stations, helm and chart table at the stern, mainsail
-amidships, foresail at the bow, pump beside the mainsail; each works only while a
-body stands on it. Everyone aboard is given a job by the order they
-boarded and a line to walk to it; nothing stops them taking another. A
-word reaches your whole ship and nobody ashore. Rocks hole the deck where
-they strike, every landing flies a flag with the crew's names, every
-wreck is a line on the board, and the server logs who did what.
-`README.md` says what good means here. This file is how it got that way.
+A big ship at a jetty with five stations that run only while a body
+stands at them, a job for everyone aboard by order of boarding, a word
+that reaches your whole ship and nobody ashore, rocks that hole the deck,
+and a board that keeps every landing and wreck with names. `README.md`
+says what good means here. This file is how it got that way.
 
 ## Ideation: from three requirements to a ship
 
@@ -67,6 +62,7 @@ not numbers: a helm that held itself made the third body idle, and reefs
 spread evenly gave a navigator nothing to find
 ([`0f828aa`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0f828aa)).
 The simulator had faults of its own, a navigator that steered straight
+([`b845fd9`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/b845fd9))
 and a server left running after every run, 398 of them bending every
 table measured that day
 ([`1fab797`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/1fab797)).
@@ -80,25 +76,20 @@ measured a deck that no longer exists, and sweep eight in
 
 Assignment 2 came back with the same comment as assignment 1, that the
 marker could not tell what it was about. So an agent with no context read
-the first screen and three more played it
+the first screen and three more played it, and the words changed
 ([`f87d651`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f87d651),
-[`7429834`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/7429834),
-[`729c7c8`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/729c7c8)).
-The two crit sessions were the real tests, and the harbour board kept the
-record
-([`docs/testing/harbour-board-2026-11-09.md`](docs/testing/harbour-board-2026-11-09.md)).
-At crit 9 the group found the sea too hard: three landings that afternoon,
-all on the near island, seven wrecks. The reefs were thinned that night. At
-crit 10 a classmate arriving from the link said nothing was clear at the
-start, and the tutor asked that everyone aboard should see what they are
-for; the card became three short paragraphs and everyone now gets a job
+[`7429834`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/7429834)).
+The two crit sessions were the real tests; the harbour board kept the
+record ([the board](docs/testing/harbour-board-2026-11-09.md)). Crit 9
+found the sea too hard, and the reefs were thinned that night. Crit 10
+found the start unclear, and the tutor asked that everyone aboard should
+see what they are for; the card became three short paragraphs and
+everyone now gets a job
 ([`cd5674f`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/cd5674f),
 [`808811a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/808811a),
 [decision 10](docs/decisions/0010-a-stranger-has-to-be-able-to-start.md)).
-That afternoon four classmates reached the middle island together; the
-one ship that sank had one person aboard. The eight scenarios from the
-crit 10 whiteboard, two joining, a late joiner, a restart with two aboard,
-were run against the live app with the Fly log lines
+The eight scenarios from the crit 10 whiteboard were run against the live
+app with its log lines
 ([the report](docs/testing/multi-user-test-report.md)).
 
 ## The big ship, the last two days
@@ -158,23 +149,29 @@ Code with Opus and then Fable, got narrow briefs and no history: readers,
 reviewers playing a marker, a tutor and a cold player, six rounds of cold
 reading, three cold plays, a code review, four play-testers, three markers
 of this file. A finder skill offered the Superpowers set; I used it once,
-for the code review that found two crashes, and otherwise left it off
-because it is heavy and my tokens are rationed. The skill I used most is
-Humanizer: the biggest fault of a project maintained by an agent is
-documents people find hard to read, all short sentences and "not this but
-that", so every page of words went through it before it shipped.
+for the code review that found two crashes
+([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2)),
+and otherwise left it off because it is heavy and my tokens are rationed.
+The skill I used most is Humanizer: the biggest fault of a project
+maintained by an agent is documents people find hard to read, all short
+sentences and "not this but that", so every page of words went through it
+before it shipped (it is in the harness table).
 
 The whole project ran as two conversations. The main one changed code,
 and I talked to it about the code. A second one, forked from it, kept the
 words: when the main one landed a piece of work it sent the fork a
 message, and the fork brought that week's `PROCESS.md` and the long log up
 to date. On the last two days they ran side by side, the big ship on its
-branch in one and the README on `main` in the other. Checks by hand: a
-phone on the home network, my own sinking read from the live log, the two
-crit sessions, Playwright at both viewports before every UI change. Every
-call was mine. The agent was wrong in ways only the checks caught: the
-first nudge test matched the boarding toast, not the nudge,
-and the navigator bug above hid for two sweeps. The twelve decision
+branch in one and the README on `main` in the other, and met at the merge
+([`f0c3f61`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f0c3f61)).
+Checks by hand: a phone on the home network, my own sinking read from the
+live log, the two crit sessions, and Playwright at both viewports before
+every UI change, borrowed from the assignment 2 repo rather than installed
+here. Every call was mine. The agent was wrong in ways only the checks
+caught: the first nudge test matched the boarding toast, not the nudge,
+and was tightened in the server commit
+([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406));
+the navigator bug above hid for two sweeps. The twelve decision
 records each list the options and what each costs; the README was
 rewritten on the last weekend from my own account of what good means,
 spoken aloud and written down with me
@@ -183,7 +180,11 @@ spoken aloud and written down with me
 ## Thin spots
 
 The commits of 10 and 11 October were made in batches at the end of each
-evening. The numbers were tuned by bots, and bots never patch. The big ship
+evening, and on 8 and 9 November several commits bundled spec, code and
+docs in one, against the one pair per claim rule; the red evidence for
+those is in `docs/red-runs.md`. The agent wrote nearly all the code and
+drafted every document, this one included; every commit carries its name.
+I decided what to build, what to cut, and what to take back. The numbers were tuned by bots, and bots never patch. The big ship
 is a day old: its ladder is one sweep, and the far-island number in the
 README is from the old deck. Only classmates have sailed it; nobody from
 outside the course has.
