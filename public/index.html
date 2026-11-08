@@ -41,7 +41,7 @@
         <div class="intro-card">
           <h2>Earshot</h2>
           <p>A small online co-op game. You are a block bird, and you wake in the crew quarters of a galleon at the pier, with whoever else is online. The more of you aboard, the safer the trip.</p>
-          <p>You can only work the station you stand at, and you only hear people within a ship's length. The helm and chart table are up on the quarterdeck, the mainsail on the main deck, the foresail at the bow, and the pump is down a ladder in the bilge, out of earshot of the deck. You are told which station is yours. Stand at it and hold E; every station stops the moment it is left. Rocks hole the deck; stand on the hole to patch it.</p>
+          <p>You can only work the station you stand at, and what you say is heard by your ship, not by the shore. The helm and chart table are up on the quarterdeck, the mainsail on the main deck, the foresail at the bow, and the pump is down a ladder in the bilge. You are told which station is yours. Stand at it and hold E; every station stops the moment it is left. Rocks hole the deck; stand on the hole to patch it.</p>
           <p>The harbour board lists how far each crew got, with their names. Press E by the gangway to step onto the pier, and again to come back aboard.</p>
           <p class="keys">WASD or tap to walk · arrows or drag to look · E boards and works a station · N leaves a note · H waves · Y and B nod and shake</p>
           <form id="name-form" class="name-form" autocomplete="off">
@@ -53,7 +53,7 @@
       </section>
       <ol id="heard" class="heard" aria-label="What you heard lately" hidden></ol>
       <form id="say" class="say" autocomplete="off">
-        <label for="text" class="sr-only">Say something to people near you</label>
+        <label for="text" class="sr-only">Say something to your ship, or to the shore</label>
         <input id="text" name="text" maxlength="40" placeholder="Say something (Enter)" />
         <span id="count" class="count">0/40</span>
         <button type="submit">Say</button>

@@ -11,7 +11,7 @@ import {
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, HULL, ISLANDS, JETTY, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  type Body, DECK, H, HULL, ISLANDS, JETTY, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
   alongside, deckToWorld, leakUnder, nearTiles, nearestPierDistance, onDeck, setTile, shipsApart, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
 } from "./world.ts";
 
@@ -299,7 +299,7 @@ function join_(ws: WebSocket, token: string): void {
   else logLine(`${whoIs(c)} arrives on the jetty at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], jetty: JETTY, hull: HULL, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], jetty: JETTY, hull: HULL, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => {
@@ -376,12 +376,11 @@ function handle(c: Client, raw: string): void {
   if (msg.t === "say") {
     const text = String(msg.text ?? "").trim().slice(0, 40);
     if (!text) return;
-    const from = worldPos(c);
-    const hearers = [...clients.values()].filter((o) => within(worldPos(o), from, SAY_RANGE));
+    const hearers = [...clients.values()].filter((o) => o.body.ship === b.ship);
     for (const o of hearers) send(o.ws, { t: "bubble", from: c.id, text });
     const others = hearers.filter((o) => o !== c);
-    logLine(`${whoIs(c)} says: "${text}" (heard by ${others.length ? others.map(whoIs).join(", ") : "nobody"})`);
-    if (!others.length) send(c.ws, { t: "toast", text: "Nobody within earshot heard that." });
+    logLine(`${whoIs(c)} says: "${text}" (heard by ${others.length ? others.map(whoIs).join(", ") : "nobody"}${b.ship === null ? ", ashore" : ` aboard ship ${b.ship}`})`);
+    if (!others.length) send(c.ws, { t: "toast", text: b.ship === null ? "Nobody heard that. Only people ashore can." : "Nobody heard that. Only your ship can." });
     return;
   }
   if (msg.t === "emote") {
@@ -390,8 +389,7 @@ function handle(c: Client, raw: string): void {
     const now = Date.now();
     if (now - c.lastEmote < 400) return;
     c.lastEmote = now;
-    const from = worldPos(c);
-    for (const o of clients.values()) if (within(worldPos(o), from, SAY_RANGE) || (b.ship !== null && o.body.ship === b.ship)) send(o.ws, { t: "emote", id: c.id, kind });
+    for (const o of clients.values()) if (o.body.ship === b.ship) send(o.ws, { t: "emote", id: c.id, kind });
     logLine(`${whoIs(c)} ${{ wave: "waves", jump: "jumps", yes: "nods", no: "shakes their head" }[kind]}`);
     return;
   }

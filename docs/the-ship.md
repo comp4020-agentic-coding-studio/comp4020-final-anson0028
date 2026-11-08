@@ -121,8 +121,10 @@ Each of these becomes a test.
    everyone not aboard sees the countdown over their head; ships at sea
    stay where they were left, up to a cap on the fleet. Boarding is E on
    the jetty within six tiles of the hull.
-10. Talking is unchanged: a bubble reaches 8 tiles. Aboard, that is the whole
-    ship. Ship to ship, and ship to shore, it isn't.
+10. Talking, 8 November (decision record 9): a word or a gesture reaches
+    everyone aboard your ship, or everyone ashore if you are ashore, and
+    nobody else. From 5 October to 8 November it reached 8 tiles instead;
+    on the galleon that split the crew, so the place replaced the radius.
 11. Hulls are solid. A ship stops short of another ship and of the shore,
     the hull is checked at five points along the keel, a landing is the bow
     touching the shore, and the crew are told when the hull is stopped or

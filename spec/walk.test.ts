@@ -35,7 +35,9 @@ describe("two people on the pier", { timeout: 30000 }, () => {
     const b = await join(uuid("bbbb0002"));
     const aboard = await join(uuid("cccc0002"));
     await Promise.all([a.ashore(), b.ashore()]);
-    await Promise.all([a.walkTo(5.5, 31.5), b.walkTo(5.5, 52.5)]);
+    await aboard.board();
+    await Promise.all([a.walkTo(5.5, 31.5), b.walkTo(5.5, 32.5)]);
+    await b.walkTo(5.5, 52.5);
     aboard.inbox.length = 0;
     a.send({ t: "say", text: "over here" });
     const heard = await b.next((m) => m.t === "bubble" && m.text === "over here", 1000);

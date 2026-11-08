@@ -20,16 +20,18 @@ database once it stops. `spec/ship.test.ts` unless noted.
 8. An island's first landing is written once, with the crew; later visits
    are counted.
 9. Only a body at the chart table is sent the map.
-10. Bubbles and gestures reach 8 tiles; nobody is sent another's cookie; a
-    move shows within a second; your bird survives a restart.
+10. Bubbles and gestures reach the people in your place, your ship or the
+    shore, and nobody else; nobody is sent another's cookie; a move shows
+    within a second; your bird survives a restart.
     (`spec/walk.test.ts`, `spec/persist.test.ts`, `spec/harbour.test.ts`)
 11. A typed name goes on every record after it.
 12. Every landing and wreck is a kept line on the harbour board, with crew
     and day.
 13. A note left ashore is seen within sight, kept, and taken up only by its
     writer.
-14. A word reaches everyone within earshot and nobody else, whatever the
-    client asks; a word nobody heard says so. (11–14: `spec/harbour.test.ts`)
+14. A word reaches everyone aboard your ship and nobody ashore, whatever
+    the client asks; a word nobody heard says so. (11–14:
+    `spec/harbour.test.ts`)
 15. The jetty is the only way on or off a ship: E boards one alongside and
     steps off one there; nothing leaves a ship at sea but a sinking.
 16. Everyone aboard has a job, given by the order they boarded and sent to
@@ -40,8 +42,9 @@ database once it stops. `spec/ship.test.ts` unless noted.
 17. A new visitor wakes aboard the ship at the berth, in the crew quarters,
     and the log says so; the deck is at least 16 tiles long with five
     stations ([decision record 8](decisions/0008-the-galleon.md)).
-18. A word said at the helm reaches the chart table beside it and not the
-    pump down in the bilge, 9 tiles away.
+18. A word said at the helm reaches the pump down in the bilge, the length
+    of the deck away, and not the jetty beside the ship
+    ([decision record 9](decisions/0009-one-channel-per-place.md)).
 19. Two sails: a body on the mainsail alone moves the ship, and a second
     body on the foresail makes it faster.
 

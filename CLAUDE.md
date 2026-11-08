@@ -8,8 +8,9 @@ them broken, change README.md first and say why.
 
 - Never send a client something its person shouldn't know. Filter on the
   server before sending; hiding it in the page doesn't count. That covers
-  bubbles beyond 8 tiles, the map beyond 8 tiles for anyone not standing at
-  the chart table, and anything about other people beyond their public id,
+  bubbles and gestures from another place (your ship hears you, the shore
+  hears the shore), the map beyond 8 tiles for anyone not standing at the
+  chart table, and anything about other people beyond their public id,
   name, colour, position and which ship they are on. The harbour board is
   public: every landing and wreck, with names, crew size and day, goes to
   everyone.
@@ -38,11 +39,12 @@ them broken, change README.md first and say why.
   heard may stay on that client for two minutes; the server keeps no chat.
 - Never update or delete a row in `visits` either; it is the board. A note
   in `notes` is removed only by its writer, through the server.
-- Never widen earshot, and never narrow it either: one channel, 8 tiles.
-  Nothing carries a word or a gesture further (the crew always sees a
-  gesture), and a note is read within 1.5. The crew-only channel was
-  removed on 14 October: two channels that looked the same confused
-  players.
+- Never carry a word or a gesture out of its place: everyone aboard the
+  speaker's ship hears it, or everyone ashore when the speaker is ashore,
+  and nobody else, with no number to widen or narrow (decision record 9,
+  8 November, replacing the 8-tile rule). A note is read within 1.5. The
+  crew-only channel was removed on 14 October: two channels that looked
+  the same confused players.
 - Never ship a test hook that works without `WALK_TEST=1`.
 
 ## Every change
@@ -116,8 +118,7 @@ them broken, change README.md first and say why.
   on the main deck, pump (3, -2) down in the bilge, foresail (7, 1) on the
   forecastle (`LAYOUT` names the levels; the client draws them a step up
   or down, the server moves on one plane). Speed is `MAIN_SHARE` of the
-  mainsail plus the rest of the foresail. Helm to pump is 9.2 tiles, so a
-  word at the wheel does not reach the bilge. A new visitor wakes in the
+  mainsail plus the rest of the foresail. A new visitor wakes in the
   crew quarters of the ship at the berth; a known one is where they left.
   The gangway amidships on the port side is where E boards and steps off.
 - A name is what the visitor typed, cleaned on the server to letters, digits

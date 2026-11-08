@@ -41,7 +41,6 @@ let stations = null;
 let leakCap = 40;
 let patchStart = null;
 let pierAt = { x: 9.5, y: 31.5 };
-let sayRange = 8;
 let boardRange = 9;
 let pier = { x: 9.5, y: 31.5 };
 let day = "";
@@ -103,7 +102,6 @@ ws.addEventListener("message", (e) => {
     stations = m.stations;
     leakCap = m.leakCap ?? 40;
     pierAt = m.pier ?? pierAt;
-    sayRange = m.sayRange;
     boardRange = m.boardRange ?? boardRange;
     pier = m.pier;
     day = m.day;
@@ -115,8 +113,6 @@ ws.addEventListener("message", (e) => {
     document.getElementById("loading")?.remove();
     who.style.color = `hsl(${me.hue} 60% 35%)`;
     for (const r of m.roster) roster.set(r.id, r);
-    ring.geometry.dispose();
-    ring.geometry = new THREE.RingGeometry(sayRange - 0.06, sayRange + 0.06, 96);
     nameInput.value = me.name;
     drawBoard();
     if (!seenIntro()) showIntro();
@@ -499,10 +495,6 @@ const mat = (color, extra) => new THREE.MeshLambertMaterial({ color, ...extra })
 const sea = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), mat(0x28506e));
 sea.rotation.x = -Math.PI / 2;
 scene.add(sea);
-const ring = new THREE.Mesh(new THREE.RingGeometry(sayRange - 0.06, sayRange + 0.06, 96), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
-ring.rotation.x = -Math.PI / 2;
-ring.position.y = 0.03;
-scene.add(ring);
 
 const tileGeo = new THREE.BoxGeometry(1, 1, 1);
 const pools = {
@@ -1110,7 +1102,7 @@ function updateHud(self, shipsNow) {
   if (self.ship !== aboardNow) {
     yawOffset = ship ? 0 : lastViewYaw;
     if (ship && !noteForm.hidden) closeNote();
-    sayInput.placeholder = "Say something (Enter · heard within 8 tiles)";
+    sayInput.placeholder = ship ? "Say something (Enter · your ship hears it)" : "Say something (Enter · the shore hears it)";
   }
   aboardNow = self.ship;
   syncNoteLabels(ship ? null : self);
@@ -1171,7 +1163,7 @@ function updateHud(self, shipsNow) {
   } else if (st === "helm") text = holding ? key("Holding the helm. A or D to turn.", "Holding the helm. ◀ ▶ to turn.") : key("Hold E to take the helm, then A or D to turn.", "Hold Use to take the helm, then ◀ ▶ to turn.");
   else if (st === "sail") text = holding ? "Raising the mainsail. Let go and it loosens." : key("Hold E to raise the mainsail.", "Hold Use to raise the mainsail.");
   else if (st === "foresail") text = holding ? "Raising the foresail. Let go and it loosens." : key("Hold E to raise the foresail.", "Hold Use to raise the foresail.");
-  else if (st === "pump") text = holding ? "Pumping, down in the bilge. Nobody on deck can hear you from here." : key("Hold E to pump.", "Hold Use to pump.");
+  else if (st === "pump") text = holding ? "Pumping." : key("Hold E to pump.", "Hold Use to pump.");
   else if (st === "chart") text = "The chart. Stand here to see the sea.";
   else if (ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y))) {
     const leak = ship.leaks.find((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y));
@@ -1277,7 +1269,6 @@ function frame(t) {
   camera.position.set(target.x - dist * cp * Math.cos(yaw), ty + 0.9 + dist * sp, target.y - dist * cp * Math.sin(yaw));
   camera.lookAt(target.x, ty + 0.9, target.y);
   sea.position.set(target.x, 0, target.y);
-  ring.position.set(target.x, 0.03, target.y);
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
