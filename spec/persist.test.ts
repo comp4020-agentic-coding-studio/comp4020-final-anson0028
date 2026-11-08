@@ -10,12 +10,13 @@ describe("what survives a restart", { timeout: 30000 }, () => {
     await island.start();
     const token = uuid("feed0001");
     const a = await Walker.join(island.wsBase, token);
+    await a.ashore();
     a.hold(-1, 0);
     await new Promise((r) => setTimeout(r, 900));
     a.hold(0, 0);
     await new Promise((r) => setTimeout(r, 400));
     const stoodAt = await a.pos();
-    expect(stoodAt.x).toBeLessThan(7);
+    expect(stoodAt.x).toBeLessThan(17);
     const name = a.name;
     a.close();
     await new Promise((r) => setTimeout(r, 200));

@@ -8,20 +8,20 @@ export const uuid = (n: string) => `${n.padEnd(8, "0")}-0000-4000-8000-${RUN}`;
 
 export type Body = { id: string; x: number; y: number; seq: number; ship: number | null };
 export type Leak = { x: number; y: number; amount: number };
-export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; state: string; hull: number; leaks: Leak[]; jobs: Record<string, string>; holders: { sail: string | null; helm: string | null; chart: string | null; pump: string | null } };
+export type Ship = { id: number; x: number; y: number; heading: number; sail: number; fore: number; water: number; state: string; hull: number; leaks: Leak[]; jobs: Record<string, string>; holders: { sail: string | null; helm: string | null; chart: string | null; pump: string | null; foresail: string | null } };
 
 export const bodies = (snap: Msg): Body[] =>
   (snap.p as [string, number, number, number, number | ""][]).map(([id, x, y, seq, ship]) => ({ id, x: x / 100, y: y / 100, seq, ship: ship === "" ? null : ship }));
 
 export const ships = (snap: Msg): Ship[] =>
-  (snap.s as [number, number, number, number, number, number, string, string, string, string, string, number, [number, number, number][], string, [string, string][]][]).map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, , jobs]) => ({
-    id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, water, state, hull: hull ?? 0,
+  (snap.s as [number, number, number, number, number, number, string, string, string, string, string, number, [number, number, number][], string, [string, string][], number, string][]).map(([id, x, y, h, sail, water, state, sh, he, ch, pu, hull, leaks, , jobs, fore, fs]) => ({
+    id, x: x / 100, y: y / 100, heading: h / 100, sail: sail / 100, fore: (fore ?? 0) / 100, water, state, hull: hull ?? 0,
     leaks: (leaks ?? []).map(([lx, ly, amount]) => ({ x: lx, y: ly, amount })),
     jobs: Object.fromEntries(jobs ?? []),
-    holders: { sail: sh || null, helm: he || null, chart: ch || null, pump: pu || null },
+    holders: { sail: sh || null, helm: he || null, chart: ch || null, pump: pu || null, foresail: fs || null },
   }));
 
-export const STATIONS = { helm: { x: -2.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: 3.5, y: 0.5 }, pump: { x: 0.5, y: -1.5 } } as const;
+export const STATIONS = { helm: { x: -5.5, y: 0.5 }, sail: { x: 0.5, y: 1.5 }, chart: { x: -3.5, y: 2.5 }, pump: { x: 3.5, y: -1.5 }, foresail: { x: 7.5, y: 1.5 } } as const;
 export type Station = keyof typeof STATIONS;
 
 export class Walker {

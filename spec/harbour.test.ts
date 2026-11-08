@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { Island } from "./island.ts";
-import { Walker, settle, uuid, type Msg } from "./walker.ts";
+import { STATIONS, Walker, settle, uuid, type Msg } from "./walker.ts";
 
 const FAST = JSON.stringify({ SAIL_RISE: 2, SAIL_LOOSEN: 1, MAX_SPEED: 3, LEAK_PER_DAMAGE: 0.4, LAUNCH_DELAY_S: 1, HELM_DRIFT: 0 });
 const env = { WALK_TEST: "1", WALK_TODAY: "2026-10-12", SHIP_PARAMS: FAST };
@@ -111,12 +111,15 @@ describe("notes on the ground", { timeout: 30000 }, () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0205"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0205"));
+    await a.ashore();
+    await b.ashore();
+    const stood = await a.pos();
     a.send({ t: "note", text: "  gone to the far island,   back by dark  " });
     const seen = await a.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
     expect(seen.notes[0].text).toBe("gone to the far island, back by dark");
     expect(seen.notes[0].name).toBe(a.name);
     expect(seen.notes[0].author).toBe(a.id);
-    expect(Math.hypot(seen.notes[0].x - 9.5, seen.notes[0].y - 31.5)).toBeLessThan(2);
+    expect(Math.hypot(seen.notes[0].x - stood.x, seen.notes[0].y - stood.y)).toBeLessThan(0.5);
     await b.next((m) => m.t === "near" && m.notes?.length === 1, 3000);
     b.send({ t: "unnote", id: seen.notes[0].id });
     await b.walkTo(4.5, 31.5);
@@ -158,6 +161,7 @@ describe("gestures", { timeout: 30000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0208"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0208"));
     const c = await Walker.join(isl.wsBase, uuid("cccc0208"));
+    await c.ashore();
     await c.walkTo(4.5, 31.5);
     await c.walkTo(4.5, 52.5);
     a.send({ t: "emote", kind: "wave" });
@@ -191,7 +195,7 @@ describe("the log", { timeout: 30000 }, () => {
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
     await a.man("helm");
-    await b.walkTo(-2.5, 0.5);
+    await b.walkTo(STATIONS.helm.x, STATIONS.helm.y);
     b.grip(true);
     await b.next((m) => m.t === "toast" && /already at the helm/.test(m.text), 2000);
     b.send({ t: "say", text: "hello crew" });
@@ -226,6 +230,7 @@ describe("saying", { timeout: 30000 }, () => {
     await c.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
     a.send({ t: "say", text: "everyone" });
     await c.next((m) => m.t === "bubble" && m.text === "everyone", 2000);
+    await c.ashore();
     await c.walkTo(4.5, 31.5);
     await c.walkTo(4.5, 55.5);
     c.send({ t: "say", text: "hello?" });

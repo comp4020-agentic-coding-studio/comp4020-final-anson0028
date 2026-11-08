@@ -9,6 +9,7 @@ describe("two people on the pier", { timeout: 30000 }, () => {
   it("tells them apart and shows one's move to the other within a second", async () => {
     const a = await join(uuid("aaaa0001"));
     const b = await join(uuid("bbbb0001"));
+    await Promise.all([a.ashore(), b.ashore()]);
     expect(a.id).not.toBe(b.id);
     expect(a.name).not.toBe(b.name);
     const before = await b.pos();
@@ -32,6 +33,7 @@ describe("two people on the pier", { timeout: 30000 }, () => {
     const a = await join(uuid("aaaa0002"));
     const b = await join(uuid("bbbb0002"));
     const far = await join(uuid("cccc0002"));
+    await Promise.all([a.ashore(), b.ashore(), far.ashore()]);
     await Promise.all([a.walkTo(5.5, 31.5), b.walkTo(5.5, 24.5), far.walkTo(5.5, 22.5)]);
     far.inbox.length = 0;
     a.send({ t: "say", text: "over here" });
