@@ -129,7 +129,7 @@ Each of these becomes a test.
    everyone not aboard sees the countdown over their head; ships at sea
    stay where they were left, up to a cap on the fleet. Boarding is E on
    the jetty within six tiles of the hull.
-10. Talking, 8 November (decision record 9): a word or a gesture reaches
+10. Talking, 8 November (decision record 12): a word or a gesture reaches
     everyone aboard your ship, or everyone ashore if you are ashore, and
     nobody else. From 5 October to 8 November it reached 8 tiles instead;
     on the galleon that split the crew, so the place replaced the radius.

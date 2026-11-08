@@ -41,7 +41,7 @@ them broken, change README.md first and say why.
   in `notes` is removed only by its writer, through the server.
 - Never carry a word or a gesture out of its place: everyone aboard the
   speaker's ship hears it, or everyone ashore when the speaker is ashore,
-  and nobody else, with no number to widen or narrow (decision record 9,
+  and nobody else, with no number to widen or narrow (decision record 12,
   8 November, replacing the 8-tile rule). A note is read within 1.5. The
   crew-only channel was removed on 14 October: two channels that looked
   the same confused players.

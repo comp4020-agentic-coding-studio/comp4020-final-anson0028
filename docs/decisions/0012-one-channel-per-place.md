@@ -1,4 +1,4 @@
-# 9. One channel per place
+# 12. One channel per place
 
 Date: 8 November 2026. Status: accepted. Changes decision record 6 and
 the 8-tile rule that gave the project its first name.

@@ -1,73 +1,88 @@
 # All Hands on Deck
 
-On this ship you can only work the station you are standing at. The
-mainsail rises only while someone holds the mast, the helm turns only
-while someone holds the wheel, the map shows only at the chart table,
-the pump runs only while someone works it, and what you say
-is heard by your ship and not ashore. One person can sail, badly,
-running the deck. More hands get there faster.
-
-All Hands on Deck is a small online co-op game for a room of people. You
-play a block bird on a pier with a galleon tied up beside it; whoever is
-online gathers there, boards, and sails. Each of you is told which
-station is yours, and how far you get is kept with your names. Further out the
-rocks hole the deck, and a hole wants one hand on the patch and one on
-the pump.
+All Hands on Deck is a sailing game for whoever is online. You start on a
+pier with one ship tied up at it, and whoever turns up is its crew. The ship
+has stations, sail, helm, chart table and pump, and each works only while
+somebody stands at it; step away and it stops. The crew's one goal is to
+find the islands out there and reach them together, past rocks that tear
+holes in the deck. A landing goes on the harbour board with your names.
+You can talk to the people near you, leave a
+note on the ground for whoever comes next, and jump to show you are pleased.
 
 ## What good means here
 
-**What you can do depends on where your body is.** Co-operation comes
-from that rule, not from one that counts heads; nothing waits for a
-number of players.
+A game has to be fun first, and with other people aboard, fun comes down
+to three things.
 
-The rule began as a distance: after Big Walk (House House, 2026), a word
-reached eight tiles, and the project was called Earshot. On this deck
-that split the crew, so the rule is now the place: your ship hears you,
-the shore does not
-([decision record 9](docs/decisions/0009-one-channel-per-place.md)).
-Erickson and Kellogg (2000) found a limit works when everyone can see
-it; the chart rule is the same for everyone, and each station is written
-above its holder's head. Other projects in this course unlock
-features once enough players are present
-([survey](docs/cohort-survey.md)); here nothing unlocks ([decision
-records 1](docs/decisions/0001-one-body-one-station.md) and
-[8](docs/decisions/0008-the-galleon.md)).
+**Every job matters, and friends get a good hour together.** In Big Walk
+your voice carries only a few steps, so a big group has to pass a clue from
+person to person down the line. In PEAK the climber who still has strength
+has to go up first and drop a rope for the others, or nobody reaches the
+top. Here the ship runs only while people stand at its stations. Everyone
+aboard heads for the same goal, and the funny things happen on the way
+([decision 1](docs/decisions/0001-one-body-one-station.md),
+[decision 7](docs/decisions/0007-everyone-aboard-has-a-job.md)).
 
-## How the rule is checked
+**The sea gets harder the further out you go, and what you got through
+leaves a mark.** R.E.P.O. sends stronger monsters the deeper you get.
+Here the rocks get denser the further you sail and tear holes in the deck, so one person has
+to patch the hole while another pumps the water out. Every landing plants a
+flag with the crew's names on the island; every wreck is a line on the
+harbour board, in order of time. Both are still there the next day, and
+they are the reason players come back
+([decision 9](docs/decisions/0009-the-sea-gets-harder.md),
+[decision 5](docs/decisions/0005-the-harbour-board-ranks-nothing.md)).
 
-Tested, by checks that drive a running server, nineteen claims
-([the full list](docs/claims.md)), among them: one body holds one
-station; only the body at the chart table is sent the map; a word
-reaches your ship and not the jetty beside it; no wreck or landing can
-be changed or deleted; everyone aboard gets a job.
+**A stranger has to be able to start.** My first two assignments came back
+with the same note, "I can't tell what this is": the agent that wrote them
+had the context and assumed every reader did. So the first screen says what
+the game is in three sentences, the game walks you onto the ship, and it
+gives you a station to start at, so there is something to do
+([decision 10](docs/decisions/0010-a-stranger-has-to-be-able-to-start.md)).
 
-Measured, by simulated crews of one to five bots
-([how](docs/tuning.md)): every crew reaches the nearer islands in about
-fifty seconds. To the far island, one to four bots take two
-minutes and a lone bot ran out of time twice in twelve; a fifth hand on
-the foresail makes it in seventy-five seconds. Bots never patch a hole;
-people can.
+## Enforced, and judged
 
-Judged, by watching it played from the link alone. On the smaller deck
-before this one, three AI agents told nothing knew within a minute what
-it was, and all missed the same thing: nobody could tell they had reached an island, and a
-sinking vanished into a fresh ship. Islands now
-fly a flag with the crew's names, and a sinking stays on screen. A
-reviewer asked that a second person aboard see what they are for, so
-everyone gets a job. The galleon is a day old; I, one agent and
-[four scripted testers](docs/testing/playtest-2026-11-09.md) have sailed
-it ([what changed](PROCESS.md)).
+Each line is a test in `spec/` that runs against the app
+([all nineteen](docs/claims.md)):
+
+- one body holds one station, and one station is held by one body
+  (`ship.test.ts`)
+- a reef holes a moving hull where it struck; a body on the hole patches
+  it (`ship.test.ts`)
+- a wreck names its crew, and no wreck or landing can be changed or
+  deleted (`ship.test.ts`)
+- only the body at the chart table is sent the map (`ship.test.ts`)
+
+Measured, by bot crews of one to four ([how](docs/tuning.md)): every crew
+reaches the near and middle islands; to the far one, a bot alone sank in
+3 of 12 runs, crews of two to four in none of 36.
+
+Judged, from what happened when people played. At crit 9 (12 October) the
+pod found the sea too hard, and the board shows it: four landings, all on
+the near island, and six wrecks. The reefs were thinned that night
+(decision 9). At crit 10 (19 October) a classmate arriving from the link
+said nothing was clear at the start; the first screen became three
+sentences and everyone now gets a job on boarding (decision 10). That
+afternoon four classmates reached the middle island together, and the one
+ship that sank had one person aboard.
 
 ## What I didn't build
 
-- Voice: in one room it would feed back.
-- Accounts, chat history, scores. The board lists crews by time, not by
-  points; the wrecks, flags and notes are the record.
-- Locked stations: a crew that loses its helmsman must still steer.
-- A mess hall and a dice table ([why not](docs/decisions/0008-the-galleon.md)).
+- Accounts. The thing I weigh most in a game is how fast it opens, and a
+  login would slow the play down. You type a name and go
+  ([decision 4](docs/decisions/0004-names-are-typed.md)).
+- Puzzles that only exactly two people can solve, as in Big Walk. Nothing
+  here counts players, and the job you are given is a suggestion, not a
+  lock.
+- Voice chat. For people who do not know each other well it adds a social
+  risk that typed words do not.
+- Coins or any reward for a landing. It would move the point of the game
+  from a good time with friends to earning coins
+  ([decision 11](docs/decisions/0011-no-reward-for-landing.md)).
 
 ## Sources
 
-- House House, [Big Walk](https://bigwalk.game/presskit/), 2026.
-- Thomas Erickson and Wendy Kellogg, [Social Translucence](https://collablab.northwestern.edu//CollabolabDistro/nucmc/p59-erickson.pdf), ACM TOCHI 7(1), 2000.
-- [Notes on 29 games and papers](docs/research.md) and [the class survey](docs/cohort-survey.md).
+- [Big Walk](https://bigwalk.game/presskit/) (House House, 2026) and [its designers in Kotaku](https://kotaku.com/the-creators-of-big-walk-break-down-the-goty-contenders-development-puzzles-and-stunning-ending-2000725133).
+- PEAK (Aggro Crab and Landfall, 2025): [Nick Kaman in PC Gamer](https://pcgamer.com/games/adventure/peak-boss-doesnt-mind-us-calling-it-friendslop-why-not-make-a-game-where-the-point-is-to-hang-out-with-your-friends).
+- R.E.P.O. (Semiwork, 2025): [PC Gamer on its difficulty](https://www.pcgamer.com/games/horror/repo-will-feature-moon-phases-as-part-of-the-new-update-ramping-up-the-difficulty-every-5-levels).
+- [29 games and papers](docs/research.md); [the class survey](docs/cohort-survey.md).

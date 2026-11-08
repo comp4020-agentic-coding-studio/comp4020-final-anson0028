@@ -44,7 +44,7 @@ database once it stops. `spec/ship.test.ts` unless noted.
     five stations ([decision record 8](decisions/0008-the-galleon.md)).
 18. A word said at the helm reaches the pump seven tiles away and not the
     jetty beside the ship
-    ([decision record 9](decisions/0009-one-channel-per-place.md)).
+    ([decision record 12](decisions/0012-one-channel-per-place.md)).
 19. Two sails: a body on the mainsail alone moves the ship, and a second
     body on the foresail makes it faster.
 
