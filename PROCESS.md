@@ -143,19 +143,20 @@ Coins for a landing I wanted and did not build
 
 The harness, every file and command the agent must obey or that catches
 it, is listed in [`docs/harness.md`](docs/harness.md). Agents, on Claude
-Code with Opus and then Fable, got narrow briefs and no history: readers,
+Code with Opus and Fable in turns, got narrow briefs and no history: readers,
 cold readers and cold players, reviewers playing a marker or a tutor,
 a code reviewer, play-testers, markers of this file. The Superpowers set
 was used once, for the code review that found two crashes, red first
 ([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2),
 [`f95c6d7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f95c6d7),
 [`f03b072`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f03b072)),
-and otherwise left off as too heavy. Humanizer read every page of words
-before it shipped, because an agent's prose is hard for people to read;
-the "plain words" commits are its output
+and otherwise left off as too heavy. Humanizer read the README and the
+card before they shipped, because an agent's prose is hard for people to
+read; the commits that rewrote them in plain words
 ([`693d43c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/693d43c),
 [`0080bd2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0080bd2),
-[`37440ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37440ce)).
+[`37440ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37440ce))
+do not name the tool, so that is a claim about method, not a traced fact.
 
 The project ran as two conversations. The main one changed code. A
 second one, forked from it, kept the words: when the main one landed a piece of work it sent the fork a
@@ -164,10 +165,11 @@ to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other, and met at the merge
 ([`f0c3f61`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f0c3f61)).
 Playwright ran at both viewports before UI changes, borrowed from the
-assignment 2 repo rather than installed here; the phone layout commits
-came from those runs
+assignment 2 repo rather than installed here; its scripts stayed outside
+the repo, so the phone layout commits it checked
 ([`df59caf`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/df59caf),
-[`52267b4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/52267b4)). Every call was mine. The agent was wrong in ways only the checks
+[`52267b4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/52267b4))
+show the result of those runs and of my own phone play, not the runs. Every call was mine. The agent was wrong in ways only the checks
 caught: the first nudge test matched the boarding toast, not the nudge,
 and was tightened in the server commit
 ([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406));
@@ -181,8 +183,9 @@ spoken aloud and written down with me
 
 ## Thin spots
 
-The commits of 10 and 11 October were made in batches at the end of each
-evening, and on 8 and 9 November several commits bundled spec, code and
+Two fifths of the commits fall on the last two days, many of them passes
+over this file and the README. The commits of 10 and 11 October were made
+in batches at the end of each evening, and on 8 and 9 November several commits bundled spec, code and
 docs in one; the red evidence is in `docs/red-runs.md`. The agent wrote
 nearly all the code and drafted every document, this one included; every
 commit carries its name. I decided what to build, what to cut, and what
