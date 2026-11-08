@@ -220,3 +220,56 @@ These are bots that never patch a hole; a careful person alone, who stops
 on a rock and patches before pumping, will do better than the solo row,
 and a crew of strangers who have to find the stations and talk will do
 worse than the others. The next check is the crit 10 pod.
+
+**Sweep 8, the galleon, 8 November.** Decision record 8 replaced the 7 by
+4 deck with an 18 by 7 galleon: five keel points, two sails (the mainsail
+six tenths of the speed, the foresail the rest), the pump in a bilge
+nine tiles from the helm, a jetty along the shore with the berth beside
+it, and the near island moved from (34, 20) to (44, 14) because the old
+one sat ten tiles off the end of the new jetty. The first run showed two
+things about the bots rather than the ship: crews without a navigator
+steered straight for the near island and swung the hull into the jetty
+(0 of 12 for two and three bots), and a solo boat at `MAX_SPEED` 1.2
+reached every island inside a minute. The bots now sail east until they
+are clear of the jetty before turning, `MAX_SPEED` is 0.8, and the water
+is flat within `HARBOUR_CALM` 14 tiles of the jetty so an unheld helm
+cannot swing a long stern into the pier while leaving. The bot roles are
+one on the mainsail, a second on the helm, a third on the pump, a fourth
+at the chart table, a fifth on the foresail; nobody patches.
+
+## The numbers, 8 November
+
+`MAX_SPEED` 0.8, `SAIL_RISE` 0.25, `SAIL_LOOSEN` 0.05, `TURN_RATE` 0.8,
+`REEF_DAMAGE` 15, `LEAK_PER_DAMAGE` 0.07, `LEAK_CAP` 40, `REPAIR_RATE`
+20, `PUMP_RATE` 3, `REEF_FROM` 10, `REEF_SLOPE` 50, `REEF_MAX` 0.5,
+`REEF_CLUMP` 1, `REEF_SCATTER_FROM` 30, `REEF_SCATTER_MAX` 0.085,
+`REEF_SCATTER_SLOPE` 570, `HELM_DRIFT` 0.1, `HARBOUR_CALM` 14. Twelve runs
+per cell, 150 game-seconds each, at five times real time:
+
+| crew | target | landed | wrecked | timed out | median landing (s) | mean furthest (tiles) |
+|---|---|---|---|---|---|---|
+| 1 | near | 100% | 0% | 0% | 51 | 27 |
+| 1 | middle | 100% | 0% | 0% | 52 | 31 |
+| 1 | far | 83% | 0% | 17% | 131 | 60 |
+| 2 | near | 100% | 0% | 0% | 51 | 27 |
+| 2 | middle | 100% | 0% | 0% | 50 | 31 |
+| 2 | far | 100% | 0% | 0% | 120 | 60 |
+| 3 | near | 100% | 0% | 0% | 50 | 27 |
+| 3 | middle | 100% | 0% | 0% | 49 | 31 |
+| 3 | far | 100% | 0% | 0% | 119 | 59 |
+| 4 | near | 100% | 0% | 0% | 51 | 28 |
+| 4 | middle | 100% | 0% | 0% | 50 | 31 |
+| 4 | far | 100% | 0% | 0% | 122 | 60 |
+| 5 | near | 100% | 0% | 0% | 32 | 28 |
+| 5 | middle | 100% | 0% | 0% | 31 | 31 |
+| 5 | far | 100% | 0% | 0% | 75 | 60 |
+
+Nobody sank. What the galleon's ladder measures is time, and the step is
+the second sail: five hands reach the far island in 75 s where one to
+four take two minutes, and the solo boat ran out of time twice in twelve.
+The near and middle islands are the same trip from the berth now, 27 and
+31 tiles, so their rows match. Bots that steer in straight lines down the
+lanes did not meet a reef in 180 runs; a crew that strays will, and a
+holed hull still needs a hand on the patch and one on the pump. The
+earlier sweeps and their numbers are kept above as the record of the
+smaller deck they measured.

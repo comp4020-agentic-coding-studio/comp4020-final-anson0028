@@ -30,18 +30,19 @@ describe("two people on the pier", { timeout: 30000 }, () => {
     b.close();
   });
 
-  it("delivers a bubble only to people within earshot", async () => {
+  it("delivers a bubble to the people in the same place, the shore or the ship, and to nobody else", async () => {
     const a = await join(uuid("aaaa0002"));
     const b = await join(uuid("bbbb0002"));
-    const far = await join(uuid("cccc0002"));
-    await Promise.all([a.ashore(), b.ashore(), far.ashore()]);
-    await Promise.all([a.walkTo(5.5, 31.5), b.walkTo(5.5, 24.5), far.walkTo(5.5, 22.5)]);
-    far.inbox.length = 0;
+    const aboard = await join(uuid("cccc0002"));
+    await Promise.all([a.ashore(), b.ashore()]);
+    await Promise.all([a.walkTo(5.5, 31.5), b.walkTo(5.5, 52.5)]);
+    aboard.inbox.length = 0;
     a.send({ t: "say", text: "over here" });
     const heard = await b.next((m) => m.t === "bubble" && m.text === "over here", 1000);
     expect(heard.from).toBe(a.id);
     await new Promise((r) => setTimeout(r, 500));
-    expect(far.inbox.filter((m) => m.t === "bubble")).toEqual([]);
+    expect(aboard.inbox.filter((m) => m.t === "bubble")).toEqual([]);
+    const far = aboard;
     a.close();
     b.close();
     far.close();

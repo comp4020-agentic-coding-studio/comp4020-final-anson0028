@@ -344,6 +344,70 @@ the map. The islands travel with `near` now, only within sight
 read by four agents and the strongest seven compared against this one; the
 finding that stuck was that their first sentence is the rule itself.
 
+## 8 November: the galleon
+
+The last evening before the deadline, after reading the cohort's 126
+final sites and the marking page again, Anson asked for a different
+ship: you should arrive already aboard, the ship should be the size of a
+Sea of Thieves galleon, and it should have places on it, a crew's
+quarters, a mess, a gambling table, a sail deck. I wrote the spec and the
+plan before touching code: four stages, the first (the big deck, two
+sails, a bilge, waking aboard, a jetty) kept every existing claim, the
+second and third (the mess with the board on its table, dice only the
+players at the table are sent) needed new rules, words and tests, and a
+dice table with no stakes is scenery while one with stakes is a score.
+Anson chose a branch, `galleon`, and the first stage, with the merge to
+wait for his say-so.
+
+Red first ([`62332a2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/62332a2)):
+a visitor wakes aboard, a word from the helm reaches the chart table and
+not the pump nine tiles away, two sails, five jobs; 4 of 4 failed on
+`f03b072`. Then the server
+([`67da561`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/67da561)):
+an 18 by 7 deck in three levels, the hull as five keel points, a landing
+as the bow touching the shore, ship clearance as the distance between
+two keels, a jetty from x 8 to 30 with the berth alongside it. Fourteen
+existing tests had to move: every ship the spec placed was now on the
+jetty, inside the near island, or had a bow through the shore, so a
+script printed the tiles under each hull track and the positions were
+chosen from it. The rule "a new visitor wakes aboard" broke the persist
+test, which stands a bird on the pier, restarts, and expects it there; the
+rule became "a new visitor wakes aboard, a known one is where they left",
+which is the better rule anyway. Then the client
+([`768913d`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/768913d))
+and decision record 8 with the docs
+([`4a83b39`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/4a83b39)).
+
+Anson played it on the local server and reported the bow and stern
+flickering while the ship moved. That was coplanar faces: the raised
+quarterdeck block and the planks on it both topped out at the same
+height, and the three hull slabs' planks overlapped by five hundredths of
+a tile at the seams. I played it myself after the fix and found three
+more: a tap on the raised deck walked to the wrong tile because the
+click was cast against one flat plane; the status read "12 tiles out"
+while moored, because distance was measured from the root of the jetty;
+and the near island sat ten tiles off the end of the new jetty, shorter
+than the ship, so the first trip was a step. All four in
+[`2424db0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2424db0),
+with the near island moved to (44, 14). Two more from sailing out alone:
+the unheld helm wandered the moment the sail rose, which on an 18-tile
+hull alongside a jetty swings the stern into the pier, so the water is
+flat within fourteen tiles of the jetty; and the raised mainsail was a
+wall in front of the camera, so the cloth is half transparent. The
+galleon also sails at 0.8 instead of 1.2, because the first bot ladder
+had a solo boat reaching every island in a minute
+([`5de2254`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/5de2254)).
+
+The bot ladder of 18 October is void: it measured a deck that no longer
+exists. Sweep eight re-measures crews of one to five on the galleon and
+is recorded in `docs/tuning.md`; whatever it says, the README says the
+same.
+
+A second session ran beside this one for part of the evening, renaming
+the project to All Hands on Deck. It began in the same working tree, we
+noticed, talked, and it moved its edits to a worktree on `main`; the
+rename meets the galleon at the merge.
+
 ## How the work was directed
 
 - **CLAUDE.md is the README as rules**, and each rule has a date and a

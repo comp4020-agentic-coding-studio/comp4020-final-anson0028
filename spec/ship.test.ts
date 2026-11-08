@@ -456,17 +456,16 @@ describe("the galleon", { timeout: 60000 }, () => {
     a.close();
   });
 
-  it("carries a word from the helm to the chart table but not down to the pump", async () => {
+  it("carries a word from the helm the length of the deck, down to the pump, and not to the jetty beside it", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0121"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0121"));
     const c = await Walker.join(isl.wsBase, uuid("cccc0121"));
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
-    expect(await c.board()).toBe(ship);
+    await c.ashore();
     await a.walkTo(STATIONS.helm.x, STATIONS.helm.y);
-    await b.walkTo(STATIONS.chart.x, STATIONS.chart.y);
-    await c.walkTo(STATIONS.pump.x, STATIONS.pump.y);
+    await b.walkTo(STATIONS.pump.x, STATIONS.pump.y);
     c.inbox.length = 0;
     a.send({ t: "say", text: "hard to port" });
     await b.next((m) => m.t === "bubble" && m.text === "hard to port", 2000);

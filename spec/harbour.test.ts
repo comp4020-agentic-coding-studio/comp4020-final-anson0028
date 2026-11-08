@@ -156,14 +156,13 @@ describe("notes on the ground", { timeout: 30000 }, () => {
 });
 
 describe("gestures", { timeout: 30000 }, () => {
-  it("carry 8 tiles like a word, come in four kinds, and no faster than one every 400 ms", async () => {
+  it("carry like a word, to your ship and not the shore, come in four kinds, and no faster than one every 400 ms", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0208"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0208"));
     const c = await Walker.join(isl.wsBase, uuid("cccc0208"));
     await c.ashore();
-    await c.walkTo(4.5, 31.5);
-    await c.walkTo(4.5, 52.5);
+    await c.walkTo(24.5, 32.5);
     a.send({ t: "emote", kind: "wave" });
     const seen = await b.next((m) => m.t === "emote", 2000);
     expect(seen.id).toBe(a.id);
@@ -217,24 +216,27 @@ describe("the log", { timeout: 30000 }, () => {
 });
 
 describe("saying", { timeout: 30000 }, () => {
-  it("reaches everyone within earshot and nobody else, whatever the client asks, and tells you when nobody heard", async () => {
+  it("reaches everyone aboard your ship and nobody ashore, whatever the client asks, and tells you when nobody heard", async () => {
     const isl = await fresh();
     const a = await Walker.join(isl.wsBase, uuid("aaaa0206"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0206"));
     const c = await Walker.join(isl.wsBase, uuid("cccc0206"));
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
+    await a.walkTo(STATIONS.helm.x, STATIONS.helm.y);
+    await b.walkTo(STATIONS.foresail.x, STATIONS.foresail.y);
     a.send({ t: "say", text: "crew only", to: "crew" });
     const heard = await b.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
     expect(heard.crew).toBeFalsy();
     await c.next((m) => m.t === "bubble" && m.text === "crew only", 2000);
-    a.send({ t: "say", text: "everyone" });
-    await c.next((m) => m.t === "bubble" && m.text === "everyone", 2000);
     await c.ashore();
-    await c.walkTo(4.5, 31.5);
-    await c.walkTo(4.5, 55.5);
+    c.inbox.length = 0;
+    a.send({ t: "say", text: "everyone" });
+    await b.next((m) => m.t === "bubble" && m.text === "everyone", 2000);
+    await settle(300);
+    expect(c.inbox.some((m) => m.t === "bubble")).toBe(false);
     c.send({ t: "say", text: "hello?" });
-    const lonely = await c.next((m) => m.t === "toast" && /earshot/i.test(m.text), 2000);
+    const lonely = await c.next((m) => m.t === "toast" && /heard/i.test(m.text), 2000);
     expect(lonely.text).toMatch(/Nobody/);
     a.close();
     b.close();
