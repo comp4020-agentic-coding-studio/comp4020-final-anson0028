@@ -714,4 +714,4 @@ for (const sig of ["SIGTERM", "SIGINT"] as const) {
   });
 }
 
-server.listen(PORT, "0.0.0.0", () => logLine(`earshot listening on ${PORT} with ${ships.size} ships, ${wrecks.length} wrecks, ${notes.length} notes`));
+server.listen(PORT, "0.0.0.0", () => logLine(`all hands on deck: listening on ${PORT} with ${ships.size} ships, ${wrecks.length} wrecks, ${notes.length} notes`));

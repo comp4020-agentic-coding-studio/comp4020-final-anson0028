@@ -5,7 +5,7 @@ mainsail rises only while someone holds the mast, the helm turns only
 while someone holds the wheel, the map shows only at the chart table,
 the pump runs only while someone is down in the bilge, and what you say
 is heard by your ship and not ashore. One person can sail, badly,
-running the length of the deck. More hands get there faster.
+running the deck. More hands get there faster.
 
 All Hands on Deck is a small online co-op game for a room of people. You
 play a block bird and wake in the crew quarters of the galleon at the
@@ -26,8 +26,8 @@ that split the crew, so the rule is now the place: your ship hears you,
 the shore does not
 ([decision record 9](docs/decisions/0009-one-channel-per-place.md)).
 Erickson and Kellogg (2000) found a limit works when everyone can see
-it; the chart rule is the same for everyone, and each person's station
-is written above their head. Other projects in this course unlock
+it; the chart rule is the same for everyone, and each station is written
+above its holder's head. Other projects in this course unlock
 features once enough players are present
 ([survey](docs/cohort-survey.md)); here nothing unlocks ([decision
 records 1](docs/decisions/0001-one-body-one-station.md) and
@@ -48,13 +48,13 @@ minutes and a lone bot ran out of time twice in twelve; a fifth hand on
 the foresail makes it in seventy-five seconds. Bots never patch a hole;
 people can.
 
-Judged, by watching it played from the link alone. Three AI agents,
-told nothing, knew within a minute what it was, and all three missed
-the same thing: nobody could tell they had reached an island, and a
+Judged, by watching it played from the link alone. On the smaller deck
+before this one, three AI agents told nothing knew within a minute what
+it was, and all missed the same thing: nobody could tell they had reached an island, and a
 sinking vanished into a fresh ship. Islands now
 fly a flag with the crew's names, and a sinking stays on screen. A
 reviewer asked that a second person aboard see what they are for, so
-everyone gets a job. The galleon is a day old; only I and the
+everyone gets a job. The galleon is a day old; only I and one
 agent have sailed it ([what changed](PROCESS.md)).
 
 ## What I didn't build
@@ -63,8 +63,7 @@ agent have sailed it ([what changed](PROCESS.md)).
 - Accounts, chat history, scores. The board lists crews by time, not by
   points; the wrecks, flags and notes are the record.
 - Locked stations: a crew that loses its helmsman must still steer.
-- A mess hall and a dice table: places where nothing sails
-  ([why not](docs/decisions/0008-the-galleon.md)).
+- A mess hall and a dice table ([why not](docs/decisions/0008-the-galleon.md)).
 
 ## Sources
 

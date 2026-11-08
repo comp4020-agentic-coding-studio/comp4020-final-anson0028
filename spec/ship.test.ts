@@ -392,11 +392,11 @@ describe("jobs", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0117"));
     const ship = await a.board();
     await b.board();
-    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 40, y: 24, heading: 0, sail: 0 });
     await a.man("sail");
     await settle(2500);
     expect(b.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
-    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, water: 30 });
+    a.test({ op: "place", ship, x: 40, y: 24, heading: 0, water: 30 });
     const told = await b.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
