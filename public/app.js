@@ -183,6 +183,9 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "ship" && m.event === "launched") {
     shipNames.set(m.id, m.ship?.name ?? "A new hull");
     say(`${m.ship?.name ?? "A new hull"} is ready at the pier.`);
+  } else if (m.t === "letgo") {
+    holding = false;
+    actButton.classList.remove("down");
   } else if (m.t === "toast") {
     say(m.text);
   } else if (m.t === "refused") {
@@ -213,6 +216,8 @@ function seenIntro() {
 }
 function showIntro() {
   intro.hidden = false;
+  intro.scrollTop = 0;
+  intro.querySelector(".intro-card")?.scrollTo?.(0, 0);
   nameInput.value = me?.name ?? "";
   nameInput.focus();
   nameInput.select();
@@ -255,7 +260,7 @@ function drawBoard() {
   furthest.textContent = today.length || wrecksToday ? `Today: ${today.length} landing${today.length === 1 ? "" : "s"}, ${wrecksToday} wreck${wrecksToday === 1 ? "" : "s"}` : "Nobody has sailed today yet.";
   const items = [];
   let lastDay = null;
-  for (const e of log.slice(0, 8)) {
+  for (const e of log.slice(0, 40)) {
     const d = dayLabel(e.at);
     if (d !== lastDay) {
       const h = document.createElement("li");
@@ -409,7 +414,7 @@ function act(down) {
   const self = cur?.self;
   const ship = selfShip(cur);
   const onLeak = !!(self && ship && ship.leaks.some((l) => l.x === Math.floor(self.x) && l.y === Math.floor(self.y)));
-  if (down && self && !stationUnder(self) && !onLeak) {
+  if (down && self && !stationUnder(self) && !onLeak && atGangway(self)) {
     ws.send(JSON.stringify({ t: "ashore" }));
     return;
   }
@@ -420,6 +425,7 @@ const moveKeyOf = { w: "w", W: "w", s: "s", S: "s", a: "a", A: "a", d: "d", D: "
 const lookKeyOf = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" };
 window.addEventListener("keydown", (e) => {
   if (e.target instanceof HTMLInputElement) return;
+  if (!intro.hidden) return;
   if (moveKeyOf[e.key]) { e.preventDefault(); moveKeys.add(moveKeyOf[e.key]); sendMove(); }
   if (lookKeyOf[e.key]) { e.preventDefault(); look.add(lookKeyOf[e.key]); }
   if (e.key === "Enter" && (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement)) return;
@@ -1186,6 +1192,10 @@ window.addEventListener("resize", resize);
 resize();
 
 const stationLabel = { helm: "helm", sail: "mainsail", chart: "chart table", pump: "pump", foresail: "foresail" };
+function atGangway(p) {
+  const gw = layout?.gangway ?? { x0: -2, x1: 2 };
+  return p.x >= gw.x0 && p.x < gw.x1 && p.y < -1;
+}
 function jettyDistance(p) {
   if (!jetty) return Math.hypot(p.x - pierAt.x, p.y - pierAt.y);
   const cx = Math.min(jetty.x1 + 1, Math.max(jetty.x0, p.x)), cy = Math.min(jetty.y1 + 1, Math.max(jetty.y0, p.y));
@@ -1220,7 +1230,7 @@ function updateHud(self, shipsNow) {
   noteButton.classList.toggle("gone", !!ship);
   noteButton.textContent = ownNoteNear !== null ? key("Remove note (X)", "Remove note") : key("Note (N)", "Note");
   atPier = !!ship && jettyDistance(ship) <= boardRange;
-  leaveButton.classList.toggle("gone", !(atPier && !stationUnder(self)));
+  leaveButton.classList.toggle("gone", !(atPier && !stationUnder(self) && atGangway(self)));
   if (ship) {
     status.hidden = false;
     if (sticky && sticky.ship !== ship.id) sticky = null;
@@ -1286,7 +1296,8 @@ function updateHud(self, shipsNow) {
     text = holding ? `Patching the hole… ${done}%` : key("A hole. Hold E to patch it.", "A hole. Hold Use to patch it.");
   } else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
   else if (ship.landed) text = `At ${ship.landed}. It is on the board with your names.`;
-  else if (atPier) text = key("At the pier. Walk to a station, or press E here to step off.", "At the pier. Walk to a station, or tap Use here to step off.");
+  else if (atPier && atGangway(self)) text = key("At the gangway. Press E to step off, or walk to a station.", "At the gangway. Tap Use to step off, or walk to a station.");
+  else if (atPier) text = key("At the pier. Walk to a station and hold E; the gangway on the pier side steps off.", "At the pier. Walk to a station and hold Use; the gangway on the pier side steps off.");
   else if (ship.jobs[me.id] && ship.jobs[me.id] !== "all") text = `Your job: ${jobWords(ship.jobs[me.id])}. Walk to it and hold E.`;
   else text = "Walk to a station. Nothing leaves a ship at sea.";
   if (!ship || !ship.leaks.length) patchStart = null;

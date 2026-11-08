@@ -22,7 +22,7 @@ const root = new URL("..", import.meta.url).pathname;
 const canberraDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Canberra", year: "numeric", month: "2-digit", day: "2-digit" });
 const today = () => process.env.WALK_TODAY ?? canberraDay.format(new Date());
 
-type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number; boardedAt: number; idleSince: number | null; idleJob: string; nudgedAt: number };
+type Client = { ws: WebSocket; token: string; id: string; name: string; hue: number; body: Body; seq: number; onChart: boolean; nearKey: string; nearAt: number; lastEmote: number; boardedAt: number; idleSince: number | null; idleJob: string; nudgedAt: number; toldHeld: string };
 const EMOTES = new Set(["wave", "jump", "yes", "no"]);
 type LiveShip = Ship & { holders: Record<StationName, Client | null>; emptySince?: number; patchers?: string[] };
 
@@ -52,6 +52,7 @@ function gangwaySpot(id: string): { x: number; y: number } {
   return { x: 17.6 + (k % 4) * 0.6, y: 31.3 + ((k >> 4) % 3) * 0.5 };
 }
 const atPier = (s: { x: number; y: number }) => nearestPierDistance(s.x, s.y) <= P.BOARD_RANGE;
+const atGangway = (b: { x: number; y: number }) => b.x >= LAYOUT.gangway.x0 && b.x < LAYOUT.gangway.x1 && b.y < -1;
 function logLine(text: string): void {
   console.log(`${new Date().toISOString()} ${text}`);
 }
@@ -321,7 +322,7 @@ function admit(ws: WebSocket, token: string): void {
   const id = publicId(token);
   const row = loadPlayer(token, spawnFor(id));
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
-  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0 };
+  const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0, toldHeld: "" };
   const away = awayFrom.get(token);
   awayFrom.delete(token);
   forgetAboard(token);
@@ -464,6 +465,10 @@ function handle(c: Client, raw: string): void {
     if (b.ship === null) return send(c.ws, { t: "toast", text: "You're already ashore." });
     const s = ships.get(b.ship);
     if (s && !atPier(s)) return send(c.ws, { t: "toast", text: "You can step off only at the pier. Bring the ship back, or stay with it." });
+    if (!atGangway(b)) {
+      logLine(`${whoIs(c)} tries to step off ship ${b.ship} away from the gangway; refused`);
+      return send(c.ws, { t: "toast", text: "Step off at the gangway, the plank on the pier side." });
+    }
     washUp(c, "steps ashore from");
     return;
   }
@@ -652,6 +657,15 @@ function loop(): void {
     if (st && s && !s.holders[st]) {
       s.holders[st] = c;
       logLine(`${whoIs(c)} takes the ${st} of ship ${s.id}`);
+    } else if (st && s && s.holders[st] && s.holders[st] !== c) {
+      const key = `${s.id}:${st}:${s.holders[st]!.id}`;
+      if (c.toldHeld !== key) {
+        c.toldHeld = key;
+        c.body.holding = false;
+        send(c.ws, { t: "letgo", station: st, by: s.holders[st]!.name });
+        send(c.ws, { t: "toast", text: `${s.holders[st]!.name} is already at the ${st}.` });
+        logLine(`${whoIs(c)} is refused the ${st} of ship ${s.id}: ${whoIs(s.holders[st]!)} holds it`);
+      }
     }
   }
   for (const s of [...ships.values()]) {

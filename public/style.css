@@ -416,7 +416,7 @@ body.page { display: block; min-height: 100%; }
 
 .guide {
   position: fixed;
-  top: 22vh;
+  top: 13vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 7;
