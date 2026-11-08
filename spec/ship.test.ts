@@ -280,11 +280,11 @@ describe("ships", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0111"));
     const one = await a.board();
     await b.ashore();
-    a.test({ op: "place", ship: one, x: 40, y: 20, heading: Math.PI / 2 });
+    a.test({ op: "place", ship: one, x: 70, y: 20, heading: Math.PI / 2 });
     await b.next((m) => m.t === "ship" && m.event === "launched", 6000);
     const two = await b.board();
     expect(two).not.toBe(one);
-    b.test({ op: "place", ship: two, x: 40, y: 55, heading: -Math.PI / 2 });
+    b.test({ op: "place", ship: two, x: 70, y: 55, heading: -Math.PI / 2 });
     await a.man("sail");
     const told = a.next((m) => m.t === "toast" && /in the way/.test(m.text), 6000);
     await settle(3000);

@@ -20,12 +20,12 @@ export const SPAWN = { x: 9.5, y: 31.5 };
 export const JETTY = { x0: 8, x1: 30, y0: 30, y1: 32 };
 export const SLOTS = [{ x: 20, y: 36.5, heading: 0 }];
 export const SHIP_CLEARANCE = 8;
-export const HULL = { bow: 10.5, stern: 8.5, keel: 0.5, parts: [-8.5, -4, 0, 5, 10.5] };
+export const HULL = { bow: 10.5, stern: 8.5, keel: 0.5, parts: [-8.5, -4, 0, 5, 10.5], beam: 3, shoulders: [-6, 7] };
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };
 export const ISLANDS: Island[] = [
   { id: "near", name: "Near Island", cx: 44, cy: 14, r: 3 },
-  { id: "mid", name: "Middle Island", cx: 58, cy: 44, r: 4 },
+  { id: "mid", name: "Middle Island", cx: 58, cy: 47, r: 4 },
   { id: "far", name: "Far Island", cx: 86, cy: 16, r: 4 },
 ];
 
@@ -220,6 +220,14 @@ export function hullPoints(x: number, y: number, heading: number): [number, numb
   return HULL.parts.map((a) => [x + a * c - HULL.keel * n, y + a * n + HULL.keel * c]);
 }
 
+export function beamPoints(x: number, y: number, heading: number): [number, number][] {
+  const c = Math.cos(heading);
+  const n = Math.sin(heading);
+  const out: [number, number][] = [];
+  for (const a of HULL.shoulders) for (const side of [-HULL.beam, HULL.beam]) out.push([x + a * c - (HULL.keel + side) * n, y + a * n + (HULL.keel + side) * c]);
+  return out;
+}
+
 export function axis(s: { x: number; y: number; heading: number }): [{ x: number; y: number }, { x: number; y: number }] {
   const c = Math.cos(s.heading);
   const n = Math.sin(s.heading);
@@ -287,9 +295,10 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
     const nx = Math.min(W - 0.5, Math.max(0.5, s.x + Math.cos(s.heading) * speed * dt));
     const ny = Math.min(H - 0.5, Math.max(0.5, s.y + Math.sin(s.heading) * speed * dt));
     const points = hullPoints(nx, ny, s.heading);
+    const sides = beamPoints(nx, ny, s.heading);
     if (points.some(([px, py]) => !inBounds(px, py))) {
       events.push({ kind: "edge" });
-    } else if (!points.every(([px, py]) => sailable(px, py))) {
+    } else if (![...points, ...sides].every(([px, py]) => !inBounds(px, py) || sailable(px, py))) {
       events.push({ kind: "aground" });
     } else if (!clear(nx, ny)) {
       events.push({ kind: "collision" });

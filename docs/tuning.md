@@ -273,3 +273,11 @@ lanes did not meet a reef in 180 runs; a crew that strays will, and a
 holed hull still needs a hand on the patch and one on the pump. The
 earlier sweeps and their numbers are kept above as the record of the
 smaller deck they measured.
+
+After sweep 8 the hull gained four beam points, three tiles either side
+of the keel at the shoulders, so a ship can no longer lay its side over
+the jetty or an island while its keel is in water. With them the lane
+east of the berth touched the Middle Island, so that island moved from
+(58, 44) to (58, 47). The sweep 8 table above was measured before both
+changes: the middle island is three tiles further than it says, and
+nothing else about the sea moved.

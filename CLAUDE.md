@@ -102,8 +102,9 @@ them broken, change README.md first and say why.
   ship left empty away from it is scuttled after `DERELICT_S`. Nothing
   lies within 30 tiles of the pier.
 - A ship is a galleon (decision record 8): five keel points from stern
-  8.5 behind the centre to bow 10.5 ahead (`HULL`). Land and reefs are
-  checked at all five, ships keep `SHIP_CLEARANCE` between keels (the
+  8.5 behind the centre to bow 10.5 ahead, and four beam points three
+  tiles out at the shoulders (`HULL`). Land and the jetty are checked at
+  all nine, reefs at the five keel points, ships keep `SHIP_CLEARANCE` between keels (the
   distance between the two segments), a landing is any keel point within
   `LANDING_RANGE` of the shore, and the crew are told when the hull is
   stopped or scraped. Reefs start `REEF_FROM` tiles from the jetty,
