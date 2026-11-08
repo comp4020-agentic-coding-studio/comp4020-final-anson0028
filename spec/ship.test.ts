@@ -363,7 +363,7 @@ describe("the pier", { timeout: 60000 }, () => {
 });
 
 describe("jobs", { timeout: 60000 }, () => {
-  it("give everyone aboard a job by order of boarding, the fifth takes the chart, and the rest move up when one steps off", async () => {
+  it("give everyone aboard a job by order of boarding: mainsail, helm, chart, pump, then the foresail, and the rest move up when one steps off", async () => {
     const isl = await fresh();
     const crew = await Promise.all(["aaaa0116", "bbbb0116", "cccc0116", "dddd0116", "eeee0116"].map((t) => Walker.join(isl.wsBase, uuid(t))));
     const [a, b, c, d, e] = crew;
@@ -372,15 +372,15 @@ describe("jobs", { timeout: 60000 }, () => {
     const ship = await a.board();
     expect(await jobs()).toEqual({ [a.id]: "all" });
     await b.board();
-    expect(await jobs()).toEqual({ [a.id]: "sail+helm", [b.id]: "pump+patch" });
+    expect(await jobs()).toEqual({ [a.id]: "sail", [b.id]: "helm" });
     await c.board();
-    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump+patch" });
+    expect(await jobs()).toEqual({ [a.id]: "sail", [b.id]: "helm", [c.id]: "chart" });
     await d.board();
-    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump+patch", [d.id]: "foresail" });
+    expect(await jobs()).toEqual({ [a.id]: "sail", [b.id]: "helm", [c.id]: "chart", [d.id]: "pump+patch" });
     await e.board();
-    expect(await jobs()).toEqual({ [a.id]: "helm", [b.id]: "sail", [c.id]: "pump+patch", [d.id]: "foresail", [e.id]: "chart" });
+    expect(await jobs()).toEqual({ [a.id]: "sail", [b.id]: "helm", [c.id]: "chart", [d.id]: "pump+patch", [e.id]: "foresail" });
     await b.ashore();
-    expect(await jobs()).toEqual({ [a.id]: "helm", [c.id]: "sail", [d.id]: "pump+patch", [e.id]: "foresail" });
+    expect(await jobs()).toEqual({ [a.id]: "sail", [c.id]: "helm", [d.id]: "chart", [e.id]: "pump+patch" });
     await e.man("helm");
     expect((await a.ship(ship)).holders.helm).toBe(e.id);
     for (const w of crew) w.close();
