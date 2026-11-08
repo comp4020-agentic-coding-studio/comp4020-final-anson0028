@@ -6,7 +6,7 @@ is a file or a command in this repo.
 | Part | What it does |
 |---|---|
 | `CLAUDE.md` | The rules. Each has a date and sits on a decision record; "never" rules first, then what every change must do, then facts about the stack. |
-| `docs/decisions/0001` to `0012` | One record per decision: context, the options, what was chosen, what it costs. The README links to them instead of restating them. |
+| `docs/decisions/0001` to `0013` | One record per decision: context, the options, what was chosen, what it costs. The README links to them instead of restating them. |
 | `docs/claims.md` | The claims the README makes, numbered; each has a test. |
 | `spec/*.test.ts` | Tests that drive a running server over HTTP and WebSocket. `spec/island.ts` starts a server on a free port with its own data directory and a fixed day, fast physics and the test-only `place` message; `spec/walker.ts` is a client that walks, boards and works a station. |
 | `docs/red-runs.md` | Every test seen failing before the code that passes it, against a named commit, and the mutations (a rate set to 0, a rule switched off) that made it fail again. |

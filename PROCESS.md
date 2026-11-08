@@ -78,7 +78,7 @@ Assignment 2 came back with the same comment as assignment 1, that the
 marker could not tell what it was about. So an agent with no context read
 the first screen and three more played it, and the words changed
 ([`f87d651`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f87d651),
-[`7429834`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/7429834)).
+[`2cb79bc`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/2cb79bc)).
 The two crit sessions were the real tests; the harbour board kept the
 record ([the board](docs/testing/harbour-board-2026-11-09.md)). Crit 9
 found the sea too hard, and the reefs were thinned that night. Crit 10
@@ -136,7 +136,7 @@ put me in the sea
 The crew-only channel went because players could not tell it from the open
 one
 ([`8c35c89`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/8c35c89)).
-The name Earshot went with the 8-tile rule it named
+The project's first name, Earshot, went with the 8-tile rule it named
 ([`9e759af`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9e759af)).
 Coins for a landing I wanted and did not build
 ([decision 11](docs/decisions/0011-no-reward-for-landing.md)).
@@ -146,10 +146,11 @@ Coins for a landing I wanted and did not build
 The harness, every file and command the agent must obey or that catches
 it, is listed in [`docs/harness.md`](docs/harness.md). Agents, on Claude
 Code with Opus and then Fable, got narrow briefs and no history: readers,
-reviewers playing a marker, a tutor and a cold player, six rounds of cold
-reading, three cold plays, a code review, four play-testers, three markers
-of this file. A finder skill offered the Superpowers set; I used it once,
-for the code review that found two crashes
+reviewers playing a marker, a tutor and a cold player, cold readers of
+the first screen and the README, cold players, a code reviewer,
+play-testers, and markers of this file. A finder skill offered the Superpowers set; I used it once,
+for the code review that found two crashes, which went into the spec
+first
 ([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2)),
 and otherwise left it off because it is heavy and my tokens are rationed.
 The skill I used most is Humanizer: the biggest fault of a project
@@ -171,7 +172,7 @@ here. Every call was mine. The agent was wrong in ways only the checks
 caught: the first nudge test matched the boarding toast, not the nudge,
 and was tightened in the server commit
 ([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406));
-the navigator bug above hid for two sweeps. The twelve decision
+the navigator bug above hid for two sweeps. The thirteen decision
 records each list the options and what each costs; the README was
 rewritten on the last weekend from my own account of what good means,
 spoken aloud and written down with me

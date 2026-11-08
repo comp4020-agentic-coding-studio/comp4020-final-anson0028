@@ -65,7 +65,7 @@ deck; the big ship's own sweep is in the same file.
 
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: four names, three
-landings, all on the near island, and seven wrecks. The reefs were thinned that night
+landings, all on the near island, and seven wrecks. The reefs were thinned that day
 (decision 9). At crit 10 (19 October) a classmate arriving from the link
 said nothing was clear at the start; the first screen became three
 short paragraphs and everyone now gets a job on boarding (decision 10).
@@ -92,6 +92,6 @@ the galleon for twenty minutes; thirteen faults were fixed that night
 ## Sources
 
 - [Big Walk](https://bigwalk.game/presskit/) (House House, 2026) and [its designers in Kotaku](https://kotaku.com/the-creators-of-big-walk-break-down-the-goty-contenders-development-puzzles-and-stunning-ending-2000725133).
-- PEAK (Aggro Crab and Landfall, 2025): [Nick Kaman in PC Gamer](https://pcgamer.com/games/adventure/peak-boss-doesnt-mind-us-calling-it-friendslop-why-not-make-a-game-where-the-point-is-to-hang-out-with-your-friends).
+- PEAK (Aggro Crab and Landfall, 2025): [Nick Kaman in PC Gamer](https://pcgamer.com/games/adventure/peak-boss-doesnt-mind-us-calling-it-friendslop-why-not-make-a-game-where-the-point-is-to-hang-out-with-your-friends); [GamingOnLinux on stamina and ropes](https://www.gamingonlinux.com/2025/07/co-op-climbing-game-peak-is-a-truly-great-time-with-friends/).
 - R.E.P.O. (Semiwork, 2025): [PC Gamer on its difficulty](https://www.pcgamer.com/games/horror/repo-will-feature-moon-phases-as-part-of-the-new-update-ramping-up-the-difficulty-every-5-levels).
 - [29 games and papers](docs/research.md); [the class survey](docs/cohort-survey.md).
