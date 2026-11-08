@@ -169,7 +169,7 @@ ws.addEventListener("message", (e) => {
   } else if (m.t === "wreck") {
     wrecks.push(m.wreck);
     const who = m.wreck.crew[0] === "nobody aboard" ? "nobody aboard" : `${m.wreck.crew.join(", ")} aboard`;
-    if (m.ship === aboardNow && aboardNow !== null) toastQueue.splice(0, toastQueue.length, ...toastQueue.filter((t) => !/^Your job/.test(t)));
+    if (m.ship === aboardNow && aboardNow !== null) toastQueue.splice(0, toastQueue.length, ...toastQueue.filter((t) => !/^Your station/.test(t)));
     if (m.ship === aboardNow && aboardNow !== null) sticky = { ship: m.ship, text: `${shipNames.get(m.ship) ?? "Your ship"} sank ${Math.round(m.wreck.distance)} tiles out with ${who}. You washed up at the pier.`, until: Date.now() + 40000 };
     else say(`${shipNames.get(m.ship) ?? "A ship"} went down ${Math.round(m.wreck.distance)} tiles out with ${who}.`);
   } else if (m.t === "landing") {
@@ -302,6 +302,10 @@ function nextToast() {
   setTimeout(nextToast, toastQueue.length ? 2600 : 4000);
 }
 const touch = matchMedia("(pointer: coarse)").matches;
+if (touch) {
+  actButton.textContent = "Use";
+  leaveButton.textContent = "Step off";
+}
 const narrow = matchMedia("(max-width: 40rem)");
 const key = (desk, tap) => (touch ? tap : desk);
 
@@ -525,6 +529,7 @@ function removeNote() {
 const GUIDE_KEY = "allhands-guide-1";
 let guideOn = (() => { try { return sibling ? sessionStorage.getItem("sibling-guide") !== "1" : localStorage.getItem(GUIDE_KEY) !== "1"; } catch { return false; } })();
 let guideText = "";
+let guideStage = "station";
 const GUIDE_STATION = { all: "sail", sail: "sail", helm: "helm", chart: "chart", pump: "pump", "pump+patch": "pump", foresail: "foresail" };
 function endGuide() {
   guideOn = false;
@@ -580,13 +585,22 @@ function updateGuide(cur) {
     else if (typeof nextShip === "number") text = `The next ship comes in ${nextShip} s. Wait at the end of the line.`;
     else if (clearing) text = `${shipNames.get(clearing.id) ?? "The last ship"} is still clearing the berth. The next ship comes once it is clear.`;
     else text = "The ship has left. Wait at the end of the line for the next one.";
+  } else if (guideStage === "chart") {
+    if (st === "chart") return endGuide();
+    const c = tileCentre("chart");
+    to = toWorld(ship, c.x, c.y);
+    ty = deckY(c.x, c.y);
+    text = "Fewer than three aboard, so nobody has the chart. Follow the red line to the chart table to pick an island; the chart opens when you stand there.";
   } else {
     const job = GUIDE_STATION[ship.jobs[me.id]];
     if (!job) text = key("Walk to any free station and hold E. E by the gangway steps off.", "Walk to any free station and hold Use. Use by the gangway steps off.");
     else {
       const c = tileCentre(job);
       const here = st === job;
-      if (here && holding) return endGuide();
+      if (here && holding) {
+        if (Object.keys(ship.jobs).length < 3 && job !== "chart") { guideStage = "chart"; return; }
+        return endGuide();
+      }
       to = toWorld(ship, c.x, c.y);
       ty = deckY(c.x, c.y);
       text = here ? key("Hold E to work it.", "Hold Use to work it.") : key(`Your station is the ${stationLabel[job]}. Follow the red line and hold E there. E by the gangway steps off.`, `Your station is the ${stationLabel[job]}. Follow the red line and hold Use there. Use by the gangway steps off.`);
@@ -1240,7 +1254,7 @@ function updateHud(self, shipsNow) {
     const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || ((ship.sail > 0.05 || ship.fore > 0.05) && jettyDistance(ship) > calm ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(jettyDistance(ship))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
-      return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${jobWords(job)}${idle ? " (nobody on it)" : ""}` };
+      return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${job === "all" ? "everything (start at the mainsail)" : jobWords(job)}${idle ? " (nobody on it)" : ""}` };
     });
     const statusKey = lineText + "|" + chips.map((c) => `${c.idle}${c.me}${c.text}`).join("|") + "|" + narrow.matches;
     if (statusKey !== lastStatus) {

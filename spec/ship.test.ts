@@ -395,12 +395,12 @@ describe("jobs", { timeout: 60000 }, () => {
     await a.man("sail");
     a.test({ op: "place", ship, x: 40, y: 24, heading: 0 });
     await settle(2500);
-    expect(d.inbox.filter((m) => m.t === "toast" && /your job is/i.test(m.text)).map((m) => m.text)).toEqual([]);
+    expect(d.inbox.filter((m) => m.t === "toast" && /your station is/i.test(m.text)).map((m) => m.text)).toEqual([]);
     a.test({ op: "place", ship, x: 40, y: 24, heading: 0, water: 30 });
-    const told = await d.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
+    const told = await d.next((m) => m.t === "toast" && /your station is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
-    expect(a.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
+    expect(a.inbox.some((m) => m.t === "toast" && /your station is/i.test(m.text))).toBe(false);
     expect(isl.stdout.join("\n")).toMatch(new RegExp(`${d.name}#${d.id} is nudged to the pump of ship ${ship}`));
     for (const w of [a, b, c, d]) w.close();
   });

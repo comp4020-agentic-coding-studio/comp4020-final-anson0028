@@ -47,8 +47,9 @@ own server. I would reverse it the day the app needed a second page.
 
 ## Implementation: red first
 
-Every claim went in as a failing test, then the code that made it pass, in
-separate commits. The eleven ship tests failed 11 of 11 against the gate
+Every claim went in as a failing test, then the code that made it pass:
+in separate commits from 23 October, in evening batches before that, and
+bundled with code and docs on 8 and 9 November (Thin spots). The eleven ship tests failed 11 of 11 against the gate
 server, "no `board` message, no ships in snapshots", and passed on the ship
 ([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4),
 [`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)).
@@ -146,9 +147,15 @@ Code with Opus and then Fable, got narrow briefs and no history: readers,
 cold readers and cold players, reviewers playing a marker or a tutor,
 a code reviewer, play-testers, markers of this file. The Superpowers set
 was used once, for the code review that found two crashes, red first
-([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2)),
+([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2),
+[`f95c6d7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f95c6d7),
+[`f03b072`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f03b072)),
 and otherwise left off as too heavy. Humanizer read every page of words
-before it shipped, because an agent's prose is hard for people to read.
+before it shipped, because an agent's prose is hard for people to read;
+the "plain words" commits are its output
+([`693d43c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/693d43c),
+[`0080bd2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0080bd2),
+[`37440ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37440ce)).
 
 The project ran as two conversations. The main one changed code. A
 second one, forked from it, kept the words: when the main one landed a piece of work it sent the fork a
@@ -157,12 +164,17 @@ to date. On the last two days they ran side by side, the big ship on its
 branch in one and the README on `main` in the other, and met at the merge
 ([`f0c3f61`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f0c3f61)).
 Playwright ran at both viewports before UI changes, borrowed from the
-assignment 2 repo rather than installed here. Every call was mine. The agent was wrong in ways only the checks
+assignment 2 repo rather than installed here; the phone layout commits
+came from those runs
+([`df59caf`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/df59caf),
+[`52267b4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/52267b4)). Every call was mine. The agent was wrong in ways only the checks
 caught: the first nudge test matched the boarding toast, not the nudge,
 and was tightened in the server commit
 ([`9dcd406`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/9dcd406));
 the navigator bug above hid for two sweeps. The thirteen decision
-records each list the options and what each costs; the README was
+records each list the options and what each costs; records 9, 10, 12 and
+13 were written on 8 and 9 November for decisions taken earlier, and say
+so; the README was
 rewritten on the last weekend from my own account of what good means,
 spoken aloud and written down with me
 ([`93906af`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/93906af)).

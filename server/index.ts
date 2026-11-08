@@ -555,7 +555,7 @@ function nudgeIdle(now: number): void {
       if (now - c.idleSince < P.JOB_NUDGE_S * 1000 || now - c.nudgedAt < P.JOB_NUDGE_S * 1000) continue;
       c.nudgedAt = now;
       const words = DUTY_WORDS[duty];
-      send(c.ws, { t: "toast", text: duty === "pump" ? `Your job is the pump. Water ${Math.round(s.water)}%.` : `Your job is ${words}. Nobody is on it.` });
+      send(c.ws, { t: "toast", text: duty === "pump" ? `Your station is the pump. Water ${Math.round(s.water)}%.` : `Your station is ${words}. Nobody is on it.` });
       logLine(`${whoIs(c)} is nudged to ${words} of ship ${s.id}`);
     }
   }
@@ -569,7 +569,7 @@ function boardNearest(c: Client): LiveShip | null {
   putAboard(c, s, BOARD_SPOTS);
   const job = jobsOf(s).find(([id]) => id === c.id)?.[1] ?? "all";
   logLine(`${whoIs(c)} boards ship ${s.id} (${shipName(s.id)}) by the gangway; ${aboard(s).length} aboard; job: ${job}`);
-  if (job !== "all") send(c.ws, { t: "toast", text: `Your job aboard ${shipName(s.id)}: ${jobWords(job)}.` });
+  if (job !== "all") send(c.ws, { t: "toast", text: `Your station aboard ${shipName(s.id)}: ${jobWords(job)}.` });
   for (const o of aboard(s)) if (o !== c) send(o.ws, { t: "toast", text: `${c.name} came aboard.` });
   return s;
 }

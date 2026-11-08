@@ -1,10 +1,12 @@
 # All Hands on Deck: rules for working in this repo
 
-The idea, from README.md: a game has to be fun first. The rule that
-makes this one fun with other people aboard is that what you can do and
-what you know depends on where your body is. Every rule here protects
-that rule. If a change needs one of them broken, change README.md first
-and say why.
+The idea, from README.md: a game has to be fun first, and with other
+people aboard that comes down to three things: every job matters, the
+sea gets harder the further out you go and leaves a mark, and a stranger
+has to be able to start. The rules below keep those three true. Most do
+it through one mechanic, that what you can do and what you know depends
+on where your body is. If a change needs one of them broken, change
+README.md first and say why.
 
 ## Never
 
@@ -36,7 +38,8 @@ and say why.
   simulator may run against Fly only when asked; its walkers stay in that
   database.
 - Never add voice, accounts, a chat history or scores. README.md says why
-  each one isn't built. A typed name is not an account, and the harbour
+  voice, accounts and rewards aren't built; a chat history isn't because
+  what a client heard stays on that client, below. A typed name is not an account, and the harbour
   board is not a ranking: no points, and no order but time. What a client
   heard may stay on that client for two minutes; the server keeps no chat.
 - Never update or delete a row in `visits` either; it is the board. A note
