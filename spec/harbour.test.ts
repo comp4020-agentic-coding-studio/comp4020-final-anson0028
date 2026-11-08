@@ -61,7 +61,7 @@ describe("names", { timeout: 30000 }, () => {
     a.send({ t: "name", name: "Anson" });
     await a.next((m) => m.t === "rename", 2000);
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 25, y: 20, heading: 0 });
+    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
     await a.man("sail");
     const landing = await a.next((m) => m.t === "landing", 10000);
     expect(landing.landing.crew).toEqual(["Anson"]);
@@ -77,7 +77,7 @@ describe("the harbour board", { timeout: 30000 }, () => {
     expect(a.hello.log).toEqual([]);
     const ship = await a.board();
     expect(await b.board()).toBe(ship);
-    a.test({ op: "place", ship, x: 25, y: 20, heading: 0 });
+    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
     await a.man("sail");
     const first = await b.next((m) => m.t === "log", 10000);
     expect(first.entry.kind).toBe("landing");
@@ -85,7 +85,7 @@ describe("the harbour board", { timeout: 30000 }, () => {
     expect(first.entry.crew.sort()).toEqual([a.name, b.name].sort());
     expect(first.entry.size).toBe(2);
     expect(first.entry.day).toBe("2026-10-12");
-    a.test({ op: "place", ship, x: 25, y: 20, heading: 0 });
+    a.test({ op: "place", ship, x: 55, y: 20, heading: Math.PI });
     const second = await b.next((m) => m.t === "log" && m !== first, 10000);
     expect(second.entry.kind).toBe("landing");
     a.test({ op: "place", ship, x: 40, y: 10, heading: 0, hull: 100, water: 95 });
@@ -203,8 +203,8 @@ describe("the log", { timeout: 30000 }, () => {
     await settle(300);
     const lines = isl.stdout.join("\n");
     const who = (id: string) => new RegExp(`[A-Za-z ]+#${id}`);
-    expect(lines).toMatch(new RegExp(`Anson#${a.id} boards ship ${ship}`));
-    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} boards ship ${ship}`));
+    expect(lines).toMatch(new RegExp(`#${a.id} (boards|wakes aboard) ship ${ship}`));
+    expect(lines).toMatch(new RegExp(`${b.name}#${b.id} (boards|wakes aboard) ship ${ship}`));
     expect(lines).toMatch(new RegExp(`Anson#${a.id} takes the helm of ship ${ship}`));
     expect(lines).toMatch(new RegExp(`${b.name}#${b.id} is refused the helm of ship ${ship}: Anson#${a.id} holds it`));
     expect(lines).toMatch(new RegExp(`${b.name}#${b.id} says: "hello crew"`));

@@ -12,7 +12,7 @@ const defaults = {
   DERELICT_S: 300,
   JOB_NUDGE_S: 8,
   SIGHT: 8,
-  BOARD_RANGE: 5.5,
+  BOARD_RANGE: 6,
   SHIPS_AT_PIER: 1,
   MAX_SHIPS: 12,
   LANDING_RANGE: 4.5,

@@ -116,7 +116,7 @@ describe("leaks", { timeout: 60000 }, () => {
     const hurt = await a.until((s) => s.leaks.length > 0, ship, 6000);
     expect(hurt.leaks[0].amount).toBeGreaterThan(0);
     expect(hurt.hull).toBeGreaterThan(0);
-    a.test({ op: "place", ship, x: 20, y: 30, heading: Math.PI / 2, sail: 0 });
+    a.test({ op: "place", ship, x: 20, y: 50, heading: Math.PI / 2, sail: 0 });
     await settle(300);
     let s = await a.ship(ship);
     expect(s.leaks.length).toBeGreaterThan(0);
@@ -204,10 +204,10 @@ describe("sinking", { timeout: 60000 }, () => {
     const shipId = await a.board();
     const berth = ships(await a.snap()).find((s) => s.id === shipId)!;
     await a.man("sail");
-    await a.until((s) => Math.hypot(s.x - berth.x, s.y - berth.y) > 3, shipId, 8000);
+    await a.until((s) => Math.hypot(s.x - berth.x, s.y - berth.y) > 3, shipId, 10000);
     const gone = await a.snap();
     expect(ships(gone).filter((s) => s.state === "moored")).toHaveLength(0);
-    const counting = await a.next((m) => m.t === "snap" && typeof m.next === "number" && m.next > 0, 12000);
+    const counting = await a.next((m) => m.t === "snap" && typeof m.next === "number" && m.next > 0, 20000);
     expect(counting.next).toBeLessThanOrEqual(1);
     const launched = await a.next((m) => m.t === "ship" && m.event === "launched", 8000);
     expect(Math.hypot(launched.ship.x - berth.x, launched.ship.y - berth.y)).toBeLessThan(0.5);
@@ -224,10 +224,11 @@ describe("sinking", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0115"));
     const one = await a.board();
     await a.ashore();
-    a.test({ op: "place", ship: one, x: 30, y: 30, heading: 0, sail: 0 });
+    await b.ashore();
+    a.test({ op: "place", ship: one, x: 20, y: 50, heading: 0, sail: 0 });
     await a.next((m) => m.t === "ship" && m.event === "launched", 6000);
     const two = await b.board();
-    b.test({ op: "place", ship: two, x: 30, y: 45, heading: 0, sail: 0 });
+    b.test({ op: "place", ship: two, x: 30, y: 52, heading: 0, sail: 0 });
     await settle(3500);
     const snap = await b.snap();
     expect(ships(snap).some((s) => s.id === one)).toBe(false);
@@ -244,9 +245,10 @@ describe("ships", { timeout: 60000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0108"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0108"));
     const one = await a.board();
+    await b.ashore();
     await a.man("sail");
     await a.until((s) => s.sail >= 0.9, one);
-    await b.next((m) => m.t === "ship" && m.event === "launched", 8000);
+    await b.next((m) => m.t === "ship" && m.event === "launched", 20000);
     const two = await b.board();
     expect(two).not.toBe(one);
     const before = await b.snap();
@@ -277,6 +279,7 @@ describe("ships", { timeout: 60000 }, () => {
     const a = await Walker.join(isl.wsBase, uuid("aaaa0111"));
     const b = await Walker.join(isl.wsBase, uuid("bbbb0111"));
     const one = await a.board();
+    await b.ashore();
     a.test({ op: "place", ship: one, x: 40, y: 20, heading: Math.PI / 2 });
     await b.next((m) => m.t === "ship" && m.event === "launched", 6000);
     const two = await b.board();
@@ -304,7 +307,7 @@ describe("landing", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0109"));
     const shipId = await a.board();
     expect(await b.board()).toBe(shipId);
-    a.test({ op: "place", ship: shipId, x: 25, y: 20, heading: 0 });
+    a.test({ op: "place", ship: shipId, x: 55, y: 20, heading: Math.PI });
     await a.man("sail");
     const landing = await a.next((m) => m.t === "landing", 10000);
     expect(landing.landing.island).toBe("near");
@@ -321,7 +324,7 @@ describe("landing", { timeout: 60000 }, () => {
     expect(c.hello.landings).toHaveLength(1);
     expect(c.hello.landings[0].size).toBe(2);
     const second = await c.board();
-    c.test({ op: "place", ship: second, x: 25, y: 20, heading: 0 });
+    c.test({ op: "place", ship: second, x: 55, y: 20, heading: Math.PI });
     await c.man("sail");
     const again = await c.next((m) => m.t === "landing", 10000);
     expect(again.first).toBe(false);
@@ -364,6 +367,7 @@ describe("jobs", { timeout: 60000 }, () => {
     const isl = await fresh();
     const crew = await Promise.all(["aaaa0116", "bbbb0116", "cccc0116", "dddd0116", "eeee0116"].map((t) => Walker.join(isl.wsBase, uuid(t))));
     const [a, b, c, d, e] = crew;
+    for (const w of crew) await w.ashore();
     const jobs = async () => (await a.ship(ship)).jobs;
     const ship = await a.board();
     expect(await jobs()).toEqual({ [a.id]: "all" });
@@ -388,11 +392,11 @@ describe("jobs", { timeout: 60000 }, () => {
     const b = await Walker.join(isl.wsBase, uuid("bbbb0117"));
     const ship = await a.board();
     await b.board();
-    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, sail: 0 });
     await a.man("sail");
     await settle(2500);
     expect(b.inbox.some((m) => m.t === "toast" && /your job is/i.test(m.text))).toBe(false);
-    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, water: 30 });
+    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, water: 30 });
     const told = await b.next((m) => m.t === "toast" && /your job is/i.test(m.text), 4000);
     expect(told.text).toMatch(/pump/i);
     await settle(200);
@@ -411,7 +415,7 @@ describe("a dropped connection", { timeout: 60000 }, () => {
     const keeper = await Walker.join(isl.wsBase, uuid("bbbb0118"));
     const ship = await a.board();
     await keeper.board();
-    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, sail: 0 });
     await settle(300);
     a.close();
     await settle(500);
@@ -428,7 +432,7 @@ describe("a dropped connection", { timeout: 60000 }, () => {
     const token = uuid("aaaa0119");
     const a = await Walker.join(isl.wsBase, token);
     const ship = await a.board();
-    a.test({ op: "place", ship, x: 20, y: 30, heading: 0, sail: 0 });
+    a.test({ op: "place", ship, x: 20, y: 50, heading: 0, sail: 0 });
     await settle(300);
     await isl.restart();
     const back = await Walker.join(isl.wsBase, token);

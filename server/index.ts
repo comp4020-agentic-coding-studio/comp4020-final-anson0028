@@ -7,12 +7,12 @@ import { WebSocketServer, WebSocket } from "ws";
 import { marked } from "marked";
 import { P } from "./params.ts";
 import {
-  addNote, createShip, forgetAboard, loadAboard, rememberAboard, loadLandings, loadNotes, loadPlayer, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
+  addNote, createShip, forgetAboard, loadAboard, rememberAboard, loadLandings, loadNotes, loadPlayer, playerKnown, loadShips, loadVisits, loadWrecks, recordLanding, recordVisit, recordWreck, removeNote, removeShip, renamePlayer, savePlayer, saveShip,
   type LandingRow, type NoteRow, type VisitRow, type WreckRow,
 } from "./db.ts";
 import {
-  type Body, DECK, H, ISLANDS, LAND, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
-  deckToWorld, distanceFromPier, leakUnder, nearTiles, onDeck, setTile, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
+  type Body, DECK, H, ISLANDS, LAND, LAYOUT, MAX_PLAYERS, PIER_CENTRE, REEF, SAY_RANGE, SHIP_CLEARANCE, SLOTS, SNAP_HZ, STATIONS, STATION_NAMES, type Ship, type StationName, TICK_HZ, W,
+  alongside, deckToWorld, distanceFromPier, leakUnder, nearTiles, nearestPierDistance, onDeck, setTile, shipsApart, standable, stationUnder, stepBody, stepShip, tileAt, tiles, within,
 } from "./world.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -45,8 +45,9 @@ function logged(entry: LogEntry): void {
 const whoIs = (c: Client) => `${c.name}#${c.id}`;
 function spawnFor(id: string): { x: number; y: number } {
   const k = parseInt(id.slice(0, 4), 16);
-  return { x: 8.6 + (k % 4) * 0.4, y: 30.8 + ((k >> 4) % 4) * 0.5 };
+  return { x: 17.6 + (k % 4) * 0.6, y: 31.3 + ((k >> 4) % 3) * 0.5 };
 }
+const atPier = (s: { x: number; y: number }) => nearestPierDistance(s.x, s.y) <= P.BOARD_RANGE;
 function logLine(text: string): void {
   console.log(`${new Date().toISOString()} ${text}`);
 }
@@ -68,10 +69,10 @@ function nudgeNear(): void {
 const tickTimes: number[] = [];
 let tick = 0;
 
-const noHolders = (): Record<StationName, Client | null> => ({ sail: null, helm: null, chart: null, pump: null });
+const noHolders = (): Record<StationName, Client | null> => ({ sail: null, helm: null, chart: null, pump: null, foresail: null });
 
 for (const row of loadShips()) {
-  ships.set(row.id, { ...row, readyAt: row.ready_at ? Date.parse(row.ready_at) : null, landedOn: null, holders: noHolders() });
+  ships.set(row.id, { ...row, fore: 0, readyAt: row.ready_at ? Date.parse(row.ready_at) : null, landedOn: null, holders: noHolders() });
 }
 for (const s of [...ships.values()]) {
   if (s.state !== "building") continue;
@@ -80,7 +81,7 @@ for (const s of [...ships.values()]) {
 }
 for (const s of ships.values()) {
   if (s.state !== "moored" || SLOTS.some((slot) => within(s, slot, 0.5))) continue;
-  const slot = SLOTS.find((slot) => ![...ships.values()].some((o) => o !== s && within(o, slot, 2)));
+  const slot = SLOTS.find((slot) => ![...ships.values()].some((o) => o !== s && shipsApart(o, slot) < SHIP_CLEARANCE));
   if (!slot) continue;
   Object.assign(s, { x: slot.x, y: slot.y, heading: slot.heading });
   saveShip({ ...s, ready_at: null });
@@ -88,13 +89,13 @@ for (const s of ships.values()) {
 while (ships.size < P.SHIPS_AT_PIER) launchAt(freeSlot());
 
 function freeSlot(): (typeof SLOTS)[number] | null {
-  return SLOTS.find((slot) => ![...ships.values()].some((s) => s.state !== "building" && within(s, slot, 2))) ?? null;
+  return SLOTS.find((slot) => ![...ships.values()].some((s) => s.state !== "building" && shipsApart(s, slot) < SHIP_CLEARANCE)) ?? null;
 }
 
 function launchAt(slot: { x: number; y: number; heading: number } | null): LiveShip | null {
   if (!slot) return null;
   const id = createShip({ x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, leaks: [], state: "moored", ready_at: null });
-  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: slot.heading, sail: 0, water: 0, hull: 0, leaks: [], state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
+  const s: LiveShip = { id, x: slot.x, y: slot.y, heading: slot.heading, sail: 0, fore: 0, water: 0, hull: 0, leaks: [], state: "moored", readyAt: null, landedOn: null, holders: noHolders() };
   ships.set(id, s);
   return s;
 }
@@ -103,7 +104,7 @@ const emptySince = new Map<number, number>();
 
 function refillBerths(now: number): void {
   SLOTS.forEach((slot, i) => {
-    const blocked = [...ships.values()].some((s) => s.state !== "building" && within(s, slot, SHIP_CLEARANCE + 2) && !SLOTS.some((o) => o !== slot && within(s, o, 0.5)));
+    const blocked = [...ships.values()].some((s) => s.state !== "building" && shipsApart(s, slot) < SHIP_CLEARANCE + 2 && !SLOTS.some((o) => o !== slot && within(s, o, 0.5)));
     if (blocked) return emptySince.delete(i);
     const since = emptySince.get(i) ?? now;
     emptySince.set(i, since);
@@ -131,7 +132,7 @@ function notice(s: LiveShip, kind: keyof typeof NOTICES, now: number): void {
 }
 
 const clearOf = (s: LiveShip) => (x: number, y: number): boolean =>
-  ![...ships.values()].some((o) => o !== s && o.state !== "building" && Math.hypot(o.x - x, o.y - y) < SHIP_CLEARANCE && Math.hypot(o.x - x, o.y - y) < Math.hypot(o.x - s.x, o.y - s.y));
+  ![...ships.values()].some((o) => o !== s && o.state !== "building" && shipsApart(o, { x, y, heading: s.heading }) < SHIP_CLEARANCE && shipsApart(o, { x, y, heading: s.heading }) < shipsApart(o, s));
 const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const publicId = (token: string) => createHash("sha256").update(token).digest("hex").slice(0, 8);
 
@@ -231,7 +232,7 @@ function shipName(id: number): string {
 }
 
 function pubShip(s: LiveShip) {
-  return { id: s.id, name: shipName(s.id), x: s.x, y: s.y, heading: s.heading, sail: s.sail, water: s.water, hull: s.hull, leaks: s.leaks, state: s.state };
+  return { id: s.id, name: shipName(s.id), x: s.x, y: s.y, heading: s.heading, sail: s.sail, fore: s.fore, water: s.water, hull: s.hull, leaks: s.leaks, state: s.state };
 }
 
 function aboard(s: LiveShip): Client[] {
@@ -278,6 +279,7 @@ function join_(ws: WebSocket, token: string): void {
     return ws.close();
   }
   const id = publicId(token);
+  const known = playerKnown(token);
   const row = loadPlayer(token, spawnFor(id));
   const start = standable(row.x, row.y) ? { x: row.x, y: row.y } : spawnFor(id);
   const c: Client = { ws, token, id, name: row.name, hue: row.hue, body: { x: start.x, y: start.y, dx: 0, dy: 0, inputAt: 0, tx: null, ty: null, ship: null, holding: false }, seq: 0, onChart: false, nearKey: "", nearAt: 0, lastEmote: 0, boardedAt: 0, idleSince: null, idleJob: "", nudgedAt: 0 };
@@ -287,15 +289,17 @@ function join_(ws: WebSocket, token: string): void {
   const backTo = away && Date.now() - away.at < REJOIN_MS ? ships.get(away.ship) : undefined;
   if (away && backTo) Object.assign(c.body, { ship: backTo.id, x: away.x, y: away.y });
   if (away && backTo) c.boardedAt = away.boardedAt;
+  const woke = backTo || known ? null : wakeAboard(c);
   alive.set(ws, true);
   ws.on("pong", () => alive.set(ws, true));
   for (const o of clients.values()) send(o.ws, { t: "join", id, name: c.name, hue: c.hue });
   clients.set(ws, c);
   if (backTo) logLine(`${whoIs(c)} comes back aboard ship ${backTo.id} after a dropped connection; ${clients.size} here`);
-  else logLine(`${whoIs(c)} arrives at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
+  else if (woke) logLine(`${whoIs(c)} wakes aboard ship ${woke.id} (${shipName(woke.id)}) in the crew quarters; ${aboard(woke).length} aboard; ${clients.size} here`);
+  else logLine(`${whoIs(c)} arrives on the jetty at (${start.x.toFixed(1)}, ${start.y.toFixed(1)}); ${clients.size} here`);
   const roster = [...clients.values()].map((o) => ({ id: o.id, name: o.name, hue: o.hue }));
   send(ws, {
-    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, stations: STATIONS, day: today(),
+    t: "hello", you: { id, name: c.name, hue: c.hue }, roster, pier: PIER_CENTRE, berth: SLOTS[0], sayRange: SAY_RANGE, boardRange: P.BOARD_RANGE, leakCap: P.LEAK_CAP, deck: DECK, layout: LAYOUT, stations: STATIONS, day: today(),
     ships: [...ships.values()].filter((s) => s.state !== "building").map(pubShip), wrecks, landings, log: log.slice(0, 40),
   });
   ws.on("message", (data) => {
@@ -431,7 +435,7 @@ function handle(c: Client, raw: string): void {
   if (msg.t === "ashore") {
     if (b.ship === null) return send(c.ws, { t: "toast", text: "You're already ashore." });
     const s = ships.get(b.ship);
-    if (s && distanceFromPier(s.x, s.y) > P.BOARD_RANGE) return send(c.ws, { t: "toast", text: "You can step off only at the pier. Bring the ship back, or stay with it." });
+    if (s && !atPier(s)) return send(c.ws, { t: "toast", text: "You can step off only at the pier. Bring the ship back, or stay with it." });
     washUp(c, "steps ashore from");
     return;
   }
@@ -464,7 +468,7 @@ function handle(c: Client, raw: string): void {
       if (msg.sail !== undefined) s.sail = Math.min(1, Math.max(0, Number(msg.sail)));
       if (msg.hull !== undefined) {
         s.hull = Number(msg.hull);
-        s.leaks = s.hull > 0 ? [{ x: 1, y: 0, amount: s.hull }] : [];
+        s.leaks = s.hull > 0 ? [{ x: 0, y: -1, amount: s.hull }] : [];
       }
       if (msg.water !== undefined) s.water = Number(msg.water);
       if (msg.reef) setTile(s.x, s.y, REEF);
@@ -473,19 +477,21 @@ function handle(c: Client, raw: string): void {
 }
 
 let boardings = 0;
-const BOARD_SPOTS = [{ x: -2.5, y: -0.5 }, { x: -1.5, y: 1.5 }, { x: -1.5, y: -1.5 }, { x: 1.5, y: -0.5 }, { x: 2.5, y: 1.5 }, { x: 2.5, y: -1.5 }];
+const BOARD_SPOTS = [{ x: -0.5, y: -2.5 }, { x: 0.5, y: -2.5 }, { x: -1.5, y: -2.5 }, { x: 1.5, y: -2.5 }, { x: -0.5, y: -1.5 }, { x: 0.5, y: -1.5 }];
+const CREW_SPOTS = [{ x: 7.5, y: -2.5 }, { x: 8.5, y: -2.5 }, { x: 6.5, y: -2.5 }, { x: 7.5, y: -1.5 }, { x: 8.5, y: -1.5 }, { x: 6.5, y: -1.5 }];
 const JOBS: Record<number, string[]> = {
   1: ["all"],
   2: ["sail+helm", "pump+patch"],
   3: ["helm", "sail", "pump+patch"],
-  4: ["helm", "sail", "pump+patch", "chart"],
+  4: ["helm", "sail", "pump+patch", "foresail"],
+  5: ["helm", "sail", "pump+patch", "foresail", "chart"],
 };
-const DUTY_WORDS: Record<string, string> = { all: "everything", helm: "the helm", sail: "the sail", pump: "the pump", chart: "the chart table", patch: "patching holes" };
+const DUTY_WORDS: Record<string, string> = { all: "everything", helm: "the helm", sail: "the mainsail", foresail: "the foresail", pump: "the pump", chart: "the chart table", patch: "patching holes" };
 const jobWords = (job: string) => job.split("+").map((d) => DUTY_WORDS[d] ?? d).join(" and ");
 
 function jobsOf(s: LiveShip): [string, string][] {
   const crew = aboard(s).sort((p, q) => p.boardedAt - q.boardedAt);
-  const table = JOBS[crew.length] ?? ["helm", "sail", "pump", "chart"];
+  const table = JOBS[crew.length] ?? ["helm", "sail", "pump", "foresail", "chart"];
   return crew.map((c, i) => [c.id, table[i] ?? "patch"]);
 }
 
@@ -503,7 +509,7 @@ function unworkedDuty(s: LiveShip, job: string): string | null {
 
 function nudgeIdle(now: number): void {
   for (const s of ships.values()) {
-    const atSea = s.state === "sailing" && distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
+    const atSea = s.state === "sailing" && !atPier(s);
     for (const [id, job] of jobsOf(s)) {
       const c = [...clients.values()].find((o) => o.id === id);
       if (!c) continue;
@@ -525,18 +531,30 @@ function nudgeIdle(now: number): void {
 
 function boardNearest(c: Client): LiveShip | null {
   const here = worldPos(c);
-  const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && within(s, here, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
+  const choices = [...ships.values()].filter((s) => s.state !== "building" && s.sail <= 0.05 && s.fore <= 0.05 && alongside(here, s, P.BOARD_RANGE)).sort((p, q) => Math.hypot(p.x - here.x, p.y - here.y) - Math.hypot(q.x - here.x, q.y - here.y));
   const s = choices[0];
   if (!s) return null;
+  putAboard(c, s, BOARD_SPOTS);
+  const job = jobsOf(s).find(([id]) => id === c.id)?.[1] ?? "all";
+  logLine(`${whoIs(c)} boards ship ${s.id} (${shipName(s.id)}) by the gangway; ${aboard(s).length} aboard; job: ${job}`);
+  if (job !== "all") send(c.ws, { t: "toast", text: `Your job aboard ${shipName(s.id)}: ${jobWords(job)}.` });
+  for (const o of aboard(s)) if (o !== c) send(o.ws, { t: "toast", text: `${c.name} came aboard.` });
+  return s;
+}
+
+function putAboard(c: Client, s: LiveShip, spots: { x: number; y: number }[]): void {
   const taken = aboard(s).map((o) => `${Math.floor(o.body.x)},${Math.floor(o.body.y)}`);
-  const spot = BOARD_SPOTS.find((p) => !taken.includes(`${Math.floor(p.x)},${Math.floor(p.y)}`)) ?? BOARD_SPOTS[aboard(s).length % BOARD_SPOTS.length];
+  const spot = spots.find((p) => !taken.includes(`${Math.floor(p.x)},${Math.floor(p.y)}`)) ?? spots[aboard(s).length % spots.length];
   Object.assign(c.body, { ship: s.id, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
   c.boardedAt = ++boardings;
   c.idleSince = null;
-  const job = jobsOf(s).find(([id]) => id === c.id)?.[1] ?? "all";
-  logLine(`${whoIs(c)} boards ship ${s.id} (${shipName(s.id)}); ${aboard(s).length} aboard; job: ${job}`);
-  if (job !== "all") send(c.ws, { t: "toast", text: `Your job aboard ${shipName(s.id)}: ${jobWords(job)}.` });
-  for (const o of aboard(s)) if (o !== c) send(o.ws, { t: "toast", text: `${c.name} jumped aboard.` });
+}
+
+function wakeAboard(c: Client): LiveShip | null {
+  if (c.body.ship !== null) return null;
+  const s = [...ships.values()].find((s) => s.state === "moored" && SLOTS.some((slot) => within(s, slot, 0.5)));
+  if (!s) return null;
+  putAboard(c, s, CREW_SPOTS);
   return s;
 }
 
@@ -548,7 +566,7 @@ function tellCrewLeft(c: Client, s: LiveShip | undefined): void {
 function washUp(c: Client, how: string): void {
   const b = c.body;
   const s = b.ship === null ? undefined : ships.get(b.ship);
-  const far = !s || distanceFromPier(s.x, s.y) > P.BOARD_RANGE;
+  const far = !s || !atPier(s);
   logLine(`${whoIs(c)} ${how} ship ${b.ship}${far ? ` and swims back from ${s ? distanceFromPier(s.x, s.y).toFixed(0) : "?"} tiles out` : ""}`);
   const spot = spawnFor(c.id);
   Object.assign(b, { ship: null, x: spot.x, y: spot.y, dx: 0, dy: 0, tx: null, ty: null, holding: false });
@@ -620,7 +638,7 @@ function loop(): void {
     if (s.state === "building") continue;
     const crew = aboard(s);
     const patching = crew.filter((c) => c.body.holding && stationUnder(c.body) === null).map((c) => ({ x: c.body.x, y: c.body.y }));
-    const control = { sail: !!s.holders.sail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump, patching };
+    const control = { sail: !!s.holders.sail, fore: !!s.holders.foresail, helmDir: s.holders.helm ? Math.sign(s.holders.helm.body.dy) : 0, helmHeld: !!s.holders.helm, pump: !!s.holders.pump, patching };
     for (const ev of stepShip(s, control, dt, clearOf(s))) {
       if (ev.kind === "sank") {
         sink(s);
@@ -653,7 +671,7 @@ function loop(): void {
     const since = emptySince.get(0);
     const next = since === undefined ? null : Math.max(0, Math.ceil((since + P.LAUNCH_DELAY_S * 1000 - now) / 1000));
     const p = [...clients.values()].map((c) => [c.id, Math.round(c.body.x * 100), Math.round(c.body.y * 100), c.seq, c.body.ship ?? ""]);
-    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)]), x.landedOn ? islandName(x.landedOn) : "", jobsOf(x)]);
+    const s = [...ships.values()].filter((x) => x.state !== "building").map((x) => [x.id, Math.round(x.x * 100), Math.round(x.y * 100), Math.round(x.heading * 100), Math.round(x.sail * 100), Math.round(x.water), x.state, x.holders.sail?.id ?? "", x.holders.helm?.id ?? "", x.holders.chart?.id ?? "", x.holders.pump?.id ?? "", Math.round(x.hull), x.leaks.map((l) => [l.x, l.y, Math.round(l.amount)]), x.landedOn ? islandName(x.landedOn) : "", jobsOf(x), Math.round(x.fore * 100), x.holders.foresail?.id ?? ""]);
     const snap = JSON.stringify({ t: "snap", at: now, p, s, next });
     for (const c of clients.values()) if (c.ws.readyState === WebSocket.OPEN) c.ws.send(snap);
   }

@@ -17,8 +17,10 @@ export const H = 64;
 
 export const PIER_CENTRE = { x: 9.5, y: 31.5 };
 export const SPAWN = { x: 9.5, y: 31.5 };
-export const SLOTS = [{ x: 13.5, y: 32, heading: 0 }];
-export const SHIP_CLEARANCE = 5;
+export const JETTY = { x0: 8, x1: 30, y0: 30, y1: 32 };
+export const SLOTS = [{ x: 20, y: 36.5, heading: 0 }];
+export const SHIP_CLEARANCE = 8;
+export const HULL = { bow: 10.5, stern: 8.5, keel: 0.5, parts: [-8.5, -4, 0, 5, 10.5] };
 
 export type Island = { id: string; name: string; cx: number; cy: number; r: number };
 export const ISLANDS: Island[] = [
@@ -27,12 +29,14 @@ export const ISLANDS: Island[] = [
   { id: "far", name: "Far Island", cx: 86, cy: 16, r: 4 },
 ];
 
-export const DECK = { minX: -3, maxX: 4, minY: -2, maxY: 2 };
+export const DECK = { minX: -8, maxX: 10, minY: -3, maxY: 4 };
+export const LAYOUT = { quarterdeck: { x0: -8, x1: -3 }, forecastle: { x0: 6, x1: 10 }, bilge: { x0: 2, x1: 5, y0: -3, y1: -1 }, gangway: { x0: -2, x1: 2, y: -3 }, quarters: { x0: 6, x1: 9, y0: -3, y1: -1 } };
 export const STATIONS = {
-  helm: { x: -3, y: 0 },
+  helm: { x: -6, y: 0 },
   sail: { x: 0, y: 1 },
-  chart: { x: 3, y: 0 },
-  pump: { x: 0, y: -2 },
+  chart: { x: -4, y: 2 },
+  pump: { x: 3, y: -2 },
+  foresail: { x: 7, y: 1 },
 } as const;
 export type StationName = keyof typeof STATIONS;
 export const STATION_NAMES = Object.keys(STATIONS) as StationName[];
@@ -59,11 +63,11 @@ for (let y = 0; y < H; y++) {
   for (let x = 0; x < W; x++) {
     let t = SEA;
     if (x < 8) t = LAND;
-    if (x >= 8 && x <= 10 && y >= 30 && y <= 33) t = PIER;
+    if (x >= JETTY.x0 && x <= JETTY.x1 && y >= JETTY.y0 && y <= JETTY.y1) t = PIER;
     for (const i of ISLANDS) if (Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) <= i.r) t = LAND;
     if (t === SEA) {
-      const d = Math.min(Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y), ...ISLANDS.map((i) => Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) - i.r));
-      const nearSlot = SLOTS.some((s) => Math.hypot(x + 0.5 - s.x, y + 0.5 - s.y) <= 5);
+      const d = Math.min(nearestPierDistance(x + 0.5, y + 0.5), ...ISLANDS.map((i) => Math.hypot(x + 0.5 - i.cx, y + 0.5 - i.cy) - i.r));
+      const nearSlot = SLOTS.some((s) => segDist({ x: x + 0.5, y: y + 0.5 }, ...axis(s)) <= 6);
       const base = d < P.REEF_FROM ? 0 : Math.min(P.REEF_MAX, (d - P.REEF_FROM) / P.REEF_SLOPE);
       const clump = 1 + P.REEF_CLUMP * (2 * lattice(x, y, 7) - 1) * 1.6;
       const out = Math.hypot(x + 0.5 - PIER_CENTRE.x, y + 0.5 - PIER_CENTRE.y);
@@ -179,12 +183,14 @@ export function stationUnder(b: Body): StationName | null {
 export type ShipState = "moored" | "sailing" | "building";
 export type Leak = { x: number; y: number; amount: number };
 export const LEAK_SPOTS: [number, number][][] = [
-  [[1, 0], [-1, 0]],
-  [[3, 1], [3, -1]],
-  [[-2, 1], [-2, -1]],
+  [[-7, -1], [-7, 2]],
+  [[-4, -1], [-4, 0]],
+  [[0, -1], [0, 0]],
+  [[5, 0], [5, -1]],
+  [[8, 0], [8, 1]],
 ];
-export type Ship = { id: number; x: number; y: number; heading: number; sail: number; water: number; hull: number; leaks: Leak[]; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
-export type Control = { sail: boolean; helmDir: number; helmHeld: boolean; pump: boolean; patching: { x: number; y: number }[] };
+export type Ship = { id: number; x: number; y: number; heading: number; sail: number; fore: number; water: number; hull: number; leaks: Leak[]; state: ShipState; readyAt: number | null; landedOn: string | null; onReef?: boolean; wander?: number };
+export type Control = { sail: boolean; fore: boolean; helmDir: number; helmHeld: boolean; pump: boolean; patching: { x: number; y: number }[] };
 export type ShipEvent = { kind: "sank" } | { kind: "landed"; island: Island } | { kind: "aground" } | { kind: "edge" } | { kind: "collision" } | { kind: "reef" } | { kind: "holed"; x: number; y: number } | { kind: "patched"; x: number; y: number };
 
 export function leakUnder(s: { leaks: Leak[] }, b: { x: number; y: number }): Leak | null {
@@ -211,7 +217,38 @@ export type Clear = (x: number, y: number) => boolean;
 export function hullPoints(x: number, y: number, heading: number): [number, number][] {
   const c = Math.cos(heading);
   const n = Math.sin(heading);
-  return [[x, y], [x + c * 3.5, y + n * 3.5], [x - c * 2.5, y - n * 2.5]];
+  return HULL.parts.map((a) => [x + a * c - HULL.keel * n, y + a * n + HULL.keel * c]);
+}
+
+export function axis(s: { x: number; y: number; heading: number }): [{ x: number; y: number }, { x: number; y: number }] {
+  const c = Math.cos(s.heading);
+  const n = Math.sin(s.heading);
+  const k = { x: -HULL.keel * n, y: HULL.keel * c };
+  return [{ x: s.x - HULL.stern * c + k.x, y: s.y - HULL.stern * n + k.y }, { x: s.x + HULL.bow * c + k.x, y: s.y + HULL.bow * n + k.y }];
+}
+
+export function segDist(p: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }): number {
+  const vx = b.x - a.x, vy = b.y - a.y;
+  const len2 = vx * vx + vy * vy || 1;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * vx + (p.y - a.y) * vy) / len2));
+  return Math.hypot(p.x - (a.x + t * vx), p.y - (a.y + t * vy));
+}
+
+export function shipsApart(a: { x: number; y: number; heading: number }, b: { x: number; y: number; heading: number }): number {
+  const [a0, a1] = axis(a);
+  const [b0, b1] = axis(b);
+  return Math.min(segDist(a0, b0, b1), segDist(a1, b0, b1), segDist(b0, a0, a1), segDist(b1, a0, a1));
+}
+
+export function alongside(p: { x: number; y: number }, s: { x: number; y: number; heading: number }, range: number): boolean {
+  return segDist(p, ...axis(s)) <= range;
+}
+
+export function deckLevel(x: number, y: number): number {
+  const tx = Math.floor(x), ty = Math.floor(y);
+  if (tx >= LAYOUT.bilge.x0 && tx < LAYOUT.bilge.x1 && ty >= LAYOUT.bilge.y0 && ty < LAYOUT.bilge.y1) return -0.7;
+  if (tx < LAYOUT.quarterdeck.x1 || tx >= LAYOUT.forecastle.x0) return 0.5;
+  return 0;
 }
 
 export function deckToWorld(s: { x: number; y: number; heading: number }, lx: number, ly: number): { x: number; y: number } {
@@ -228,10 +265,13 @@ export function worldToDeck(s: { x: number; y: number; heading: number }, wx: nu
   return { x: dx * c + dy * n, y: -dx * n + dy * c };
 }
 
+export const MAIN_SHARE = 0.6;
+
 export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => true): ShipEvent[] {
   const events: ShipEvent[] = [];
   if (s.state === "building") return events;
   s.sail = c.sail ? Math.min(1, s.sail + P.SAIL_RISE * dt) : Math.max(0, s.sail - P.SAIL_LOOSEN * dt);
+  s.fore = c.fore ? Math.min(1, (s.fore ?? 0) + P.SAIL_RISE * dt) : Math.max(0, (s.fore ?? 0) - P.SAIL_LOOSEN * dt);
   if (c.helmDir) {
     s.heading += c.helmDir * P.TURN_RATE * dt;
   } else if (!c.helmHeld && s.state === "sailing" && P.HELM_DRIFT > 0) {
@@ -240,8 +280,8 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   }
   if (s.heading > Math.PI) s.heading -= 2 * Math.PI;
   if (s.heading < -Math.PI) s.heading += 2 * Math.PI;
-  if (s.state === "moored" && s.sail > 0.05) s.state = "sailing";
-  const speed = s.sail * P.MAX_SPEED;
+  if (s.state === "moored" && (s.sail > 0.05 || s.fore > 0.05)) s.state = "sailing";
+  const speed = (MAIN_SHARE * s.sail + (1 - MAIN_SHARE) * s.fore) * P.MAX_SPEED;
   if (s.state === "sailing" && speed > 0) {
     const nx = Math.min(W - 0.5, Math.max(0.5, s.x + Math.cos(s.heading) * speed * dt));
     const ny = Math.min(H - 0.5, Math.max(0.5, s.y + Math.sin(s.heading) * speed * dt));
@@ -259,7 +299,7 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
   }
   const hits = hullPoints(s.x, s.y, s.heading).map(([px, py]) => tileAt(px, py) === REEF);
   const struck = hits.filter(Boolean).length;
-  const way = s.state === "sailing" ? s.sail : 0;
+  const way = s.state === "sailing" ? MAIN_SHARE * s.sail + (1 - MAIN_SHARE) * s.fore : 0;
   if (way > 0) hits.forEach((hit, part) => hit && hole(s, part, (P.REEF_DAMAGE * way * dt) / struck, events));
   if (struck && !s.onReef) events.push({ kind: "reef" });
   s.onReef = struck > 0;
@@ -281,11 +321,13 @@ export function stepShip(s: Ship, c: Control, dt: number, clear: Clear = () => t
     events.push({ kind: "sank" });
     return events;
   }
-  const near = ISLANDS.find((i) => Math.hypot(s.x - i.cx, s.y - i.cy) <= i.r + P.LANDING_RANGE);
+  const points = hullPoints(s.x, s.y, s.heading);
+  const shore = (i: Island) => Math.min(...points.map(([px, py]) => Math.hypot(px - i.cx, py - i.cy))) - i.r;
+  const near = ISLANDS.find((i) => shore(i) <= P.LANDING_RANGE);
   if (near && s.landedOn !== near.id) {
     s.landedOn = near.id;
     events.push({ kind: "landed", island: near });
-  } else if (!near && s.landedOn && !ISLANDS.some((i) => i.id === s.landedOn && Math.hypot(s.x - i.cx, s.y - i.cy) <= i.r + P.LANDING_RANGE + 2)) {
+  } else if (!near && s.landedOn && !ISLANDS.some((i) => i.id === s.landedOn && shore(i) <= P.LANDING_RANGE + 2)) {
     s.landedOn = null;
   }
   return events;
@@ -315,7 +357,7 @@ export function distanceFromPier(x: number, y: number): number {
 }
 
 export function nearestPierDistance(x: number, y: number): number {
-  let best = Infinity;
-  for (let py = 30; py <= 33; py++) for (let px = 8; px <= 10; px++) best = Math.min(best, Math.hypot(x - (px + 0.5), y - (py + 0.5)));
-  return best;
+  const cx = Math.min(JETTY.x1 + 1, Math.max(JETTY.x0, x));
+  const cy = Math.min(JETTY.y1 + 1, Math.max(JETTY.y0, y));
+  return Math.hypot(x - cx, y - cy);
 }

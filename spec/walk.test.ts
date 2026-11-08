@@ -8,8 +8,9 @@ const join = (token: string) => W.join(wsBase, token);
 describe("two people on the pier", { timeout: 30000 }, () => {
   it("tells them apart and shows one's move to the other within a second", async () => {
     const a = await join(uuid("aaaa0001"));
+    await a.ashore();
     const b = await join(uuid("bbbb0001"));
-    await Promise.all([a.ashore(), b.ashore()]);
+    await b.ashore();
     expect(a.id).not.toBe(b.id);
     expect(a.name).not.toBe(b.name);
     const before = await b.pos();
