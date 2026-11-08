@@ -19,10 +19,9 @@ judged, not tested, which is why the judged paragraph below carries the
 most weight. With other people aboard, fun comes down to three things.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
-your voice carries only a few steps, so a big group has to pass a clue from
-person to person down the line. In PEAK the climber who still has strength
-has to go up first and drop a rope for the others, or nobody reaches the
-top. Here the ship runs only while people stand at its stations. Everyone
+a voice carries a few steps, so a group passes a clue down the line; in
+PEAK the climber with strength left goes up first and drops a rope. Here
+the ship runs only while people stand at its stations. Everyone
 aboard heads for the same goal, and the funny things happen on the way
 ([decision 1](docs/decisions/0001-one-body-one-station.md),
 [decision 7](docs/decisions/0007-everyone-aboard-has-a-job.md)).
@@ -54,15 +53,11 @@ Each line is a test in `spec/` that runs against the app
   deleted (claims 5 and 12, `ship.test.ts`, `harbour.test.ts`)
 - only the body at the chart table is sent the map (claim 9,
   `ship.test.ts`)
-- a move shows to everyone within a second, and a word reaches your ship
-  and not the shore (claims 10 and 14, `walk.test.ts`, `harbour.test.ts`)
-- everyone aboard has a job by order of boarding (claim 16,
-  `ship.test.ts`)
 
 Measured, by bot crews of one to four ([how](docs/tuning.md)): every crew
 reaches the near and middle islands; to the far one, a bot alone sank in
-3 of 12 runs, crews of two to four in none of 36. That was the October
-deck; the big ship's own sweep is in the same file.
+3 of 12 runs, crews of two to four in none of 36 (the October deck; the
+big ship's sweep is in the same file).
 
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: three landings, all on
