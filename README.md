@@ -10,18 +10,15 @@ You can talk to your ship, leave a note on the jetty, and wave.
 
 ## What good means here
 
-**A game has to be fun first.** The brief says an app can do everything on
-its list and still not be worth using; for a game, worth using means a
-crew that gets somewhere together and comes back for more. Raph Koster calls fun the pleasure of getting better
-at something (*A Theory of Fun*, 2004), and PEAK's Nick Kaman says the
-point of a co-op game is to hang out with your friends. Fun can only be
-judged, not tested, which is why the judged paragraph below carries the
-most weight. With other people aboard, fun comes down to the three
-things below.
+**A game has to be fun first.** Doing everything on a list does not make
+an app worth using; for a game, worth using means a crew that gets
+somewhere together and comes back for more. Raph Koster calls fun the
+pleasure of getting better at something (*A Theory of Fun*, 2004);
+PEAK's Nick Kaman says a co-op game's point is to hang out with friends.
+With other people aboard, fun comes down to the three things below.
 
 **Every job matters, and friends get a good hour together.** In Big Walk
-a voice carries a few steps, so a group passes a clue down the line; in
-PEAK the climber with strength left goes up first and drops a rope. Here
+a voice carries a few steps, so a group passes a clue down the line. Here
 the ship runs only while people stand at its stations. Everyone
 aboard heads for the same goal, and the funny things happen on the way
 ([decision 1](docs/decisions/0001-one-body-one-station.md),
@@ -43,8 +40,7 @@ you are given a station to start at, so there is something to do
 
 ## Enforced, and judged
 
-Each line is a test in `spec/` that runs against the app
-([all nineteen](docs/claims.md)):
+Each line is a test ([all nineteen](docs/claims.md)):
 
 - one body holds one station, and one station is held by one body
   (claim 1, `ship.test.ts`)
@@ -59,13 +55,12 @@ reaches the near and middle islands; to the far one, a bot alone sank in
 
 Judged, from what happened when people played. At crit 9 (12 October) the
 pod found the sea too hard, and the board shows it: three landings, all on
-the near island, and seven wrecks; the reefs were thinned that day (sweep
-5 in [docs/tuning.md](docs/tuning.md), decision 9). At crit 10 (19 October)
+the near island, and seven wrecks; the reefs were thinned that day (decision 9). At crit 10 (19 October)
 a classmate arriving from the link said nothing was clear at the start;
 the first screen and the jobs came from that (decision 10). That afternoon four of the six names on
 the board reached the middle island together, and the one ship that sank
-had one person aboard. On 9 November four AI testers played for twenty
-minutes; thirteen faults were fixed that night
+had one person aboard. Four AI testers played for twenty minutes on 9
+November; thirteen faults were fixed
 ([the report](docs/testing/playtest-2026-11-09.md)). Two names came back
 on their own: quiet lorikeet sailed at both crits, and gentle currawong
 landed on 18 October and again on the 23rd
