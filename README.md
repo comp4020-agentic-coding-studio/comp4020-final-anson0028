@@ -11,8 +11,8 @@ You can talk to your ship, leave a note on the jetty, and wave.
 ## What good means here
 
 **A game has to be fun first.** The brief says an app can do everything on
-its list and still not be worth using; for a game, worth using means
-wanting another go. Raph Koster calls fun the pleasure of getting better
+its list and still not be worth using; for a game, worth using means a
+crew that gets somewhere together and comes back for more. Raph Koster calls fun the pleasure of getting better
 at something (*A Theory of Fun*, 2004), and PEAK's Nick Kaman says the
 point of a co-op game is to hang out with your friends. Fun can only be
 judged, not tested, which is why the judged paragraph below carries the
@@ -66,7 +66,10 @@ the first screen and the jobs came from that (decision 10). That afternoon four 
 the board reached the middle island together, and the one ship that sank
 had one person aboard. On 9 November four AI testers played for twenty
 minutes; thirteen faults were fixed that night
-([the report](docs/testing/playtest-2026-11-09.md)).
+([the report](docs/testing/playtest-2026-11-09.md)). Two names came back
+on their own: quiet lorikeet sailed at both crits, and gentle currawong
+landed on 18 October and again on the 23rd
+([the board](docs/testing/harbour-board-2026-11-09.md)).
 
 ## What I didn't build
 
