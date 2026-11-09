@@ -50,7 +50,7 @@ own server. I would reverse it the day the app needed a second page.
 Every claim went in as a failing test, then the code that made it pass:
 in separate commits from 23 October, in evening batches before that, and
 bundled with code and docs on 8 and 9 November (Thin spots). The eleven ship tests failed 11 of 11 against the gate
-server, "no `board` message, no ships in snapshots", and passed on the ship
+server and passed on the ship
 ([`c5b36c4`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/c5b36c4),
 [`605d8f0`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/605d8f0)).
 Every test since was seen red before its code, and five were broken again on
@@ -71,8 +71,7 @@ table measured that day
 ([`1fab797`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/1fab797)).
 The reefs were thinned three times in a week, measured each time
 ([`45fc95a`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/45fc95a),
-[decision 9](docs/decisions/0009-the-sea-gets-harder.md)); those sweeps
-measured a deck that no longer exists, and sweep eight in
+[decision 9](docs/decisions/0009-the-sea-gets-harder.md)); sweep eight in
 `docs/tuning.md` measures the big ship.
 
 ## Human checks
@@ -97,8 +96,8 @@ app with its log lines
 
 ## The big ship, the last two days
 
-I asked for the ship I had wanted, a big one with places on it; the agent
-wrote a four-stage plan and I took stage one on a branch. Four tests went
+I asked for a big ship with places on it; the agent planned four stages
+and I took the first, on a branch. Four tests went
 red, then the server, the client and decision record 8
 ([`62332a2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/62332a2),
 [`67da561`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/67da561),
@@ -118,7 +117,7 @@ red,
 now leads a first visit to the gangway and to your station
 ([`a6a488e`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/a6a488e)).
 Four AI testers played it for twenty minutes; thirteen faults were fixed
-that night, six are listed open
+that night
 ([the report](docs/testing/playtest-2026-11-09.md),
 [`f7613d1`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f7613d1)),
 and the deck was cut to 14 by 6
@@ -143,20 +142,14 @@ Coins for a landing I wanted and did not build
 
 The harness, every file and command the agent must obey or that catches
 it, is listed in [`docs/harness.md`](docs/harness.md). Agents, on Claude
-Code with Opus and Fable in turns, got narrow briefs and no history: readers,
-cold readers and cold players, reviewers playing a marker or a tutor,
-a code reviewer, play-testers, markers of this file. The Superpowers set
+Code with Opus and Fable in turns, got narrow briefs and no history: cold
+readers and players, reviewers as marker or tutor, a code reviewer,
+play-testers, markers of this file. The Superpowers set
 was used once, for the code review that found two crashes, red first
 ([`272f7b2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/272f7b2),
 [`f95c6d7`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f95c6d7),
 [`f03b072`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/f03b072)),
-and otherwise left off as too heavy. Humanizer read the README and the
-card before they shipped, because an agent's prose is hard for people to
-read; the commits that rewrote them in plain words
-([`693d43c`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/693d43c),
-[`0080bd2`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/0080bd2),
-[`37440ce`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/37440ce))
-do not name the tool, so that is a claim about method, not a traced fact.
+and otherwise left off as too heavy.
 
 The project ran as two conversations. The main one changed code. A
 second one, forked from it, kept the words: when the main one landed a piece of work it sent the fork a
@@ -177,8 +170,7 @@ the navigator bug above hid for two sweeps. The thirteen decision
 records each list the options and what each costs; records 9, 10, 12 and
 13 were written on 8 and 9 November for decisions taken earlier, and say
 so; the README was
-rewritten on the last weekend from my own account of what good means,
-spoken aloud and written down with me
+rewritten on the last weekend from my own account of what good means
 ([`93906af`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-anson0028/commit/93906af)).
 
 ## Thin spots
@@ -192,5 +184,4 @@ commit carries its name. I decided what to build, what to cut, and what
 to take back. The numbers were tuned by bots, and bots never patch. The
 big ship
 is a day old: its ladder is one sweep, and the far-island number in the
-README is from the old deck. Only classmates have sailed it; nobody from
-outside the course has.
+README is from the old deck.
