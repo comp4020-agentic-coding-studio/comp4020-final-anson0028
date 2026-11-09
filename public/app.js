@@ -67,6 +67,7 @@ const ground = new Map();
 let seq = 0;
 let holding = false;
 let lastHint = "";
+let lastJob = "";
 let aboardNow = null;
 let yawOffset = 0;
 let lastViewYaw = 0;
@@ -408,6 +409,11 @@ function setHold(on) {
 }
 
 let atPier = false;
+let pendingHold = false;
+function nearestSpot(self, ship) {
+  const spots = [...Object.values(stations).map((s) => ({ x: s.x + 0.5, y: s.y + 0.5 })), ...ship.leaks.map((l) => ({ x: l.x + 0.5, y: l.y + 0.5 }))];
+  return spots.map((p) => ({ p, d: Math.hypot(p.x - self.x, p.y - self.y) })).sort((a, b) => a.d - b.d)[0];
+}
 function act(down) {
   if (!me || ws.readyState !== 1) return;
   if (aboardNow === null) {
@@ -422,6 +428,15 @@ function act(down) {
     ws.send(JSON.stringify({ t: "ashore" }));
     return;
   }
+  if (down && self && ship && !stationUnder(self) && !onLeak) {
+    const near = nearestSpot(self, ship);
+    if (near && near.d <= 1.3) {
+      ws.send(JSON.stringify({ t: "goto", seq: ++seq, x: near.p.x, y: near.p.y }));
+      pendingHold = true;
+      return;
+    }
+  }
+  if (!down) pendingHold = false;
   setHold(down);
 }
 
@@ -1240,6 +1255,9 @@ function updateHud(self, shipsNow) {
     sayInput.placeholder = ship ? "Talk to your ship (Enter)" : "Talk to the shore (Enter)";
   }
   aboardNow = self.ship;
+  const myJob = ship ? ship.jobs[me.id] ?? "" : "";
+  if (ship && lastJob && myJob && myJob !== lastJob) say(`Your station is now ${jobWords(myJob)}.`);
+  lastJob = myJob;
   syncNoteLabels(ship ? null : self);
   noteButton.classList.toggle("gone", !!ship);
   noteButton.textContent = ownNoteNear !== null ? key("Remove note (X)", "Remove note") : key("Note (N)", "Note");
@@ -1251,7 +1269,7 @@ function updateHud(self, shipsNow) {
     const crew = snaps.at(-1).players.filter((p) => p.ship === ship.id).length;
     const deg = Math.round(((ship.heading * 180) / Math.PI + 360) % 360);
     const at = (station) => (ship.holders[station] ? ` ${roster.get(ship.holders[station])?.name ?? ""}`.trimEnd() : "");
-    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || ((ship.sail > 0.05 || ship.fore > 0.05) && jettyDistance(ship) > calm ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(jettyDistance(ship))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
+    const lineText = `${shipNames.get(ship.id) ?? "Ship"} · Main ${Math.round(ship.sail * 100)}%${at("sail")} · Fore ${Math.round(ship.fore * 100)}%${at("foresail")} · Helm${at("helm") || ((ship.sail > 0.05 || ship.fore > 0.05) && jettyDistance(ship) > calm ? " — drifting" : " —")} · Water ${Math.round(ship.water)}%${at("pump") ? ` (pump${at("pump")})` : ""} · Hull ${100 - Math.round(ship.hull)}%${ship.leaks.length ? ` (${ship.leaks.length} hole${ship.leaks.length > 1 ? "s" : ""})` : ""} · Heading ${deg}° · ${Math.round(Math.hypot(ship.x - berth.x, ship.y - berth.y))} tiles out · ${crew} aboard${ship.landed ? ` · at ${ship.landed}` : ""}`;
     const chips = Object.entries(ship.jobs).map(([id, job]) => {
       const idle = job !== "all" && jobIdle(ship, job);
       return { me: id === me.id, idle, text: `${id === me.id ? "you" : roster.get(id)?.name ?? "someone"}: ${job === "all" ? "everything (start at the mainsail)" : jobWords(job)}${idle ? " (nobody on it)" : ""}` };
@@ -1311,8 +1329,8 @@ function updateHud(self, shipsNow) {
   } else if (ship.leaks.length) text = key("The hull is holed where the deck shows red. Stand there and hold E.", "The hull is holed where the deck shows red. Stand there and hold Use.");
   else if (ship.landed) text = `At ${ship.landed}. It is on the board with your names.`;
   else if (atPier && atGangway(self)) text = key("At the gangway. Press E to step off, or walk to a station.", "At the gangway. Tap Use to step off, or walk to a station.");
-  else if (atPier) text = key("At the pier. Walk to a station and hold E; the gangway on the pier side steps off.", "At the pier. Walk to a station and hold Use; the gangway on the pier side steps off.");
-  else if (ship.jobs[me.id] && ship.jobs[me.id] !== "all") text = `Your job: ${jobWords(ship.jobs[me.id])}. Walk to it and hold E.`;
+  else if (atPier) text = key("Aboard, at the berth. Walk to a station and hold E; the gangway on the pier side steps off.", "Aboard, at the berth. Walk to a station and hold Use; the gangway on the pier side steps off.");
+  else if (ship.jobs[me.id] && ship.jobs[me.id] !== "all") text = `Your station: ${jobWords(ship.jobs[me.id])}. Walk to it and hold E.`;
   else text = "Walk to a station. Nothing leaves a ship at sea.";
   if (!ship || !ship.leaks.length) patchStart = null;
   if (text !== lastHint) {
@@ -1394,6 +1412,10 @@ function frame(t) {
     syncBirds(cur.players, cur.ships);
     if (!wreckMeshes.size && wrecks.length) syncWrecks();
     updateHud(cur.self, cur.ships);
+    if (pendingHold && cur.self && (stationUnder(cur.self) || (selfShip(cur)?.leaks ?? []).some((l) => l.x === Math.floor(cur.self.x) && l.y === Math.floor(cur.self.y)))) {
+      pendingHold = false;
+      setHold(true);
+    }
     updateGuide(cur);
     sendMove();
     if (cur.self) {
